@@ -1,10 +1,10 @@
 # TunePhere
 
-#Mô tả hệ thống TuneSphere
+# Mô tả hệ thống TuneSphere
 
 TuneSphere là một nền tảng phát nhạc trực tuyến được phát triển bằng ASP.NET Core, tích hợp các công nghệ hiện đại để mang đến trải nghiệm âm nhạc cá nhân hóa, sáng tạo và tương tác xã hội. Hệ thống cho phép người dùng nghe nhạc, tạo và remix bài hát, tham gia phòng nghe nhạc ảo, đồng thời hiển thị lời bài hát đồng bộ theo thời gian thực. Với mục tiêu kết nối cộng đồng yêu nhạc, TuneSphere không chỉ là một ứng dụng nghe nhạc mà còn là không gian để sáng tạo và chia sẻ.
 
-# Các thành phần chính:
+## Các thành phần chính:
 
 # Hệ thống phát nhạc và cá nhân hóa:
 Cung cấp thư viện nhạc phong phú, hỗ trợ tìm kiếm theo từ khóa, nghệ sĩ hoặc thể loại.
