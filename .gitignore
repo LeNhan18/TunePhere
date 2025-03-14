@@ -1,0 +1,20 @@
+# Các thư mục .NET Core
+bin/
+obj/
+
+# Thư mục người dùng của Visual Studio
+.vs/
+
+# Thư mục Node.js
+node_modules/
+
+# Thư mục lưu trữ dữ liệu (dành cho các file cấu hình cá nhân)
+appsettings.Development.json
+appsettings.Local.json
+
+# Các file tạm thời khác
+.idea/
+.vscode/
+
+# Các file log
+*.log
