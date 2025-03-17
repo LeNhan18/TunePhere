@@ -20,7 +20,7 @@ namespace TunePhere.Models
         [StringLength(100)]
         public string FullName { get; set; } // Họ và tên đầy đủ
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Ngày tạo tài khoản
+        public DateTime CreatedAt { get; set; } = DateTime.Now; // Ngày tạo tài khoản
 
         public DateTime? LastLogin { get; set; } // Lần đăng nhập gần nhất
     }
