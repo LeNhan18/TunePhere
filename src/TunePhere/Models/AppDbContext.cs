@@ -17,7 +17,6 @@ namespace TunePhere.Models
         public DbSet<Lyric> Lyrics { get; set; }
         public DbSet<ListeningRoom> ListeningRooms { get; set; }
         public DbSet<ListeningRoomParticipant> ListeningRoomParticipants { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
