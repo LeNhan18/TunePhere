@@ -18,6 +18,7 @@ namespace TunePhere.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             base.OnModelCreating(modelBuilder);
 
             // Cấu hình ListeningRoomParticipant
@@ -56,43 +57,41 @@ namespace TunePhere.Models
                 .OnDelete(DeleteBehavior.NoAction);
 
             // Playlists -> Users
+
             modelBuilder.Entity<Playlist>()
                 .HasOne(p => p.User)
-                .WithMany()
+                .WithMany(u => u.Playlists)
                 .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Remixes -> Users
             modelBuilder.Entity<Remix>()
                 .HasOne(r => r.User)
-                .WithMany()
+                .WithMany(u => u.Remixes)
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Remixes -> Songs
             modelBuilder.Entity<Remix>()
                 .HasOne(r => r.OriginalSong)
-                .WithMany()
+                .WithMany(s => s.Remixes)
                 .HasForeignKey(r => r.OriginalSongId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // UserPreferences -> Users
             modelBuilder.Entity<UserPreference>()
                 .HasOne(up => up.User)
-                .WithOne()
+                .WithOne(u => u.Preferences)
                 .HasForeignKey<UserPreference>(up => up.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // PlaylistSong relationships
             modelBuilder.Entity<PlaylistSong>()
                 .HasOne(ps => ps.Playlist)
-                .WithMany()
+                .WithMany(p => p.PlaylistSongs)
                 .HasForeignKey(ps => ps.PlaylistId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<PlaylistSong>()
                 .HasOne(ps => ps.Song)
-                .WithMany()
+                .WithMany(s => s.PlaylistSongs)
                 .HasForeignKey(ps => ps.SongId)
                 .OnDelete(DeleteBehavior.NoAction);
 
