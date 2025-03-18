@@ -28,11 +28,16 @@ namespace TunePhere.Models
         // Các thuộc tính điều hướng (Navigation properties)
         public virtual ICollection<ListeningRoom> ListeningRooms { get; set; } // Danh sách phòng do người dùng tạo
         public virtual ICollection<ListeningRoomParticipant> ListeningRoomParticipants { get; set; } // Danh sách phòng đã tham gia
+        public virtual ICollection<Playlist> Playlists { get; set; } // Danh sách playlist của người dùng
+        public virtual ICollection<Remix> Remixes { get; set; } // Danh sách remix của người dùng
+        public virtual UserPreference Preferences { get; set; } // Tùy chọn người dùng
 
         public User()
         {
             ListeningRooms = new HashSet<ListeningRoom>();
             ListeningRoomParticipants = new HashSet<ListeningRoomParticipant>();
+            Playlists = new HashSet<Playlist>();
+            Remixes = new HashSet<Remix>();
         }
     }
 }
