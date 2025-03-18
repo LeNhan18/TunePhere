@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TunePhere.Models;
 using TunePhere.Repository.IMPRepository;
 
@@ -13,7 +13,7 @@ namespace TunePhere.Repository.EFRepository
             _context = context;
         }
 
-        public async Task<UserPreference> GetByUserIdAsync(int userId)
+        public async Task<UserPreference?> GetByUserIdAsync(int userId)
         {
             return await _context.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId);
         }

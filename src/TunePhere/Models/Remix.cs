@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,19 +13,19 @@ namespace TunePhere.Models
         public int UserId { get; set; } // Khóa ngoại liên kết với User (người tạo remix)
 
         [ForeignKey("UserId")]
-        public User User { get; set; } // Quan hệ với User
+        public required User User { get; set; } // Quan hệ với User
 
         [Required]
         public int OriginalSongId { get; set; } // Khóa ngoại liên kết với bài hát gốc
 
         [ForeignKey("OriginalSongId")]
-        public Song OriginalSong { get; set; } // Quan hệ với Song gốc
+        public required Song OriginalSong { get; set; } // Quan hệ với Song gốc
 
         [Required, StringLength(200)]
-        public string Title { get; set; } // Tên bản remix
+        public required string Title { get; set; } // Tên bản remix
 
         [Required]
-        public string FileUrl { get; set; } // Đường dẫn file remix
+        public required string FileUrl { get; set; } // Đường dẫn file remix
 
         public int Likes { get; set; } = 0; // Số lượt thích
 

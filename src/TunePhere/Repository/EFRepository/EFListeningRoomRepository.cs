@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TunePhere.Models;
 using TunePhere.Repository.IMPRepository;
 
@@ -18,7 +18,7 @@ namespace TunePhere.Repository.EFRepository
             return await _context.ListeningRooms.ToListAsync();
         }
 
-        public async Task<ListeningRoom> GetByIdAsync(int roomId)
+        public async Task<ListeningRoom?> GetByIdAsync(int roomId)
         {
             return await _context.ListeningRooms.FindAsync(roomId);
         }
