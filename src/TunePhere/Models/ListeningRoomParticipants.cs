@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,13 +13,13 @@ namespace TunePhere.Models
         public int RoomId { get; set; } // Khóa ngoại liên kết với ListeningRoom
 
         [ForeignKey("RoomId")]
-        public ListeningRoom Room { get; set; } // Quan hệ với ListeningRoom
+        public required ListeningRoom Room { get; set; } // Quan hệ với ListeningRoom
 
         [Required]
         public int UserId { get; set; } // Khóa ngoại liên kết với User
 
         [ForeignKey("UserId")]
-        public User User { get; set; } // Quan hệ với User
+        public required User User { get; set; } // Quan hệ với User
 
         public DateTime JoinedAt { get; set; } = DateTime.Now; // Thời gian tham gia phòng
     }
