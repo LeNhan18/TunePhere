@@ -18,39 +18,41 @@ namespace TunePhere.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // ListeningRoomParticipant -> ListeningRoom
-            modelBuilder.Entity<ListeningRoomParticipant>()
-                .HasOne(p => p.Room)
-                .WithMany(r => r.Participants)
-                .HasForeignKey(p => p.RoomId)
-                .OnDelete(DeleteBehavior.NoAction);
+            base.OnModelCreating(modelBuilder);
 
-            // ListeningRoomParticipant -> User
-            modelBuilder.Entity<ListeningRoomParticipant>()
-                .HasOne(p => p.User)
-                .WithMany(u => u.ListeningRoomParticipants)
-                .HasForeignKey(p => p.UserId)
-                .OnDelete(DeleteBehavior.NoAction);
+            // Cấu hình ListeningRoomParticipant
+            modelBuilder.Entity<ListeningRoomParticipant>(entity =>
+            {
+                entity.HasOne(lrp => lrp.Room)
+                    .WithMany(r => r.Participants)
+                    .HasForeignKey(lrp => lrp.RoomId)
+                    .OnDelete(DeleteBehavior.NoAction);
 
-            // ListeningRoom -> User (sử dụng NguoiTao)
-            modelBuilder.Entity<ListeningRoom>()
-                .HasOne(r => r.Creator)
-                .WithMany(u => u.ListeningRooms)
-                .HasForeignKey(r => r.CreatorId) // Hoặc CreatorId
-                .OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(lrp => lrp.User)
+                    .WithMany(u => u.ListeningRoomParticipants)
+                    .HasForeignKey(lrp => lrp.UserId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            // Cấu hình ListeningRoom
+            modelBuilder.Entity<ListeningRoom>(entity =>
+            {
+                entity.HasOne(r => r.Creator)
+                    .WithMany(u => u.ListeningRooms)
+                    .HasForeignKey(r => r.CreatorId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                    
+                entity.HasOne(r => r.CurrentSong)
+                    .WithMany()
+                    .HasForeignKey(r => r.CurrentSongId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
 
             // Lyrics -> Songs
             modelBuilder.Entity<Lyric>()
                 .HasOne(l => l.Song)
                 .WithMany()
                 .HasForeignKey(l => l.SongId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            // ListeningRoom -> Songs
-            modelBuilder.Entity<ListeningRoom>()
-                .HasOne(r => r.CurrentSong)
-                .WithMany()
-                .HasForeignKey(r => r.CurrentSongId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // Playlists -> Users
