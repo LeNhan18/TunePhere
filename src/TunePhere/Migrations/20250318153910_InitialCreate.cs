@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TunePhere.Migrations
 {
     /// <inheritdoc />
-    public partial class v1 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -56,8 +56,9 @@ namespace TunePhere.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SongId = table.Column<int>(type: "int", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Language = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Language = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -66,8 +67,7 @@ namespace TunePhere.Migrations
                         name: "FK_Lyrics_Songs_SongId",
                         column: x => x.SongId,
                         principalTable: "Songs",
-                        principalColumn: "SongId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "SongId");
                 });
 
             migrationBuilder.CreateTable(
@@ -76,7 +76,7 @@ namespace TunePhere.Migrations
                 {
                     RoomId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    HostUserId = table.Column<int>(type: "int", nullable: false),
+                    CreatorId = table.Column<int>(type: "int", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CurrentSongId = table.Column<int>(type: "int", nullable: true),
@@ -91,11 +91,10 @@ namespace TunePhere.Migrations
                         principalTable: "Songs",
                         principalColumn: "SongId");
                     table.ForeignKey(
-                        name: "FK_ListeningRooms_Users_HostUserId",
-                        column: x => x.HostUserId,
+                        name: "FK_ListeningRooms_Users_CreatorId",
+                        column: x => x.CreatorId,
                         principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "UserId");
                 });
 
             migrationBuilder.CreateTable(
@@ -116,8 +115,7 @@ namespace TunePhere.Migrations
                         name: "FK_Playlists_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "UserId");
                 });
 
             migrationBuilder.CreateTable(
@@ -140,14 +138,12 @@ namespace TunePhere.Migrations
                         name: "FK_Remixes_Songs_OriginalSongId",
                         column: x => x.OriginalSongId,
                         principalTable: "Songs",
-                        principalColumn: "SongId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "SongId");
                     table.ForeignKey(
                         name: "FK_Remixes_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "UserId");
                 });
 
             migrationBuilder.CreateTable(
@@ -166,8 +162,7 @@ namespace TunePhere.Migrations
                         name: "FK_UserPreferences_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "UserId");
                 });
 
             migrationBuilder.CreateTable(
@@ -187,14 +182,12 @@ namespace TunePhere.Migrations
                         name: "FK_ListeningRoomParticipants_ListeningRooms_RoomId",
                         column: x => x.RoomId,
                         principalTable: "ListeningRooms",
-                        principalColumn: "RoomId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "RoomId");
                     table.ForeignKey(
                         name: "FK_ListeningRoomParticipants_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "UserId");
                 });
 
             migrationBuilder.CreateTable(
@@ -216,20 +209,17 @@ namespace TunePhere.Migrations
                         name: "FK_PlaylistSongs_Playlists_PlaylistId",
                         column: x => x.PlaylistId,
                         principalTable: "Playlists",
-                        principalColumn: "PlaylistId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "PlaylistId");
                     table.ForeignKey(
                         name: "FK_PlaylistSongs_Songs_SongId",
                         column: x => x.SongId,
                         principalTable: "Songs",
-                        principalColumn: "SongId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "SongId");
                     table.ForeignKey(
                         name: "FK_PlaylistSongs_Users_AddedByUserId",
                         column: x => x.AddedByUserId,
                         principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "UserId");
                 });
 
             migrationBuilder.CreateIndex(
@@ -243,14 +233,14 @@ namespace TunePhere.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ListeningRooms_CreatorId",
+                table: "ListeningRooms",
+                column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ListeningRooms_CurrentSongId",
                 table: "ListeningRooms",
                 column: "CurrentSongId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ListeningRooms_HostUserId",
-                table: "ListeningRooms",
-                column: "HostUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Lyrics_SongId",

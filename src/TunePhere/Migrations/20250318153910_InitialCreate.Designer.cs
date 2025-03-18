@@ -12,8 +12,8 @@ using TunePhere.Models;
 namespace TunePhere.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250317162425_3")]
-    partial class _3
+    [Migration("20250318153910_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,10 +36,10 @@ namespace TunePhere.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CurrentSongId")
+                    b.Property<int>("CreatorId")
                         .HasColumnType("int");
 
-                    b.Property<int>("HostUserId")
+                    b.Property<int?>("CurrentSongId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
@@ -52,9 +52,9 @@ namespace TunePhere.Migrations
 
                     b.HasKey("RoomId");
 
-                    b.HasIndex("CurrentSongId");
+                    b.HasIndex("CreatorId");
 
-                    b.HasIndex("HostUserId");
+                    b.HasIndex("CurrentSongId");
 
                     b.ToTable("ListeningRooms");
                 });
@@ -102,11 +102,14 @@ namespace TunePhere.Migrations
 
                     b.Property<string>("Language")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("SongId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("LyricId");
 
@@ -319,33 +322,34 @@ namespace TunePhere.Migrations
 
             modelBuilder.Entity("TunePhere.Models.ListeningRoom", b =>
                 {
-                    b.HasOne("TunePhere.Models.Song", "CurrentSong")
-                        .WithMany()
-                        .HasForeignKey("CurrentSongId");
-
-                    b.HasOne("TunePhere.Models.User", "HostUser")
-                        .WithMany()
-                        .HasForeignKey("HostUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("TunePhere.Models.User", "Creator")
+                        .WithMany("ListeningRooms")
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("CurrentSong");
+                    b.HasOne("TunePhere.Models.Song", "CurrentSong")
+                        .WithMany()
+                        .HasForeignKey("CurrentSongId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
-                    b.Navigation("HostUser");
+                    b.Navigation("Creator");
+
+                    b.Navigation("CurrentSong");
                 });
 
             modelBuilder.Entity("TunePhere.Models.ListeningRoomParticipant", b =>
                 {
                     b.HasOne("TunePhere.Models.ListeningRoom", "Room")
-                        .WithMany()
+                        .WithMany("Participants")
                         .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("TunePhere.Models.User", "User")
-                        .WithMany()
+                        .WithMany("ListeningRoomParticipants")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Room");
@@ -358,7 +362,7 @@ namespace TunePhere.Migrations
                     b.HasOne("TunePhere.Models.Song", "Song")
                         .WithMany()
                         .HasForeignKey("SongId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Song");
@@ -369,7 +373,7 @@ namespace TunePhere.Migrations
                     b.HasOne("TunePhere.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -380,19 +384,19 @@ namespace TunePhere.Migrations
                     b.HasOne("TunePhere.Models.User", "AddedByUser")
                         .WithMany()
                         .HasForeignKey("AddedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("TunePhere.Models.Playlist", "Playlist")
                         .WithMany()
                         .HasForeignKey("PlaylistId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("TunePhere.Models.Song", "Song")
                         .WithMany()
                         .HasForeignKey("SongId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("AddedByUser");
@@ -407,13 +411,13 @@ namespace TunePhere.Migrations
                     b.HasOne("TunePhere.Models.Song", "OriginalSong")
                         .WithMany()
                         .HasForeignKey("OriginalSongId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("TunePhere.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("OriginalSong");
@@ -424,12 +428,24 @@ namespace TunePhere.Migrations
             modelBuilder.Entity("TunePhere.Models.UserPreference", b =>
                 {
                     b.HasOne("TunePhere.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithOne()
+                        .HasForeignKey("TunePhere.Models.UserPreference", "UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TunePhere.Models.ListeningRoom", b =>
+                {
+                    b.Navigation("Participants");
+                });
+
+            modelBuilder.Entity("TunePhere.Models.User", b =>
+                {
+                    b.Navigation("ListeningRoomParticipants");
+
+                    b.Navigation("ListeningRooms");
                 });
 #pragma warning restore 612, 618
         }
