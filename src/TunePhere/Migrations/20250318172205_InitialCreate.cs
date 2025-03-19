@@ -58,7 +58,8 @@ namespace TunePhere.Migrations
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Language = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    SongId1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -66,6 +67,11 @@ namespace TunePhere.Migrations
                     table.ForeignKey(
                         name: "FK_Lyrics_Songs_SongId",
                         column: x => x.SongId,
+                        principalTable: "Songs",
+                        principalColumn: "SongId");
+                    table.ForeignKey(
+                        name: "FK_Lyrics_Songs_SongId1",
+                        column: x => x.SongId1,
                         principalTable: "Songs",
                         principalColumn: "SongId");
                 });
@@ -246,6 +252,11 @@ namespace TunePhere.Migrations
                 name: "IX_Lyrics_SongId",
                 table: "Lyrics",
                 column: "SongId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Lyrics_SongId1",
+                table: "Lyrics",
+                column: "SongId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Playlists_UserId",
