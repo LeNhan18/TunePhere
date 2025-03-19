@@ -18,3 +18,5 @@ appsettings.Local.json
 
 # Các file log
 *.log
+
+appsettings.Development.json
