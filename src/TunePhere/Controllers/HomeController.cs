@@ -1,32 +1,32 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using TunePhere.Models;
+using TunePhere.Repository;
+using System.Threading.Tasks;
+using TunePhere.Repository.IMPRepository;
 
 namespace TunePhere.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ISongRepository _songRepo;
+        private readonly IPlaylistRepository _playlistRepo;
+        private readonly IRemixRepository _remixRepo;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ISongRepository songRepo, IPlaylistRepository playlistRepo, IRemixRepository remixRepo)
         {
-            _logger = logger;
+            _songRepo = songRepo;
+            _playlistRepo = playlistRepo;
+            _remixRepo = remixRepo;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
-        }
+            var topSongs = await _songRepo.GetTopSongsAsync();
+            var suggestedPlaylists = await _playlistRepo.GetSuggestedPlaylistsAsync();
+            var trendingRemixes = await _remixRepo.GetTopRemixesAsync();
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            ViewBag.SuggestedPlaylists = suggestedPlaylists;
+            ViewBag.TrendingRemixes = trendingRemixes;
+            return View(topSongs);
         }
     }
 }

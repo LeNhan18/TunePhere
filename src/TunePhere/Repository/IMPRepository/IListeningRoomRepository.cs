@@ -9,5 +9,6 @@ namespace TunePhere.Repository.IMPRepository
         Task AddAsync(ListeningRoom room);
         Task UpdateAsync(ListeningRoom room);
         Task DeleteAsync(int roomId);
+        Task<IEnumerable<ListeningRoom>> GetActiveRoomsAsync();
     }
 }

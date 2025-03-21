@@ -44,5 +44,21 @@ namespace TunePhere.Repository.EFRepository
                 await _context.SaveChangesAsync();
             }
         }
+        // L?y remix theo l??t thích gi?m d?n
+        public async Task<IEnumerable<Remix>> GetTopRemixesAsync()
+        {
+            return await _context.Remixes
+                .OrderByDescending(r => r.Likes)
+                .Take(10)
+                .ToListAsync();
+        }
+        // L?y remix c?a ng??i dùng theo username
+        public async Task<IEnumerable<Remix>> GetUserRemixesAsync(string username)
+        {
+            return await _context.Remixes
+                .Include(r => r.User)
+                .Where(r => r.User.Username == username)
+                .ToListAsync();
+        }
     }
 }

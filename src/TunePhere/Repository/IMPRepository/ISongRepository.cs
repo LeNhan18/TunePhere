@@ -9,5 +9,6 @@ namespace TunePhere.Repository.IMPRepository
         Task AddAsync(Song song);
         Task UpdateAsync(Song song);
         Task DeleteAsync(int songId);
+        Task<IEnumerable<Song>> GetTopSongsAsync();
     }
 }
