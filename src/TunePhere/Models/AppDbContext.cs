@@ -52,7 +52,7 @@ namespace TunePhere.Models
             // Lyrics -> Songs
             modelBuilder.Entity<Lyric>()
                 .HasOne(l => l.Song)
-                .WithMany()
+                .WithMany(s => s.Lyrics)
                 .HasForeignKey(l => l.SongId)
                 .OnDelete(DeleteBehavior.NoAction);
 

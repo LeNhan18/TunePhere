@@ -20,3 +20,4 @@ appsettings.Local.json
 *.log
 
 appsettings.Development.json
+Migrations/
