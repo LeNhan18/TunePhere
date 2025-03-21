@@ -30,7 +30,7 @@ namespace TunePhere.Models
         public virtual ICollection<ListeningRoomParticipant> ListeningRoomParticipants { get; set; } // Danh sách phòng đã tham gia
         public virtual ICollection<Playlist> Playlists { get; set; } // Danh sách playlist của người dùng
         public virtual ICollection<Remix> Remixes { get; set; } // Danh sách remix của người dùng
-        public virtual UserPreference Preferences { get; set; } // Tùy chọn người dùng
+        public virtual UserPreference? Preferences { get; set; } // Tùy chọn người dùng
 
         public User()
         {
