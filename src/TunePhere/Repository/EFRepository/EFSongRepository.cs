@@ -44,5 +44,12 @@ namespace TunePhere.Repository.EFRepository
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task<IEnumerable<Song>> GetTopSongsAsync()
+        {
+            return await _context.Songs
+                .OrderByDescending(s => s.UploadDate)
+                .Take(10)
+                .ToListAsync();
+        }
     }
 }

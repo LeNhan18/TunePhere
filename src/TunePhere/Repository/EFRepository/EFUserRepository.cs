@@ -22,7 +22,15 @@ namespace TunePhere.Repository.EFRepository
         {
             return await _context.Users.FindAsync(userId);
         }
-
+        public async Task<User> GetByUsernameAsync(string username)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+        }
+        public async Task<User> AuthenticateAsync(string email, string password)
+        {
+            // ?ây ch? là ví d? ??n gi?n; th?c t? b?n nên s? d?ng c? ch? hash và salt
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.PasswordHash == password);
+        }
         public async Task AddAsync(User user)
         {
             _context.Users.Add(user);
