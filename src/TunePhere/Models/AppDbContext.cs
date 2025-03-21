@@ -41,7 +41,7 @@ namespace TunePhere.Models
                 entity.HasOne(r => r.Creator)
                     .WithMany(u => u.ListeningRooms)
                     .HasForeignKey(r => r.CreatorId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                    .OnDelete(DeleteBehavior.NoAction); 
                     
                 entity.HasOne(r => r.CurrentSong)
                     .WithMany()
