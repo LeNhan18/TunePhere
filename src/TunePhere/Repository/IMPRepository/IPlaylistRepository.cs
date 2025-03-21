@@ -9,5 +9,8 @@ namespace TunePhere.Repository.IMPRepository
         Task AddAsync(Playlist playlist);
         Task UpdateAsync(Playlist playlist);
         Task DeleteAsync(int playlistId);
+        Task<IEnumerable<Playlist>> GetUserPlaylistsAsync(string username);
+        Task<IEnumerable<Playlist>> GetPublicPlaylistsAsync();
+        Task<IEnumerable<Playlist>> GetSuggestedPlaylistsAsync();
     }
 }

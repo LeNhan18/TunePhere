@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TunePhere.Models;
 using TunePhere.Repository.IMPRepository;
 
@@ -43,6 +43,11 @@ namespace TunePhere.Repository.EFRepository
                 _context.ListeningRooms.Remove(room);
                 await _context.SaveChangesAsync();
             }
+        }
+        // Lấy các phòng nghe nhạc đang hoạt động
+        public async Task<IEnumerable<ListeningRoom>> GetActiveRoomsAsync()
+        {
+            return await _context.ListeningRooms.Where(r => r.IsActive).ToListAsync();
         }
     }
 }

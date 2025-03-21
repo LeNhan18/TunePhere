@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TunePhere.Models;
 using TunePhere.Repository.IMPRepository;
 
@@ -43,6 +43,26 @@ namespace TunePhere.Repository.EFRepository
                 _context.Playlists.Remove(playlist);
                 await _context.SaveChangesAsync();
             }
+        }
+        // Lấy playlist của người dùng theo username (giả sử Playlist.User có thuộc tính Username)
+        public async Task<IEnumerable<Playlist>> GetUserPlaylistsAsync(string username)
+        {
+            return await _context.Playlists
+                .Include(p => p.User)
+                .Where(p => p.User.Username == username)
+                .ToListAsync();
+        }
+        // Lấy playlist công khai
+        public async Task<IEnumerable<Playlist>> GetPublicPlaylistsAsync()
+        {
+            return await _context.Playlists
+                .Where(p => p.IsPublic)
+                .ToListAsync();
+        }
+        // Gợi ý playlist (ví dụ: sử dụng playlist công khai)
+        public async Task<IEnumerable<Playlist>> GetSuggestedPlaylistsAsync()
+        {
+            return await GetPublicPlaylistsAsync();
         }
     }
 }

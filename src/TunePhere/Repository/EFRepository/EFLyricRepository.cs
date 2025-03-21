@@ -22,6 +22,10 @@ namespace TunePhere.Repository.EFRepository
         {
             return await _context.Lyrics.FindAsync(lyricId);
         }
+        public async Task<IEnumerable<Lyric>> GetBySongIdAsync(int songId)
+        {
+            return await _context.Lyrics.Where(l => l.SongId == songId).ToListAsync();
+        }
 
         public async Task AddAsync(Lyric lyric)
         {
