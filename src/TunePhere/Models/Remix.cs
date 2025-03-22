@@ -10,10 +10,10 @@ namespace TunePhere.Models
         public int RemixId { get; set; } // Khóa chính
 
         [Required]
-        public int UserId { get; set; } // Khóa ngoại liên kết với User (người tạo remix)
+        public string UserId { get; set; } // Khóa ngoại liên kết với User (người tạo remix)
 
         [ForeignKey("UserId")]
-        public required User User { get; set; } // Quan hệ với User
+        public required AppUser User { get; set; } // Quan hệ với User
 
         [Required]
         public int OriginalSongId { get; set; } // Khóa ngoại liên kết với bài hát gốc

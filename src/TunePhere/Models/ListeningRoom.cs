@@ -11,10 +11,10 @@ namespace TunePhere.Models
         public int RoomId { get; set; } // Khóa chính
 
         [Required]
-        public int CreatorId { get; set; } // Khóa ngoại liên kết với User (người tạo phòng)
+        public string CreatorId { get; set; } // Khóa ngoại liên kết với User (người tạo phòng)
 
         [ForeignKey("CreatorId")]
-        public required User? Creator { get; set; } // Quan hệ với User
+        public required AppUser? Creator { get; set; } // Quan hệ với User
 
         [Required, StringLength(200)]
         public required string Title { get; set; } // Tên phòng nghe nhạc

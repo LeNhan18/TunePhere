@@ -4,8 +4,8 @@ namespace TunePhere.Repository.IMPRepository
 {
     public interface IUserPreferenceRepository
     {
-        Task<UserPreference?> GetByUserIdAsync(int userId);
+        Task<UserPreference?> GetByUserIdAsync(string userId);
         Task AddOrUpdateAsync(UserPreference preference);
-        Task DeleteAsync(int userId);
+        Task DeleteAsync(string userId);
     }
 }

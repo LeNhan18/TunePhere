@@ -18,10 +18,10 @@ namespace TunePhere.Repository.EFRepository
             return await _context.ListeningRoomParticipants.ToListAsync();
         }
 
-        public async Task<ListeningRoomParticipant?> GetByIdsAsync(int roomId, int userId)
+        public async Task<ListeningRoomParticipant?> GetByIdsAsync(int roomId, string userId)
         {
             return await _context.ListeningRoomParticipants
-                .FirstOrDefaultAsync(p => p.RoomId == roomId && p.UserId == userId);
+                .FirstOrDefaultAsync(p => p.RoomId == roomId && p.UserId.Equals(userId));
         }
 
         public async Task AddAsync(ListeningRoomParticipant participant)
@@ -36,10 +36,10 @@ namespace TunePhere.Repository.EFRepository
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int roomId, int userId)
+        public async Task DeleteAsync(int roomId, string userId)
         {
             var participant = await _context.ListeningRoomParticipants
-                .FirstOrDefaultAsync(p => p.RoomId == roomId && p.UserId == userId);
+                .FirstOrDefaultAsync(p => p.RoomId == roomId && p.UserId.Equals(userId));
             if (participant != null)
             {
                 _context.ListeningRoomParticipants.Remove(participant);
