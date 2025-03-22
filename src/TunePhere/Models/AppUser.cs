@@ -1,24 +1,10 @@
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace TunePhere.Models
 {
-    public class User
+    public class AppUser : IdentityUser
     {
-        [Key]
-        public int UserId { get; set; } // Khóa chính
-
-        [Required, StringLength(50)]
-        public required string Username { get; set; } // Tên đăng nhập
-
-        [Required, EmailAddress, StringLength(100)]
-        public required string Email { get; set; } // Email
-
-        [Required]
-        public required string PasswordHash { get; set; } // Mã hóa mật khẩu
-
-        [Required, StringLength(100)]
         public required string FullName { get; set; } // Họ và tên đầy đủ
 
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Ngày tạo tài khoản
@@ -32,12 +18,13 @@ namespace TunePhere.Models
         public virtual ICollection<Remix> Remixes { get; set; } // Danh sách remix của người dùng
         public virtual UserPreference? Preferences { get; set; } // Tùy chọn người dùng
 
-        public User()
+        public AppUser()
         {
             ListeningRooms = new HashSet<ListeningRoom>();
             ListeningRoomParticipants = new HashSet<ListeningRoomParticipant>();
             Playlists = new HashSet<Playlist>();
             Remixes = new HashSet<Remix>();
         }
+
     }
 }

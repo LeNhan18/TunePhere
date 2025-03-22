@@ -13,9 +13,9 @@ namespace TunePhere.Repository.EFRepository
             _context = context;
         }
 
-        public async Task<UserPreference?> GetByUserIdAsync(int userId)
+        public async Task<UserPreference?> GetByUserIdAsync(string userId)
         {
-            return await _context.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId);
+            return await _context.UserPreferences.FirstOrDefaultAsync(p => p.UserId.Equals( userId));
         }
 
         public async Task AddOrUpdateAsync(UserPreference preference)
@@ -32,9 +32,9 @@ namespace TunePhere.Repository.EFRepository
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int userId)
+        public async Task DeleteAsync(string userId)
         {
-            var preference = await _context.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId);
+            var preference = await _context.UserPreferences.FirstOrDefaultAsync(p => p.UserId.Equals(userId));
             if (preference != null)
             {
                 _context.UserPreferences.Remove(preference);

@@ -49,7 +49,7 @@ namespace TunePhere.Repository.EFRepository
         {
             return await _context.Playlists
                 .Include(p => p.User)
-                .Where(p => p.User.Username == username)
+                .Where(p => p.User.UserName == username)
                 .ToListAsync();
         }
         // Lấy playlist công khai

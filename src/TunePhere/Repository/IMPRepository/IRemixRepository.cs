@@ -5,7 +5,7 @@ namespace TunePhere.Repository.IMPRepository
     public interface IRemixRepository
     {
         Task<IEnumerable<Remix>> GetAllAsync();
-        Task<Remix> GetByIdAsync(int remixId);
+        Task<Remix?> GetByIdAsync(int remixId);
         Task AddAsync(Remix remix);
         Task UpdateAsync(Remix remix);
         Task DeleteAsync(int remixId);

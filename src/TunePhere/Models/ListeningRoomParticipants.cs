@@ -16,10 +16,10 @@ namespace TunePhere.Models
         public required ListeningRoom Room { get; set; } // Quan hệ với ListeningRoom
 
         [Required]
-        public int UserId { get; set; } // Khóa ngoại liên kết với User
+        public string UserId { get; set; } // Khóa ngoại liên kết với User
 
         [ForeignKey("UserId")]
-        public required User User { get; set; } // Quan hệ với User
+        public required AppUser User { get; set; } // Quan hệ với User
 
         public DateTime JoinedAt { get; set; } = DateTime.Now; // Thời gian tham gia phòng
     }
