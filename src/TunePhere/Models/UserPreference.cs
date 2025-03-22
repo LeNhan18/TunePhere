@@ -7,10 +7,10 @@ namespace TunePhere.Models
     public class UserPreference
     {
         [Key, ForeignKey("User")]
-        public required int UserId { get; set; } // Khóa chính đồng thời là khóa ngoại liên kết với User
+        public required string UserId { get; set; } // Khóa chính đồng thời là khóa ngoại liên kết với User
 
         [Required]
-        public required User User { get; set; } // Quan hệ với User
+        public required AppUser User { get; set; } // Quan hệ với User
 
         [Required]
         public required string FavoriteGenres { get; set; } // Danh sách thể loại yêu thích (lưu dạng JSON hoặc chuỗi)

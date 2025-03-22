@@ -57,7 +57,7 @@ namespace TunePhere.Repository.EFRepository
         {
             return await _context.Remixes
                 .Include(r => r.User)
-                .Where(r => r.User.Username == username)
+                .Where(r => r.User.UserName == username)
                 .ToListAsync();
         }
     }

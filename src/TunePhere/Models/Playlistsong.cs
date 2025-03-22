@@ -22,10 +22,10 @@ namespace TunePhere.Models
         public required Song Song { get; set; } // Quan hệ với Song
 
         [Required]
-        public int AddedByUserId { get; set; } // Người thêm bài hát
+        public string AddedByUserId { get; set; } // Người thêm bài hát
 
         [ForeignKey("AddedByUserId")]
-        public required User AddedByUser { get; set; } // Quan hệ với User
+        public required AppUser AddedByUser { get; set; } // Quan hệ với User
 
         public DateTime AddedAt { get; set; } = DateTime.Now; // Ngày thêm vào playlist
 

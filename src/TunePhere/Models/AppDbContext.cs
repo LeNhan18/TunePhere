@@ -1,14 +1,16 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace TunePhere.Models
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<AppUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<ListeningRoomParticipant> ListeningRoomParticipants { get; set; }
         public DbSet<ListeningRoom> ListeningRooms { get; set; }
-        public DbSet<User> Users { get; set; }
+        public DbSet<AppUser> Users { get; set; }
         public DbSet<Song> Songs { get; set; }
         public DbSet<Lyric> Lyrics { get; set; }
         public DbSet<Playlist> Playlists { get; set; }
@@ -52,7 +54,7 @@ namespace TunePhere.Models
             // Lyrics -> Songs
             modelBuilder.Entity<Lyric>()
                 .HasOne(l => l.Song)
-                .WithMany()
+                .WithMany(n => n.Lyrics)
                 .HasForeignKey(l => l.SongId)
                 .OnDelete(DeleteBehavior.NoAction);
 

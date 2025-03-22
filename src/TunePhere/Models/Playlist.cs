@@ -11,10 +11,10 @@ namespace TunePhere.Models
         public int PlaylistId { get; set; } // Khóa chính
 
         [Required]
-        public int UserId { get; set; } // Khóa ngoại liên kết với User
+        public string UserId { get; set; } // Khóa ngoại liên kết với User
 
         [ForeignKey("UserId")]
-        public required User User { get; set; } // Quan hệ với bảng Users
+        public required AppUser User { get; set; } // Quan hệ với bảng Users
 
         [Required, StringLength(200)]
         public required string Title { get; set; } // Tên playlist
