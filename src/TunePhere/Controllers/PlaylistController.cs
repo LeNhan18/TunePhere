@@ -11,7 +11,6 @@ namespace TunePhere.Controllers
         {
             _playlistRepo = playlistRepo;
         }
-
         public async Task<IActionResult> Index()
         {
             var personalPlaylists = await _playlistRepo.GetUserPlaylistsAsync(User.Identity.Name);

@@ -14,7 +14,7 @@ namespace TunePhere.Repository.EFRepository
         public async Task<SearchResult> SearchAsync(string query)
         {
             var songs = await _context.Songs
-                .Where(s => s.Title.Contains(query) || s.Artist.Contains(query))
+                .Where(s => s.Title.Contains(query) || s.Artist.ArtistName.Contains(query))
                 .ToListAsync();
             var playlists = await _context.Playlists
                 .Where(p => p.Title.Contains(query))

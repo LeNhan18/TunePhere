@@ -18,6 +18,7 @@ namespace TunePhere.Models
         public DbSet<UserPreference> UserPreferences { get; set; }
         public DbSet<PlaylistSong> PlaylistSongs { get; set; }
 
+        public DbSet<Artists> Artistss { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
@@ -102,6 +103,10 @@ namespace TunePhere.Models
                 .WithMany()
                 .HasForeignKey(ps => ps.AddedByUserId)
                 .OnDelete(DeleteBehavior.NoAction);
+            //Artists relationships
+            modelBuilder.Entity<Artists>()
+                .HasMany(a => a)
+                .WithMany(s => s.Artistss);
         }
     }
 }

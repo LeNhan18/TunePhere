@@ -5,11 +5,7 @@ using TunePhere.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
 var Configuration = builder.Configuration; // Add this line to define Configuration
-
-// Add services to the container.
-builder.Services.AddControllersWithViews();
 
 // Đăng ký DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
