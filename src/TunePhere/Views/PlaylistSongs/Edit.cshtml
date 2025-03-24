@@ -1,0 +1,55 @@
+﻿@model TunePhere.Models.PlaylistSong
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "_Layout";
+}
+
+<h1>Edit</h1>
+
+<h4>PlaylistSong</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="PlaylistId" class="control-label"></label>
+                <select asp-for="PlaylistId" class="form-control" asp-items="ViewBag.PlaylistId"></select>
+                <span asp-validation-for="PlaylistId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SongId" class="control-label"></label>
+                <select asp-for="SongId" class="form-control" asp-items="ViewBag.SongId"></select>
+                <span asp-validation-for="SongId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AddedByUserId" class="control-label"></label>
+                <select asp-for="AddedByUserId" class="form-control" asp-items="ViewBag.AddedByUserId"></select>
+                <span asp-validation-for="AddedByUserId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AddedAt" class="control-label"></label>
+                <input asp-for="AddedAt" class="form-control" />
+                <span asp-validation-for="AddedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="VoteCount" class="control-label"></label>
+                <input asp-for="VoteCount" class="form-control" />
+                <span asp-validation-for="VoteCount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
