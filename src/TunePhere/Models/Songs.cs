@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TunePhere.Models
 {
@@ -29,16 +30,21 @@ namespace TunePhere.Models
 
         public DateTime UploadDate { get; set; } = DateTime.Now; // Ngày tải lên
 
+        public virtual Album Album { get; set; }
+
         // Navigation properties
         public virtual ICollection<Lyric> Lyrics { get; set; } // Lời bài hát
         public virtual ICollection<Remix> Remixes { get; set; } // Danh sách remix
         public virtual ICollection<PlaylistSong> PlaylistSongs { get; set; } // Danh sách playlist chứa bài hát này
 
+        public virtual ICollection<ArtistSong> ArtistsSong { get; set; }
         public Song()
         {
             Lyrics = new HashSet<Lyric>();
             Remixes = new HashSet<Remix>();
             PlaylistSongs = new HashSet<PlaylistSong>();
+            ArtistsSong = new HashSet<ArtistSong>();
+
         }
     }
 }
