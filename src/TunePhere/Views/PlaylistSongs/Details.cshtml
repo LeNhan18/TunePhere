@@ -1,0 +1,49 @@
+﻿@model TunePhere.Models.PlaylistSong
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "_Layout";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>PlaylistSong</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Playlist)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Playlist.Title)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Song)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Song.Artist)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.AddedByUser)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.AddedByUser.Id)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.AddedAt)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.AddedAt)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.VoteCount)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.VoteCount)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
