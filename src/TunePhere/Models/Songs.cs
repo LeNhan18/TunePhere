@@ -30,7 +30,9 @@ namespace TunePhere.Models
 
         public DateTime UploadDate { get; set; } = DateTime.Now; // Ngày tải lên
 
-        public virtual Album Album { get; set; }
+        [ForeignKey("AlbumId")]
+        public int AlbumId { get; set; } // Khóa ngoại liên kết với Album
+        public virtual Album Albums { get; set; }
 
         // Navigation properties
         public virtual ICollection<Lyric> Lyrics { get; set; } // Lời bài hát
