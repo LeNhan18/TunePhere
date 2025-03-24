@@ -119,9 +119,9 @@ namespace TunePhere.Models
                 .HasForeignKey(sa => sa.ArtistId);
             // Cấu hình mối quan hệ một-nhiều giữa Album và Song
             modelBuilder.Entity<Song>()
-                .HasOne(s => s.Album)
+                .HasOne(s => s.Albums)
                 .WithMany(a => a.Songs)
-                .HasForeignKey(s => s.Album);
+                .HasForeignKey(s => s.AlbumId);
 
         }
     }
