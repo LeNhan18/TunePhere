@@ -1,0 +1,257 @@
+@model TunePhere.Models.ListeningRoom
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Khu vực chính: Thông tin phòng và trình phát nhạc -->
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">@Model.Title</h4>
+                    <span class="badge bg-primary">@Model.Participants.Count người tham gia</span>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-4">
+                        @if (Model.CurrentSong != null)
+                        {
+                            <img id="currentSongThumb" src="@Model.CurrentSong.ImageUrl" class="img-fluid rounded me-3" style="max-width: 100px;" alt="@Model.CurrentSong.Title">
+                            <div>
+                                <h5 id="currentSongTitle" class="mb-1">@Model.CurrentSong.Title</h5>
+                                <p id="currentSongArtist" class="mb-1 text-muted">@Model.CurrentSong.Artist</p>
+                                <small class="text-muted">Được yêu cầu bởi: <span id="songRequestedBy">-</span></small>
+                            </div>
+                        }
+                        else
+                        {
+                            <img id="currentSongThumb" src="/images/default-song.jpg" class="img-fluid rounded me-3" style="max-width: 100px;" alt="Ảnh bài hát">
+                            <div>
+                                <h5 id="currentSongTitle" class="mb-1">Chưa có bài hát nào đang phát</h5>
+                                <p id="currentSongArtist" class="mb-1 text-muted">Hãy bình chọn một bài hát để phát</p>
+                                <small class="text-muted">Được yêu cầu bởi: <span id="songRequestedBy">-</span></small>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="audio-player mb-4">
+                        <audio id="audioPlayer" class="w-100" controls>
+                            <source src="" type="audio/mpeg">
+                            Trình duyệt của bạn không hỗ trợ phát âm thanh.
+                        </audio>
+                        <div class="progress mt-2" style="height: 5px;">
+                            <div id="audioProgress" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small id="currentTime">0:00</small>
+                            <small id="duration">0:00</small>
+                        </div>
+                    </div>
+
+                    <!-- Lyrics -->
+                    <h5>Lyrics</h5>
+                    <div class="lyrics-container p-3 bg-light rounded" style="height: 250px; overflow-y: auto;">
+                        <div id="lyrics-sync">
+                            <p class="text-center text-muted">Lyrics sẽ xuất hiện khi bài hát được phát.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bình chọn bài hát tiếp theo -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Bình chọn bài hát tiếp theo</h5>
+                </div>
+                <div class="card-body">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" placeholder="Tìm kiếm bài hát để đề xuất...">
+                        <button class="btn btn-outline-primary" type="button">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+
+                    <div class="list-group">
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <img src="/images/sample-song1.jpg" class="rounded me-3" style="width: 50px; height: 50px;" alt="Song 1">
+                                <div>
+                                    <h6 class="mb-0">Hẹn Ngày Mai</h6>
+                                    <small class="text-muted">Hải Đăng Doo</small>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="badge bg-primary rounded-pill me-2">5 phiếu</span>
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-hand-thumbs-up"></i> Bình chọn
+                                </button>
+                            </div>
+                        </div>
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <img src="/images/sample-song2.jpg" class="rounded me-3" style="width: 50px; height: 50px;" alt="Song 2">
+                                <div>
+                                    <h6 class="mb-0">Lạc Trôi</h6>
+                                    <small class="text-muted">Sơn Tùng M-TP</small>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="badge bg-primary rounded-pill me-2">3 phiếu</span>
+                                <button class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-hand-thumbs-up"></i> Bình chọn
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Khu vực bên phải: Danh sách thành viên và khung chat -->
+        <div class="col-md-4">
+            <!-- Danh sách thành viên -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Thành viên</h5>
+                </div>
+                <div class="card-body" style="max-height: 250px; overflow-y: auto;">
+                    <ul class="list-group">
+                        @foreach (var participant in Model.Participants)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <img src="/images/default-avatar.jpg" class="rounded-circle me-2" style="width: 30px; height: 30px;" alt="@participant.User.Username">
+                                    <span>@participant.User.Username</span>
+                                </div>
+                                @if (participant.User.UserId == Model.CreatorId)
+                                {
+                                    <span class="badge bg-primary">Chủ phòng</span>
+                                }
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Khung chat -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-chat-dots me-2"></i>Chat</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="chat-messages" class="p-3" style="height: 350px; overflow-y: auto;">
+                        <div class="chat-message d-flex mb-3">
+                            <img src="/images/user1.jpg" class="rounded-circle me-2" style="width: 40px; height: 40px;" alt="User 1">
+                            <div>
+                                <div class="d-flex align-items-center mb-1">
+                                    <span class="fw-bold me-2">Nguyễn Văn A</span>
+                                    <small class="text-muted">10:15</small>
+                                </div>
+                                <div class="bg-light rounded p-2">
+                                    Xin chào mọi người!
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-message d-flex mb-3">
+                            <img src="/images/user2.jpg" class="rounded-circle me-2" style="width: 40px; height: 40px;" alt="User 2">
+                            <div>
+                                <div class="d-flex align-items-center mb-1">
+                                    <span class="fw-bold me-2">Trần Thị B</span>
+                                    <small class="text-muted">10:17</small>
+                                </div>
+                                <div class="bg-light rounded p-2">
+                                    Mình vừa bình chọn bài Lạc Trôi, mọi người cùng bình chọn nhé!
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-message d-flex mb-3">
+                            <img src="/images/user3.jpg" class="rounded-circle me-2" style="width: 40px; height: 40px;" alt="User 3">
+                            <div>
+                                <div class="d-flex align-items-center mb-1">
+                                    <span class="fw-bold me-2">Lê Văn C</span>
+                                    <small class="text-muted">10:18</small>
+                                </div>
+                                <div class="bg-light rounded p-2">
+                                    Mình thích bài này lắm, sẽ bình chọn ngay! 😊
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input p-3 border-top">
+                        <div class="input-group">
+                            <input type="text" id="message-input" class="form-control" placeholder="Nhập tin nhắn...">
+                            <button class="btn btn-primary" type="button">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Khi phòng sử dụng SignalR, phần này sẽ kết nối với hub
+            
+            // Mẫu code giả lập phát nhạc và hiển thị lyrics
+            const audioPlayer = document.getElementById('audioPlayer');
+            const audioProgress = document.getElementById('audioProgress');
+            const currentTimeDisplay = document.getElementById('currentTime');
+            const durationDisplay = document.getElementById('duration');
+            
+            // Cập nhật thanh tiến trình
+            audioPlayer.addEventListener('timeupdate', function () {
+                const percentage = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                audioProgress.style.width = percentage + '%';
+                
+                // Cập nhật hiển thị thời gian
+                currentTimeDisplay.textContent = formatTime(audioPlayer.currentTime);
+            });
+
+            // Hiển thị tổng thời gian khi metadata được tải
+            audioPlayer.addEventListener('loadedmetadata', function () {
+                durationDisplay.textContent = formatTime(audioPlayer.duration);
+            });
+
+            // Định dạng thời gian từ giây sang mm:ss
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = Math.floor(seconds % 60);
+                return minutes + ':' + (remainingSeconds < 10 ? '0' : '') + remainingSeconds;
+            }
+
+            // Cho phép click vào thanh tiến trình để nhảy đến vị trí tương ứng
+            document.querySelector('.progress').addEventListener('click', function (e) {
+                const percent = e.offsetX / this.offsetWidth;
+                audioPlayer.currentTime = percent * audioPlayer.duration;
+            });
+
+            // Code giả lập gửi tin nhắn
+            const messageInput = document.getElementById('message-input');
+            const chatMessages = document.getElementById('chat-messages');
+            
+            document.querySelector('.chat-input button').addEventListener('click', function() {
+                sendMessage();
+            });
+            
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            function sendMessage() {
+                if (messageInput.value.trim() === '') return;
+                
+                // Trong thực tế, đây là nơi gọi phương thức từ SignalR hub
+                console.log('Sending message:', messageInput.value);
+                
+                // Xóa input sau khi gửi
+                messageInput.value = '';
+            }
+        });
+    </script>
+} 

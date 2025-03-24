@@ -21,6 +21,9 @@ namespace TunePhere.Models
         [Required, StringLength(100)]
         public required string FullName { get; set; } // Họ và tên đầy đủ
 
+        [Required]
+        public required string ProfileImageUrl { get; set; } = "/images/default-avatar.jpg"; // Ảnh đại diện
+
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Ngày tạo tài khoản
 
         public DateTime? LastLogin { get; set; } // Lần đăng nhập gần nhất

@@ -1,0 +1,268 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Khám phá";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Khám phá</h1>
+            <p class="lead">Khám phá những bài hát, remix thịnh hành và phòng nghe nhạc công khai</p>
+        </div>
+    </div>
+
+    <!-- Bảng xếp hạng bài hát -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2><i class="bi bi-trophy me-2"></i>Top Bài Hát</h2>
+                <a asp-controller="Search" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-music-note-list me-1"></i>Xem tất cả
+                </a>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;" class="text-center">#</th>
+                                    <th style="width: 80px;"></th>
+                                    <th>Bài hát</th>
+                                    <th>Album</th>
+                                    <th>Lượt nghe</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.TopSongs != null && Model.TopSongs.Count > 0)
+                                {
+                                    @for (int i = 0; i < Model.TopSongs.Count; i++)
+                                    {
+                                        var song = Model.TopSongs[i];
+                                        <tr>
+                                            <td class="text-center">
+                                                <span class="@(i < 3 ? "badge bg-primary" : "text-muted")">@(i + 1)</span>
+                                            </td>
+                                            <td>
+                                                <img src="@song.SongThumb" class="img-fluid rounded" alt="@song.SongName" style="width: 50px; height: 50px; object-fit: cover;">
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <span class="fw-bold">@song.SongName</span>
+                                                    <small class="text-muted">@song.Artist</small>
+                                                </div>
+                                            </td>
+                                            <td>@song.Album</td>
+                                            <td>
+                                                <i class="bi bi-headphones me-1"></i>@song.PlayCount.ToString("N0")
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-2">
+                                                    <a asp-controller="Song" asp-action="Details" asp-route-id="@song.SongId" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-play-fill"></i>
+                                                    </a>
+                                                    <button class="btn btn-sm btn-outline-secondary">
+                                                        <i class="bi bi-plus-lg"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4">Chưa có dữ liệu</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Remix -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2><i class="bi bi-music-note-beamed me-2"></i>Top Remix</h2>
+                <a asp-controller="Remix" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-music-note-beamed me-1"></i>Tạo remix
+                </a>
+            </div>
+        </div>
+        
+        @if (Model != null && Model.TopRemixes != null && Model.TopRemixes.Count > 0)
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                @foreach (var remix in Model.TopRemixes)
+                {
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <div class="position-relative">
+                                <img src="@remix.RemixThumb" class="card-img-top" alt="@remix.RemixName">
+                                <div class="position-absolute top-0 end-0 p-2">
+                                    <span class="badge bg-primary">
+                                        <i class="bi bi-headphones me-1"></i>@remix.PlayCount.ToString("N0")
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">@remix.RemixName</h5>
+                                <p class="card-text">
+                                    <small class="text-muted">Remix bởi @remix.User.UserName</small><br />
+                                    <small class="text-muted">Gốc: @remix.OriginalSong.SongName</small>
+                                </p>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <div class="d-flex justify-content-between">
+                                    <a href="#" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-play-fill me-1"></i>Phát
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-share me-1"></i>Chia sẻ
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Chưa có dữ liệu về remix thịnh hành.
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Phòng nghe nhạc công khai -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2><i class="bi bi-people-fill me-2"></i>Phòng nghe nhạc công khai</h2>
+                <a asp-controller="ListeningRoom" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-door-open me-1"></i>Xem tất cả phòng
+                </a>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <!-- Phòng nghe nhạc giả lập vì không có dữ liệu thực tế từ controller -->
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Acoustic Chill</h5>
+                            <span class="badge bg-success rounded-pill">Đang hoạt động</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="/images/sample-profile.jpg" class="rounded-circle me-2" width="40" height="40" alt="Host">
+                                <div>
+                                    <p class="mb-0 fw-bold">Chủ phòng: Minh Trí</p>
+                                    <small class="text-muted">Đã tạo 2 giờ trước</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="bi bi-people-fill me-1"></i>
+                                    <span>12 người tham gia</span>
+                                </div>
+                                <div>
+                                    <i class="bi bi-music-note me-1"></i>
+                                    <span>45 bài hát</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="#" class="btn btn-primary w-100">
+                                <i class="bi bi-door-open me-2"></i>Tham gia
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Rap Việt Fans</h5>
+                            <span class="badge bg-success rounded-pill">Đang hoạt động</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="/images/sample-profile2.jpg" class="rounded-circle me-2" width="40" height="40" alt="Host">
+                                <div>
+                                    <p class="mb-0 fw-bold">Chủ phòng: Ngọc Anh</p>
+                                    <small class="text-muted">Đã tạo 5 giờ trước</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="bi bi-people-fill me-1"></i>
+                                    <span>28 người tham gia</span>
+                                </div>
+                                <div>
+                                    <i class="bi bi-music-note me-1"></i>
+                                    <span>67 bài hát</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="#" class="btn btn-primary w-100">
+                                <i class="bi bi-door-open me-2"></i>Tham gia
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">V-Pop Lovers</h5>
+                            <span class="badge bg-success rounded-pill">Đang hoạt động</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="/images/sample-profile3.jpg" class="rounded-circle me-2" width="40" height="40" alt="Host">
+                                <div>
+                                    <p class="mb-0 fw-bold">Chủ phòng: Hoàng Long</p>
+                                    <small class="text-muted">Đã tạo 1 giờ trước</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="bi bi-people-fill me-1"></i>
+                                    <span>19 người tham gia</span>
+                                </div>
+                                <div>
+                                    <i class="bi bi-music-note me-1"></i>
+                                    <span>32 bài hát</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="#" class="btn btn-primary w-100">
+                                <i class="bi bi-door-open me-2"></i>Tham gia
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // JavaScript cho trang khám phá có thể được thêm vào đây
+        });
+    </script>
+} 

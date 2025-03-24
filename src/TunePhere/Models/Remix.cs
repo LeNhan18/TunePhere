@@ -27,6 +27,9 @@ namespace TunePhere.Models
         [Required]
         public required string FileUrl { get; set; } // Đường dẫn file remix
 
+        [Required]
+        public required string ImageUrl { get; set; } = "/images/default-remix.jpg"; // Đường dẫn ảnh bìa
+
         public int Likes { get; set; } = 0; // Số lượt thích
 
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Ngày tạo remix

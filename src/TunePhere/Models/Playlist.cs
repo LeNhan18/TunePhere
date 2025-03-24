@@ -19,9 +19,14 @@ namespace TunePhere.Models
         [Required, StringLength(200)]
         public required string Title { get; set; } // Tên playlist
 
+        [Required]
+        public required string ImageUrl { get; set; } = "/images/default-playlist.jpg"; // Đường dẫn ảnh bìa
+
         public bool IsPublic { get; set; } = true; // Playlist công khai hoặc riêng tư
 
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Ngày tạo
+
+        public int PlayCount { get; set; } = 0; // Số lượt phát playlist
 
         // Navigation property
         public virtual ICollection<PlaylistSong> PlaylistSongs { get; set; } // Danh sách bài hát trong playlist
@@ -30,5 +35,9 @@ namespace TunePhere.Models
         {
             PlaylistSongs = new HashSet<PlaylistSong>();
         }
+        
+        // Thuộc tính để trả về số lượng bài hát trong playlist
+        [NotMapped]
+        public int SongCount => PlaylistSongs?.Count ?? 0;
     }
 }

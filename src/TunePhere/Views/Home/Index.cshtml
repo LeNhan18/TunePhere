@@ -1,8 +1,131 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<TunePhere.Models.Song>
+@{
+    ViewData["Title"] = "Trang Chủ";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid">
+    <!-- Phần Banner -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-dark text-white rounded-3 shadow">
+                <div class="card-body text-center p-5">
+                    <h1 class="display-4">TunePhere - Thế Giới Âm Nhạc Của Bạn</h1>
+                    <p class="lead">Khám phá, chia sẻ và tận hưởng âm nhạc cùng cộng đồng</p>
+                    <div class="d-flex justify-content-center gap-3 mt-4">
+                        <a asp-controller="Playlist" asp-action="Index" class="btn btn-primary btn-lg">
+                            <i class="bi bi-music-note-list me-2"></i>Tạo Playlist
+                        </a>
+                        <a asp-controller="ListeningRoom" asp-action="Index" class="btn btn-success btn-lg">
+                            <i class="bi bi-people-fill me-2"></i>Tham gia Phòng nghe nhạc
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phần Playlist gợi ý -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="border-bottom pb-2"><i class="bi bi-music-note-list me-2"></i>Playlist gợi ý</h2>
+        </div>
+        @if (ViewBag.SuggestedPlaylists != null)
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                @foreach (var playlist in ViewBag.SuggestedPlaylists)
+                {
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <img src="@playlist.ImageUrl" class="card-img-top" alt="@playlist.Title">
+                            <div class="card-body">
+                                <h5 class="card-title">@playlist.Title</h5>
+                                <p class="card-text text-muted">Tạo bởi @playlist.User.Username</p>
+                            </div>
+                            <div class="card-footer bg-transparent border-top-0">
+                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-play-fill"></i> Nghe ngay
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p>Không có playlist nào được gợi ý.</p>
+        }
+    </div>
+
+    <!-- Phần Top Remix -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="border-bottom pb-2"><i class="bi bi-music-note-beamed me-2"></i>Top Remix</h2>
+        </div>
+        @if (ViewBag.TrendingRemixes != null)
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                @foreach (var remix in ViewBag.TrendingRemixes)
+                {
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <img src="@remix.ImageUrl" class="card-img-top" alt="@remix.Title">
+                            <div class="card-body">
+                                <h5 class="card-title">@remix.Title</h5>
+                                <p class="card-text text-muted">Remix bởi @remix.User.Username</p>
+                            </div>
+                            <div class="card-footer bg-transparent border-top-0">
+                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-play-fill"></i> Nghe ngay
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p>Không có remix nào đang thịnh hành.</p>
+        }
+    </div>
+
+    <!-- Phần Bài hát hot -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="border-bottom pb-2"><i class="bi bi-fire me-2"></i>Bài hát hot</h2>
+        </div>
+        @if (Model != null && Model.Any())
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                @foreach (var song in Model)
+                {
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <img src="@song.ImageUrl" class="card-img-top" alt="@song.Title">
+                            <div class="card-body">
+                                <h5 class="card-title">@song.Title</h5>
+                                <p class="card-text text-muted">@song.Artist</p>
+                            </div>
+                            <div class="card-footer bg-transparent border-top-0">
+                                <a asp-controller="Song" asp-action="Details" asp-route-id="@song.SongId" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-play-fill"></i> Nghe ngay
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p>Không có bài hát nào đang hot.</p>
+        }
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        // JavaScript cho trang chủ có thể được thêm vào đây
+    </script>
+}

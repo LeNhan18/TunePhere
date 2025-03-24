@@ -1,0 +1,356 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Tìm kiếm";
+    var query = Context.Request.Query["query"].ToString();
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Kết quả tìm kiếm cho "@query"</h1>
+            <form class="mt-3" asp-controller="Search" asp-action="Index" method="get">
+                <div class="input-group input-group-lg">
+                    <input type="text" class="form-control" name="query" value="@query" placeholder="Tìm kiếm bài hát, playlist, nghệ sĩ...">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-search me-2"></i>Tìm kiếm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tab điều hướng -->
+    <ul class="nav nav-tabs mb-4" id="searchTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-results" type="button" role="tab" aria-controls="all-results" aria-selected="true">
+                <i class="bi bi-grid me-2"></i>Tất cả
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="songs-tab" data-bs-toggle="tab" data-bs-target="#songs-results" type="button" role="tab" aria-controls="songs-results" aria-selected="false">
+                <i class="bi bi-music-note me-2"></i>Bài hát
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="playlists-tab" data-bs-toggle="tab" data-bs-target="#playlists-results" type="button" role="tab" aria-controls="playlists-results" aria-selected="false">
+                <i class="bi bi-music-note-list me-2"></i>Playlist
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="remixes-tab" data-bs-toggle="tab" data-bs-target="#remixes-results" type="button" role="tab" aria-controls="remixes-results" aria-selected="false">
+                <i class="bi bi-music-note-beamed me-2"></i>Remix
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-results" type="button" role="tab" aria-controls="users-results" aria-selected="false">
+                <i class="bi bi-people me-2"></i>Người dùng
+            </button>
+        </li>
+    </ul>
+
+    <!-- Nội dung tab -->
+    <div class="tab-content" id="searchTabContent">
+        <!-- Tab Tất cả -->
+        <div class="tab-pane fade show active" id="all-results" role="tabpanel" aria-labelledby="all-tab">
+            @if (Model != null && ((Model.Songs != null && Model.Songs.Count > 0) || 
+                                  (Model.Playlists != null && Model.Playlists.Count > 0) || 
+                                  (Model.Remixes != null && Model.Remixes.Count > 0) || 
+                                  (Model.Users != null && Model.Users.Count > 0)))
+            {
+                <!-- Kết quả Bài hát -->
+                if (Model.Songs != null && Model.Songs.Count > 0)
+                {
+                    <div class="mb-4">
+                        <h3 class="mb-3">Bài hát</h3>
+                        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+                            @foreach (var song in Model.Songs.Take(4))
+                            {
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <img src="@song.ImageUrl" class="card-img-top" alt="@song.Title">
+                                        <div class="card-body">
+                                            <h5 class="card-title">@song.Title</h5>
+                                            <p class="card-text text-muted">@song.Artist</p>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <a asp-controller="Song" asp-action="Details" asp-route-id="@song.SongId" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-play-fill"></i> Nghe ngay
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        @if (Model.Songs.Count > 4)
+                        {
+                            <div class="text-center mt-3">
+                                <button class="btn btn-link" id="songs-tab" data-bs-toggle="tab" data-bs-target="#songs-results">
+                                    Xem thêm @(Model.Songs.Count - 4) bài hát <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- Kết quả Playlist -->
+                if (Model.Playlists != null && Model.Playlists.Count > 0)
+                {
+                    <div class="mb-4">
+                        <h3 class="mb-3">Playlist</h3>
+                        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+                            @foreach (var playlist in Model.Playlists.Take(4))
+                            {
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <img src="@playlist.ImageUrl" class="card-img-top" alt="@playlist.Title">
+                                        <div class="card-body">
+                                            <h5 class="card-title">@playlist.Title</h5>
+                                            <p class="card-text text-muted">Tạo bởi @playlist.User.Username</p>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-play-fill"></i> Phát
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        @if (Model.Playlists.Count > 4)
+                        {
+                            <div class="text-center mt-3">
+                                <button class="btn btn-link" id="playlists-tab" data-bs-toggle="tab" data-bs-target="#playlists-results">
+                                    Xem thêm @(Model.Playlists.Count - 4) playlist <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- Kết quả Remix -->
+                if (Model.Remixes != null && Model.Remixes.Count > 0)
+                {
+                    <div class="mb-4">
+                        <h3 class="mb-3">Remix</h3>
+                        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+                            @foreach (var remix in Model.Remixes.Take(4))
+                            {
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <img src="@remix.ImageUrl" class="card-img-top" alt="@remix.Title">
+                                        <div class="card-body">
+                                            <h5 class="card-title">@remix.Title</h5>
+                                            <p class="card-text text-muted">Remix bởi @remix.User.Username</p>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-play-fill"></i> Nghe ngay
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        @if (Model.Remixes.Count > 4)
+                        {
+                            <div class="text-center mt-3">
+                                <button class="btn btn-link" id="remixes-tab" data-bs-toggle="tab" data-bs-target="#remixes-results">
+                                    Xem thêm @(Model.Remixes.Count - 4) remix <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- Kết quả Người dùng -->
+                if (Model.Users != null && Model.Users.Count > 0)
+                {
+                    <div class="mb-4">
+                        <h3 class="mb-3">Người dùng</h3>
+                        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+                            @foreach (var user in Model.Users.Take(4))
+                            {
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-body text-center">
+                                            <img src="@user.ProfileImageUrl" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" alt="@user.Username">
+                                            <h5 class="card-title">@user.Username</h5>
+                                            <a asp-controller="Profile" asp-action="Index" asp-route-id="@user.UserId" class="btn btn-sm btn-outline-primary mt-2">
+                                                <i class="bi bi-person me-1"></i> Xem hồ sơ
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        @if (Model.Users.Count > 4)
+                        {
+                            <div class="text-center mt-3">
+                                <button class="btn btn-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-results">
+                                    Xem thêm @(Model.Users.Count - 4) người dùng <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center p-5 bg-light rounded">
+                    <i class="bi bi-search display-1 text-muted"></i>
+                    <h3 class="mt-3">Không tìm thấy kết quả nào</h3>
+                    <p class="lead">Vui lòng thử lại với từ khóa khác</p>
+                </div>
+            }
+        </div>
+
+        <!-- Tab Bài hát -->
+        <div class="tab-pane fade" id="songs-results" role="tabpanel" aria-labelledby="songs-tab">
+            @if (Model != null && Model.Songs != null && Model.Songs.Count > 0)
+            {
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    @foreach (var song in Model.Songs)
+                    {
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <img src="@song.ImageUrl" class="card-img-top" alt="@song.Title">
+                                <div class="card-body">
+                                    <h5 class="card-title">@song.Title</h5>
+                                    <p class="card-text text-muted">@song.Artist</p>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <a asp-controller="Song" asp-action="Details" asp-route-id="@song.SongId" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-play-fill"></i> Nghe ngay
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-5 bg-light rounded">
+                    <i class="bi bi-music-note display-1 text-muted"></i>
+                    <h3 class="mt-3">Không tìm thấy bài hát nào</h3>
+                    <p class="lead">Vui lòng thử lại với từ khóa khác</p>
+                </div>
+            }
+        </div>
+
+        <!-- Tab Playlist -->
+        <div class="tab-pane fade" id="playlists-results" role="tabpanel" aria-labelledby="playlists-tab">
+            @if (Model != null && Model.Playlists != null && Model.Playlists.Count > 0)
+            {
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    @foreach (var playlist in Model.Playlists)
+                    {
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <img src="@playlist.ImageUrl" class="card-img-top" alt="@playlist.Title">
+                                <div class="card-body">
+                                    <h5 class="card-title">@playlist.Title</h5>
+                                    <p class="card-text text-muted">Tạo bởi @playlist.User.Username</p>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <a href="#" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-play-fill"></i> Phát
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-5 bg-light rounded">
+                    <i class="bi bi-music-note-list display-1 text-muted"></i>
+                    <h3 class="mt-3">Không tìm thấy playlist nào</h3>
+                    <p class="lead">Vui lòng thử lại với từ khóa khác</p>
+                </div>
+            }
+        </div>
+
+        <!-- Tab Remix -->
+        <div class="tab-pane fade" id="remixes-results" role="tabpanel" aria-labelledby="remixes-tab">
+            @if (Model != null && Model.Remixes != null && Model.Remixes.Count > 0)
+            {
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    @foreach (var remix in Model.Remixes)
+                    {
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <img src="@remix.ImageUrl" class="card-img-top" alt="@remix.Title">
+                                <div class="card-body">
+                                    <h5 class="card-title">@remix.Title</h5>
+                                    <p class="card-text text-muted">Remix bởi @remix.User.Username</p>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <a href="#" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-play-fill"></i> Nghe ngay
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-5 bg-light rounded">
+                    <i class="bi bi-music-note-beamed display-1 text-muted"></i>
+                    <h3 class="mt-3">Không tìm thấy remix nào</h3>
+                    <p class="lead">Vui lòng thử lại với từ khóa khác</p>
+                </div>
+            }
+        </div>
+
+        <!-- Tab người dùng -->
+        <div class="tab-pane fade" id="users-results" role="tabpanel" aria-labelledby="users-tab">
+            @if (Model != null && Model.Users != null && Model.Users.Count > 0)
+            {
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    @foreach (var user in Model.Users)
+                    {
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-center">
+                                    <img src="@user.ProfileImageUrl" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" alt="@user.Username">
+                                    <h5 class="card-title">@user.Username</h5>
+                                    <a asp-controller="Profile" asp-action="Index" asp-route-id="@user.UserId" class="btn btn-sm btn-outline-primary mt-2">
+                                        <i class="bi bi-person me-1"></i> Xem hồ sơ
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-5 bg-light rounded">
+                    <i class="bi bi-people display-1 text-muted"></i>
+                    <h3 class="mt-3">Không tìm thấy người dùng nào</h3>
+                    <p class="lead">Vui lòng thử lại với từ khóa khác</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // JavaScript cho tab chuyển đổi
+            const tabs = document.querySelectorAll('.btn-link[data-bs-toggle="tab"]');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const target = document.querySelector(this.getAttribute('data-bs-target'));
+                    const tabButton = document.querySelector(`button[data-bs-target="${this.getAttribute('data-bs-target')}"]`);
+                    tabButton.click();
+                });
+            });
+        });
+    </script>
+}

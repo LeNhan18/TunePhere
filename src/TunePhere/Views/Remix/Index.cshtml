@@ -1,0 +1,254 @@
+@model IEnumerable<TunePhere.Models.Remix>
+@{
+    ViewData["Title"] = "Remix Studio";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1>Remix Studio</h1>
+                <div>
+                    <button id="saveRemix" class="btn btn-primary me-2">
+                        <i class="bi bi-save me-2"></i>Lưu Remix
+                    </button>
+                    <button id="shareRemix" class="btn btn-success">
+                        <i class="bi bi-share me-2"></i>Chia sẻ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Thanh công cụ bên trái -->
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-sliders me-2"></i>Hiệu ứng âm thanh</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="effectEcho" class="form-label">Echo</label>
+                        <input type="range" class="form-range" min="0" max="100" value="0" id="effectEcho">
+                    </div>
+                    <div class="mb-3">
+                        <label for="effectReverb" class="form-label">Reverb</label>
+                        <input type="range" class="form-range" min="0" max="100" value="0" id="effectReverb">
+                    </div>
+                    <div class="mb-3">
+                        <label for="effectPitch" class="form-label">Pitch</label>
+                        <input type="range" class="form-range" min="-12" max="12" value="0" id="effectPitch">
+                    </div>
+                    <div class="mb-3">
+                        <label for="effectBass" class="form-label">Bass</label>
+                        <input type="range" class="form-range" min="0" max="100" value="50" id="effectBass">
+                    </div>
+                    <div class="mb-3">
+                        <label for="effectTreble" class="form-label">Treble</label>
+                        <input type="range" class="form-range" min="0" max="100" value="50" id="effectTreble">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-music-note-list me-2"></i>Nhạc cụ ảo</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button class="btn btn-outline-primary w-100 mb-2" data-instrument="piano">
+                            <i class="bi bi-music-note-beamed me-2"></i>Piano
+                        </button>
+                        <button class="btn btn-outline-primary w-100 mb-2" data-instrument="guitar">
+                            <i class="bi bi-music-note-beamed me-2"></i>Guitar
+                        </button>
+                        <button class="btn btn-outline-primary w-100 mb-2" data-instrument="drums">
+                            <i class="bi bi-music-note-beamed me-2"></i>Drums
+                        </button>
+                        <button class="btn btn-outline-primary w-100 mb-2" data-instrument="bass">
+                            <i class="bi bi-music-note-beamed me-2"></i>Bass
+                        </button>
+                        <button class="btn btn-outline-primary w-100" data-instrument="synth">
+                            <i class="bi bi-music-note-beamed me-2"></i>Synth
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Khu vực sóng âm chính -->
+        <div class="col-md-9">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-soundwave me-2"></i>Track chính</h5>
+                    <div>
+                        <button id="playPause" class="btn btn-sm btn-light me-2">
+                            <i class="bi bi-play-fill"></i>
+                        </button>
+                        <button id="stopTrack" class="btn btn-sm btn-light">
+                            <i class="bi bi-stop-fill"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="waveform" class="waveform-container" style="height: 150px; background-color: #f8f9fa; position: relative;">
+                        <!-- Vùng sóng âm sẽ được tạo bằng JavaScript -->
+                        <div class="waveform-placeholder text-center p-5">
+                            <p class="text-muted">Vùng hiển thị sóng âm sẽ xuất hiện khi bạn tải bài hát</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 d-flex justify-content-between">
+                        <span id="currentTime">0:00</span>
+                        <span id="totalTime">0:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-layers me-2"></i>Tracks phụ</h5>
+                </div>
+                <div class="card-body">
+                    <div id="additional-tracks">
+                        <!-- Tracks phụ sẽ được thêm vào đây -->
+                        <div class="track-item mb-3 p-3 bg-light rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="badge bg-primary me-2">Hiệu ứng</span>
+                                    <span>Echo Track</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="track-waveform" style="height: 50px; background-color: #e9ecef;"></div>
+                        </div>
+
+                        <div class="track-item mb-3 p-3 bg-light rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="badge bg-success me-2">Nhạc cụ</span>
+                                    <span>Piano Track</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="track-waveform" style="height: 50px; background-color: #e9ecef;"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <button id="addTrack" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-plus-circle me-2"></i>Thêm track mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm track mới -->
+<div class="modal fade" id="addTrackModal" tabindex="-1" aria-labelledby="addTrackModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTrackModalLabel">Thêm track mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="trackType" class="form-label">Loại track</label>
+                    <select class="form-select" id="trackType">
+                        <option value="instrument">Nhạc cụ</option>
+                        <option value="effect">Hiệu ứng</option>
+                        <option value="vocal">Vocal</option>
+                        <option value="sample">Sample</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="trackName" class="form-label">Tên track</label>
+                    <input type="text" class="form-control" id="trackName">
+                </div>
+                <div class="mb-3">
+                    <label for="trackFile" class="form-label">File âm thanh (tùy chọn)</label>
+                    <input type="file" class="form-control" id="trackFile">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary">Thêm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Khởi tạo các nút
+            const playPauseBtn = document.getElementById('playPause');
+            const stopBtn = document.getElementById('stopTrack');
+            const addTrackBtn = document.getElementById('addTrack');
+            const saveRemixBtn = document.getElementById('saveRemix');
+            const shareRemixBtn = document.getElementById('shareRemix');
+
+            // Xử lý sự kiện click
+            playPauseBtn.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                if (icon.classList.contains('bi-play-fill')) {
+                    icon.classList.remove('bi-play-fill');
+                    icon.classList.add('bi-pause-fill');
+                } else {
+                    icon.classList.remove('bi-pause-fill');
+                    icon.classList.add('bi-play-fill');
+                }
+            });
+
+            stopBtn.addEventListener('click', function() {
+                const playIcon = playPauseBtn.querySelector('i');
+                playIcon.classList.remove('bi-pause-fill');
+                playIcon.classList.add('bi-play-fill');
+            });
+
+            addTrackBtn.addEventListener('click', function() {
+                // Mở modal thêm track
+                const modal = new bootstrap.Modal(document.getElementById('addTrackModal'));
+                modal.show();
+            });
+
+            // Xử lý nút nhạc cụ ảo
+            const instrumentButtons = document.querySelectorAll('[data-instrument]');
+            instrumentButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const instrument = this.getAttribute('data-instrument');
+                    alert('Đã chọn nhạc cụ: ' + instrument);
+                });
+            });
+
+            // Xử lý thanh trượt hiệu ứng
+            const effectSliders = document.querySelectorAll('.form-range');
+            effectSliders.forEach(slider => {
+                slider.addEventListener('input', function() {
+                    // Trong thực tế, đây là nơi bạn sẽ áp dụng hiệu ứng âm thanh
+                    console.log(this.id + ': ' + this.value);
+                });
+            });
+
+            // Giả lập làm việc với Web Audio API trong thực tế
+            // Trong dự án thực tế, bạn sẽ cần tích hợp với thư viện như Wavesurfer.js, Tone.js, hoặc Web Audio API
+        });
+    </script>
+}

@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using TunePhere.Models;
+using TunePhere.Repository.IMPRepository;
+using TunePhere.Repository.EFRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,11 @@ builder.Services.AddControllersWithViews();
 // Đăng ký DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Đăng ký các Repository
+builder.Services.AddScoped<ISongRepository, EFSongRepository>();
+builder.Services.AddScoped<IPlaylistRepository, EFPlaylistRepository>();
+builder.Services.AddScoped<IRemixRepository, EFRemixRepository>();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
