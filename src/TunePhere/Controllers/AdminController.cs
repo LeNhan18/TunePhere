@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TunePhere.Models;
 using TunePhere.Models.ViewModels;
 using TunePhere.Attributes;
+using Microsoft.EntityFrameworkCore;
 
 namespace TunePhere.Controllers
 {
