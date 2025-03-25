@@ -25,7 +25,6 @@ namespace TunePhere.Models
          
         public virtual ICollection<Playlist> Playlists { get; set; }
 
-        public virtual ICollection<ArtistSong> ArtistSongs { get; set; }
 
 
         public Artists()

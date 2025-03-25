@@ -252,14 +252,13 @@ namespace TunePhere.Migrations
                     SongId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Artist = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Genre = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Duration = table.Column<TimeSpan>(type: "time", nullable: false),
                     FileUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UploadDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AlbumId = table.Column<int>(type: "int", nullable: false),
-                    ArtistsArtistId = table.Column<int>(type: "int", nullable: true)
+                    ArtistId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -271,33 +270,10 @@ namespace TunePhere.Migrations
                         principalColumn: "AlbumId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Songs_Artists_ArtistsArtistId",
-                        column: x => x.ArtistsArtistId,
-                        principalTable: "Artists",
-                        principalColumn: "ArtistId");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ArtistsSongs",
-                columns: table => new
-                {
-                    SongId = table.Column<int>(type: "int", nullable: false),
-                    ArtistId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ArtistsSongs", x => new { x.SongId, x.ArtistId });
-                    table.ForeignKey(
-                        name: "FK_ArtistsSongs_Artists_ArtistId",
+                        name: "FK_Songs_Artists_ArtistId",
                         column: x => x.ArtistId,
                         principalTable: "Artists",
                         principalColumn: "ArtistId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ArtistsSongs_Songs_SongId",
-                        column: x => x.SongId,
-                        principalTable: "Songs",
-                        principalColumn: "SongId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -447,11 +423,6 @@ namespace TunePhere.Migrations
                 column: "AppUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ArtistsSongs_ArtistId",
-                table: "ArtistsSongs",
-                column: "ArtistId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
@@ -561,17 +532,14 @@ namespace TunePhere.Migrations
                 column: "AlbumId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Songs_ArtistsArtistId",
+                name: "IX_Songs_ArtistId",
                 table: "Songs",
-                column: "ArtistsArtistId");
+                column: "ArtistId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "ArtistsSongs");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
