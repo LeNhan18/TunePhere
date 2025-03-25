@@ -1,0 +1,70 @@
+@inject AppDbContext DbContext
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+
+<link rel="stylesheet" href="~/css/navigation.css">
+
+<nav class="navbar fixed-top">
+    <!-- Phần bên trái: Logo, biểu tượng và thanh tìm kiếm -->
+    <div class="navbar-left">
+        <a href="/" class="logo">
+            <img src="~/images/spotify-logo.png" alt="TunePhere Logo" />
+        </a>
+        <a href="/home" class="nav-icon home-icon">
+            <i class="fas fa-home"></i>
+        </a>
+        <div class="search-container">
+            <div class="search-bar">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" placeholder="Bạn muốn phát nội dung gì?" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Phần bên phải: Liên kết và nút -->
+    <div class="navbar-right">
+        <a href="/premium" class="nav-link">Premium</a>
+        <a href="/support" class="nav-link">Hỗ trợ</a>
+        <a href="/download" class="nav-link download-link">
+            <i class="fas fa-download"></i> Tải xuống
+        </a>
+        <div class="vertical-line"></div>
+        
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <div class="user-menu-container">
+                <div class="user-menu-button">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <span class="user-name">@UserManager.GetUserName(User)</span>
+                    <i class="fas fa-caret-down"></i>
+                </div>
+                <div class="user-dropdown-menu">
+                    <a href="/Identity/Account/Manage" class="dropdown-item">
+                        <i class="fas fa-user"></i> Hồ sơ
+                    </a>
+                    <a href="/Identity/Account/Manage/ChangePassword" class="dropdown-item">
+                        <i class="fas fa-key"></i> Đổi mật khẩu
+                    </a>
+                    <a href="/user/playlists" class="dropdown-item">
+                        <i class="fas fa-music"></i> Playlist của tôi
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                        <button type="submit" class="dropdown-item logout-button">
+                            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+        else
+        {
+            <a href="/Identity/Account/Register" class="nav-button signup">Đăng ký</a>
+            <a href="/Identity/Account/Login" class="nav-button login">Đăng nhập</a>
+        }
+    </div>
+</nav>
