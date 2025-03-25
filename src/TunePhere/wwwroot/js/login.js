@@ -100,6 +100,25 @@
     console.log("Container:", container);
     console.log("Sign up button:", sign_up_btn);
     console.log("Sign in button:", sign_in_btn);
+
+    // Thêm đoạn này để xử lý z-index khi trang tải
+    if (localStorage.getItem('pageTransitionTarget') === 'login') {
+        const signInForm = document.querySelector('.sign-in-form');
+        const signUpForm = document.querySelector('.sign-up-form');
+        
+        if (signInForm && signUpForm) {
+            signInForm.style.zIndex = "2";
+            signUpForm.style.zIndex = "1";
+        }
+    } else if (localStorage.getItem('pageTransitionTarget') === 'register') {
+        const signInForm = document.querySelector('.sign-in-form');
+        const signUpForm = document.querySelector('.sign-up-form');
+        
+        if (signInForm && signUpForm) {
+            signInForm.style.zIndex = "1";
+            signUpForm.style.zIndex = "2";
+        }
+    }
 });
 
     // Animation cho nốt nhạc bay
@@ -166,42 +185,53 @@
 
 // Định nghĩa lại hàm trong file JS để đảm bảo nó luôn có sẵn
 function animateThenRedirect(url) {
-    // Tạo lớp che phủ để tránh chớp nháy
-    if (!document.querySelector('.page-transition-overlay')) {
-        const overlay = document.createElement('div');
-        overlay.className = 'page-transition-overlay';
-        document.body.appendChild(overlay);
-        
-        // Cho phép render trước khi thêm class
-        setTimeout(() => overlay.classList.add('active'), 10);
-    } else {
-        document.querySelector('.page-transition-overlay').classList.add('active');
-    }
+    // Tạo lớp che phủ
+    const overlay = document.createElement('div');
+    overlay.className = 'page-transition-overlay';
+    document.body.appendChild(overlay);
+    setTimeout(() => overlay.classList.add('active'), 10);
     
     const container = document.querySelector(".container");
+    
+    // Thêm class để đảm bảo transition mượt mà
+    container.classList.add('smooth-transition');
     
     // Lưu trạng thái
     if (url.includes('Register')) {
         localStorage.setItem('formState', 'register');
         localStorage.setItem('pageTransitionTarget', 'register');
+        
+        // Đánh dấu rằng đây là chuyển trang, không cần animation phóng to
+        sessionStorage.setItem('skipContainerAnimation', 'true');
+        
+        // Thêm class để bắt đầu animation
+        container.classList.add("sign-up-mode");
     } else {
         localStorage.setItem('formState', 'login');
         localStorage.setItem('pageTransitionTarget', 'login');
-    }
-    
-    // Đánh dấu rằng đây là chuyển trang, không cần animation phóng to
-    sessionStorage.setItem('skipContainerAnimation', 'true');
-    
-    if (url.includes('Register')) {
-        container.classList.add("sign-up-mode");
-    } else {
+        
+        // Đánh dấu rằng đây là chuyển trang, không cần animation phóng to
+        sessionStorage.setItem('skipContainerAnimation', 'true');
+        
+        // Xử lý animation khi chuyển Register -> Login
+        // Xóa class để bắt đầu animation ngược lại
         container.classList.remove("sign-up-mode");
+        
+        // Quan trọng: Thay đổi z-index theo quy trình
+        const signInForm = document.querySelector('.sign-in-form');
+        const signUpForm = document.querySelector('.sign-up-form');
+        
+        // Trì hoãn thay đổi z-index để animation diễn ra mượt mà
+        setTimeout(() => {
+            signInForm.style.zIndex = "2";
+            signUpForm.style.zIndex = "1";
+        }, 350); // Đợi một nửa thời gian animation để thay đổi z-index
     }
     
-    // Tăng thời gian đợi
+    // Kéo dài thời gian chờ để animation hoàn thành
     setTimeout(function() {
         window.location.href = url;
-    }, 300);
+    }, 700);
     
     return false;
 }
