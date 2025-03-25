@@ -18,12 +18,6 @@
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.FullName" class="form-control" aria-required="false" placeholder="Nguyễn Văn A" />
-                <label asp-for="Input.FullName">Họ và tên</label>
-                <span asp-validation-for="Input.FullName" class="text-danger"></span>
-                <div class="form-text text-muted">Nếu bỏ trống, tên của bạn sẽ được tạo tự động từ email.</div>
-            </div>
-            <div class="form-floating mb-3">
                 <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
                 <label asp-for="Input.Password">Mật khẩu</label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>

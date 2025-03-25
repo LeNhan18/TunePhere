@@ -120,7 +120,7 @@ namespace TunePhere.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
-                
+
                 // Tự động điền FullName từ email hoặc từ Input nếu được cung cấp
                 if (!string.IsNullOrEmpty(Input.FullName))
                 {
@@ -131,7 +131,7 @@ namespace TunePhere.Areas.Identity.Pages.Account
                     var emailParts = Input.Email.Split('@');
                     user.FullName = emailParts[0]; // Lấy phần trước @ làm tên
                 }
-                
+
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -139,6 +139,9 @@ namespace TunePhere.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    // Gán vai trò "User" cho người dùng mới đăng ký
+                    await _userManager.AddToRoleAsync(user, "User");
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
