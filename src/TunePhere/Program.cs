@@ -24,7 +24,8 @@ builder.Services.AddDefaultIdentity<AppUser>(options => {
     options.Password.RequireNonAlphanumeric = false; // Không yêu cầu ký tự đặc biệt
     options.Password.RequireUppercase = false; // Không yêu cầu chữ hoa
     options.Password.RequireLowercase = false; // Không yêu cầu chữ thường
-}).AddEntityFrameworkStores<AppDbContext>();
+}).AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<AppDbContext>();
 
 // Đăng ký các Repository
 builder.Services.AddScoped<ISongRepository, EFSongRepository>();
@@ -43,6 +44,49 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+
+    // Tạo các roles
+    string[] roleNames = { "Administrator", "User" };
+    foreach (var roleName in roleNames)
+    {
+        if (!await roleManager.RoleExistsAsync(roleName))
+        {
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+        }
+    }
+
+    // Kiểm tra và tạo tài khoản admin
+    var adminEmail = "TunePhereAdmin@gmail.com";
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+    if (adminUser == null)
+    {
+        var admin = new AppUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            FullName = "Administrator",
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(admin, "adTunePhere@123");
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(admin, "Administrator");
+        }
+    }
+    else if (!await userManager.IsInRoleAsync(adminUser, "Administrator"))
+    {
+        await userManager.AddToRoleAsync(adminUser, "Administrator");
+    }
+}
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
