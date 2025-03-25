@@ -17,9 +17,8 @@ namespace TunePhere.Models
         public DbSet<Remix> Remixes { get; set; }
         public DbSet<UserPreference> UserPreferences { get; set; }
         public DbSet<PlaylistSong> PlaylistSongs { get; set; }
-        
-        public DbSet<ArtistSong> ArtistsSongs { get; set; }
 
+        public DbSet<Artists> Artists { get; set; }
         public DbSet<Album> Albums { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -107,16 +106,11 @@ namespace TunePhere.Models
                 .OnDelete(DeleteBehavior.NoAction);
 
             // ArtistSong relationships
-            modelBuilder.Entity<ArtistSong>()
-                .HasKey(sa => new { sa.SongId, sa.ArtistId });
-            modelBuilder.Entity<ArtistSong>()
-                .HasOne(sa => sa.Song)
-                .WithMany(s => s.ArtistsSong)
-                .HasForeignKey(sa => sa.SongId);
-            modelBuilder.Entity<ArtistSong>()
-                .HasOne(sa => sa.Artist)
-                .WithMany(a => a.ArtistSongs)
-                .HasForeignKey(sa => sa.ArtistId);
+            modelBuilder.Entity<Artists>()
+                .HasMany(a => a.Songs)
+                .WithOne(s => s.Artists)
+                .HasForeignKey(s => s.ArtistId);
+
             // Cấu hình mối quan hệ một-nhiều giữa Album và Song
             modelBuilder.Entity<Song>()
                 .HasOne(s => s.Albums)

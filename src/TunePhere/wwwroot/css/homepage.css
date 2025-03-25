@@ -1,0 +1,343 @@
+:root {
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 80px;
+    --primary-color: #1DB954;
+    --primary-dark: #1AA34A;
+    --background-color: #121212;
+    --background-lighter: #181818;
+    --background-elevated: #282828;
+    --text-color: #FFFFFF;
+    --text-subdued: #B3B3B3;
+    --card-border-radius: 8px;
+    --transition-quick: 0.2s ease;
+    --transition-smooth: 0.3s cubic-bezier(0.3, 0, 0.4, 1);
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Circular', 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.main-container {
+    display: flex;
+    margin-top: 64px; /* Cho navbar fixed */
+    height: calc(100vh - 64px);
+}
+
+/* Sidebar Styles */
+.sidebar {
+    background-color: #000000;
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    height: 100%;
+    transition: var(--transition-smooth);
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar.collapsed {
+    min-width: var(--sidebar-collapsed-width);
+    width: var(--sidebar-collapsed-width);
+}
+
+.sidebar-header {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.library-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.library-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-subdued);
+}
+
+.library-title i {
+    font-size: 20px;
+}
+
+.library-title h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.library-actions {
+    display: flex;
+    align-items: center;
+}
+
+.add-button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: var(--text-subdued);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-quick);
+}
+
+.add-button:hover {
+    color: var(--text-color);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.library-toggle {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.toggle-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: var(--text-subdued);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-quick);
+}
+
+.toggle-btn:hover {
+    color: var(--text-color);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-content {
+    padding: 0 16px 16px;
+}
+
+.library-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 8px;
+    border-radius: var(--card-border-radius);
+    cursor: pointer;
+    transition: var(--transition-quick);
+}
+
+.library-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.library-item i {
+    color: var(--text-subdued);
+    font-size: 18px;
+    min-width: 24px;
+    text-align: center;
+}
+
+.library-item span {
+    color: var(--text-subdued);
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.library-item:hover i,
+.library-item:hover span {
+    color: var(--text-color);
+}
+
+.sidebar.collapsed .library-title h2,
+.sidebar.collapsed .add-button,
+.sidebar.collapsed .library-item span {
+    display: none;
+}
+
+.sidebar.collapsed .library-header {
+    justify-content: center;
+}
+
+.sidebar.collapsed .library-toggle {
+    justify-content: center;
+}
+
+.sidebar.collapsed .library-item {
+    justify-content: center;
+    padding: 16px 8px;
+}
+
+.sidebar.collapsed .library-item i {
+    font-size: 20px;
+}
+
+/* Main Content Styles */
+.content {
+    flex: 1;
+    padding: 20px 32px;
+    background: linear-gradient(to bottom, #1a1a1a, var(--background-color) 15%);
+    overflow-y: auto;
+    transition: var(--transition-smooth);
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 24px 0 16px;
+    color: var(--text-color);
+}
+
+/* Music Grid Styles */
+.music-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 36px;
+}
+
+.music-card, .artist-card, .chart-card {
+    background-color: var(--background-lighter);
+    padding: 16px;
+    border-radius: var(--card-border-radius);
+    transition: var(--transition-quick);
+    cursor: pointer;
+}
+
+.music-card:hover, .artist-card:hover, .chart-card:hover {
+    background-color: var(--background-elevated);
+}
+
+.card-img-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 16px;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.card-img-container img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.music-card:hover .card-img-container img,
+.artist-card:hover .card-img-container img,
+.chart-card:hover .card-img-container img {
+    transform: scale(1.05);
+}
+
+.artist-img img {
+    border-radius: 50%;
+}
+
+.play-overlay {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    opacity: 0;
+    transition: var(--transition-smooth);
+}
+
+.play-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    border: none;
+    color: var(--text-color);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-quick);
+    transform: translateY(10px);
+    opacity: 0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.play-btn:hover {
+    background-color: var(--primary-dark);
+    transform: scale(1.05) translateY(0) !important;
+}
+
+.song-title, .artist-name, .chart-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.artist-name, .artist-type, .chart-desc {
+    font-size: 14px;
+    color: var(--text-subdued);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .music-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .music-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        z-index: 100;
+        height: calc(100vh - 64px);
+    }
+    
+    .sidebar:not(.collapsed) {
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    .content {
+        margin-left: var(--sidebar-collapsed-width);
+        width: calc(100% - var(--sidebar-collapsed-width));
+    }
+    
+    .content.expanded {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .music-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .content {
+        padding: 16px;
+    }
+} 
