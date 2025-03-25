@@ -1,8 +1,155 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@model IEnumerable<TunePhere.Models.Song>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@using Microsoft.Extensions.DependencyInjection
+@inject AppDbContext DbContext
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<!-- CSS-->
+<link rel="stylesheet" href="~/css/navigation.css">
+<link rel="stylesheet" href="~/css/homepage.css">
+
+@await Html.PartialAsync("_NavigationPartial")
+@{
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+<input type="hidden" name="__RequestVerificationToken" value="@token" />
+
+<div class="main-container">
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <div class="library-header">
+                <div class="library-title">
+                    <i class="fas fa-book"></i>
+                    <h2>Thư viện</h2>
+                </div>
+                <div class="library-actions">
+                    <button class="add-button" title="Thêm mới">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="library-toggle">
+                <button id="toggle-sidebar" class="toggle-btn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="sidebar-content">
+            <!-- Các danh mục thư viện sẽ được hiển thị ở đây -->
+            <div class="library-item">
+                <i class="fas fa-music"></i>
+                <span>Bài hát đã thích</span>
+            </div>
+            <div class="library-item">
+                <i class="fas fa-compact-disc"></i>
+                <span>Album đã lưu</span>
+            </div>
+            <div class="library-item">
+                <i class="fas fa-microphone-alt"></i>
+                <span>Nghệ sĩ đang theo dõi</span>
+            </div>
+            <div class="library-item">
+                <i class="fas fa-podcast"></i>
+                <span>Podcast</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="content">
+        <!-- Những bài hát thịnh hành -->
+        <section class="music-section">
+            <h2 class="section-title">Những bài hát thịnh hành</h2>
+            <div class="music-grid">
+                @foreach (var song in Model.Take(4))
+                {
+                    <div class="music-card">
+                        <div class="card-img-container">
+                            @* <img src="@(song.CoverImageUrl ?? "/images/default-cover.jpg")" alt="@song.Title"> *@
+                            <div class="play-overlay">
+                                <button class="play-btn">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h3 class="song-title">@song.Title</h3>
+                        <p class="artist-name">@song.Artists.ArtistName</p>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- Nghệ sĩ phổ biến -->
+        <section class="music-section">
+            <h2 class="section-title">Nghệ sĩ phổ biến</h2>
+            <div class="music-grid">
+                @for (int i = 0; i < 8; i++)
+                {
+                    <div class="artist-card">
+                        <div class="card-img-container artist-img">
+                            <img src="/images/artist-placeholder.jpg" alt="Nghệ sĩ">
+                            <div class="play-overlay">
+                                <button class="play-btn">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h3 class="artist-name">Tên nghệ sĩ</h3>
+                        <p class="artist-type">Nghệ sĩ</p>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- Album nổi tiếng -->
+        <section class="music-section">
+            <h2 class="section-title">Album nổi tiếng</h2>
+            <div class="music-grid">
+                @for (int i = 0; i < 8; i++)
+                {
+                    <div class="music-card">
+                        <div class="card-img-container">
+                            <img src="/images/album-placeholder.jpg" alt="Album">
+                            <div class="play-overlay">
+                                <button class="play-btn">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h3 class="song-title">Tên album</h3>
+                        <p class="artist-name">Tên nghệ sĩ</p>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- Bảng xếp hạng nổi bật -->
+        <section class="music-section">
+            <h2 class="section-title">Bảng xếp hạng nổi bật</h2>
+            <div class="music-grid">
+                @for (int i = 0; i < 8; i++)
+                {
+                    <div class="chart-card">
+                        <div class="card-img-container">
+                            <img src="/images/chart-placeholder.jpg" alt="Bảng xếp hạng">
+                            <div class="play-overlay">
+                                <button class="play-btn">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h3 class="chart-title">Top 50 Việt Nam</h3>
+                        <p class="chart-desc">Cập nhật hàng tuần</p>
+                    </div>
+                }
+            </div>
+        </section>
+    </div>
 </div>
+
+<!-- Script --> 
+<script src="~/js/homepage.js"></script>

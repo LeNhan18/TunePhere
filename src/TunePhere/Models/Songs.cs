@@ -13,9 +13,6 @@ namespace TunePhere.Models
         [Required, StringLength(200)]
         public required string Title { get; set; } // Tên bài hát
 
-        [Required, StringLength(100)]
-        public required string Artist { get; set; } // Nghệ sĩ
-
         [Required, StringLength(50)]
         public required string Genre { get; set; } // Thể loại nhạc
 
@@ -32,21 +29,22 @@ namespace TunePhere.Models
 
         [ForeignKey("AlbumId")]
         public int AlbumId { get; set; } // Khóa ngoại liên kết với Album
+
+        [ForeignKey("ArtistId")]
+        public int ArtistId { get; set; } // Khóa ngoại liên kết với Artist
+
+        public virtual Artists Artists { get; set; }
         public virtual Album Albums { get; set; }
 
         // Navigation properties
         public virtual ICollection<Lyric> Lyrics { get; set; } // Lời bài hát
         public virtual ICollection<Remix> Remixes { get; set; } // Danh sách remix
         public virtual ICollection<PlaylistSong> PlaylistSongs { get; set; } // Danh sách playlist chứa bài hát này
-
-        public virtual ICollection<ArtistSong> ArtistsSong { get; set; }
         public Song()
         {
             Lyrics = new HashSet<Lyric>();
             Remixes = new HashSet<Remix>();
             PlaylistSongs = new HashSet<PlaylistSong>();
-            ArtistsSong = new HashSet<ArtistSong>();
-
         }
     }
 }

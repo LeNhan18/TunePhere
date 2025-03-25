@@ -28,7 +28,6 @@ namespace TunePhere.Repository.EFRepository
         }
         public async Task<AppUser?> AuthenticateAsync(string email, string password)
         {
-            // ?ây ch? là ví d? ??n gi?n; th?c t? b?n nên s? d?ng c? ch? hash và salt
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email && u.PasswordHash == password);
         }
         public async Task AddAsync(AppUser user)
