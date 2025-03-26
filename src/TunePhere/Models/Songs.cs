@@ -28,7 +28,7 @@ namespace TunePhere.Models
         public DateTime UploadDate { get; set; } = DateTime.Now; // Ngày tải lên
 
         [ForeignKey("AlbumId")]
-        public int AlbumId { get; set; } // Khóa ngoại liên kết với Album
+        public int? AlbumId { get; set; } // Khóa ngoại liên kết với Album
 
         [ForeignKey("ArtistId")]
         public int ArtistId { get; set; } // Khóa ngoại liên kết với Artist

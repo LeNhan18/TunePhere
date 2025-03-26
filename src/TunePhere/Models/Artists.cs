@@ -12,6 +12,8 @@ namespace TunePhere.Models
 
         public string? ImageUrl { get; set; }
 
+        public string? CoverImageUrl { get; set; }
+
         public string? Bio { get; set; }
 
         [ForeignKey("userId")]
@@ -24,8 +26,6 @@ namespace TunePhere.Models
         public virtual ICollection<Remix> Remixes { get; set; }
          
         public virtual ICollection<Playlist> Playlists { get; set; }
-
-
 
         public Artists()
         {
