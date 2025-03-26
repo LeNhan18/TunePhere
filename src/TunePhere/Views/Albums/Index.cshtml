@@ -1,67 +1,91 @@
 ﻿@model IEnumerable<TunePhere.Models.Album>
 
 @{
-    ViewData["Title"] = "Index";
-
-    Layout = "_Layout";
+    ViewData["Title"] = "Albums";
 }
 
-<h1>Index</h1>
+<link rel="stylesheet" href="~/css/albums.css" />
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.AlbumName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AlbumDescription)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ImageUrl)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ReleaseDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.numberSongs)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Time)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.AlbumName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AlbumDescription)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ImageUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ReleaseDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.numberSongs)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Time)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.AlbumId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.AlbumId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.AlbumId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="albums-container">
+    <section class="trending-songs">
+        <h2>Những bài hát thịnh hành</h2>
+        <div class="songs-grid">
+            <!-- Sẽ thêm danh sách bài hát sau -->
+        </div>
+    </section>
+
+    <section class="popular-artists">
+        <h2>Nghệ sĩ phổ biến</h2>
+        <div class="artists-grid">
+            @if (ViewBag.PopularArtists != null)
+            {
+                foreach (var artist in ViewBag.PopularArtists)
+                {
+                    <a href="@Url.Action("Profile", "Artists", new { id = artist.ArtistId })" class="artist-card">
+                        <div class="artist-image">
+                            <img src="@(string.IsNullOrEmpty(artist.ImageUrl) ? "/images/default-artist.jpg" : artist.ImageUrl)" alt="@artist.ArtistName" />
+                        </div>
+                        <div class="artist-info">
+                            <h3 class="artist-name">@artist.ArtistName</h3>
+                            <p class="artist-songs">@artist.Songs?.Count bài hát</p>
+                        </div>
+                    </a>
+                }
+            }
+        </div>
+    </section>
+
+    <section class="featured-albums">
+        <h2>Album nổi tiếng</h2>
+        <div class="albums-grid">
+            @foreach (var album in Model)
+            {
+                <a href="@Url.Action("Details", new { id = album.AlbumId })" class="album-card">
+                    <div class="album-image">
+                        <img src="@(string.IsNullOrEmpty(album.ImageUrl) ? "/images/default-album.jpg" : album.ImageUrl)" alt="@album.AlbumName" />
+                        <div class="album-overlay">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+                    <div class="album-info">
+                        <h3 class="album-name">@album.AlbumName</h3>
+                        <p class="artist-name">@album.Artists?.ArtistName</p>
+                    </div>
+                </a>
+            }
+        </div>
+    </section>
+
+    @if (ViewBag.IsArtist && ViewBag.MyAlbums != null)
+    {
+        <section class="my-albums">
+            <div class="section-header">
+                <h2>Album của tôi</h2>
+                <a href="@Url.Action("Create")" class="create-album-btn">
+                    <i class="fas fa-plus"></i>
+                    Tạo album mới
+                </a>
+            </div>
+            <div class="albums-grid">
+                @foreach (var album in ViewBag.MyAlbums)
+                {
+                    <a href="@Url.Action("Details", new { id = album.AlbumId })" class="album-card">
+                        <div class="album-image">
+                            <img src="@(string.IsNullOrEmpty(album.ImageUrl) ? "/images/default-album.jpg" : album.ImageUrl)" alt="@album.AlbumName" />
+                            <div class="album-overlay">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                        <div class="album-info">
+                            <h3 class="album-name">@album.AlbumName</h3>
+                            <div class="album-stats">
+                                <span>@album.numberSongs bài hát</span>
+                                <span>@album.Time.ToString(@"mm\:ss")</span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </section>
+    }
+</div>

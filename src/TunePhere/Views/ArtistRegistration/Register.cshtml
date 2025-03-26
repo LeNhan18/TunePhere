@@ -1,0 +1,242 @@
+@model TunePhere.Models.Artists
+
+@{
+    ViewData["Title"] = "Đăng ký trở thành nghệ sĩ";
+}
+
+<div class="artist-registration">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="registration-card">
+                    <div class="card-header">
+                        <h2 class="text-center">@ViewData["Title"]</h2>
+                    </div>
+                    <div class="card-body p-4">
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger">
+                                <ul>
+                                    @foreach (var modelError in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                    {
+                                        <li>@modelError.ErrorMessage</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        <form asp-action="Register" method="post" enctype="multipart/form-data">
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+
+                            <div class="mb-4">
+                                <label asp-for="ArtistName" class="form-label">Tên nghệ danh</label>
+                                <input asp-for="ArtistName" class="form-control" placeholder="Nhập tên nghệ danh của bạn" required />
+                                <span asp-validation-for="ArtistName" class="validation-message"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="Bio" class="form-label">Tiểu sử</label>
+                                <textarea asp-for="Bio" class="form-control" rows="4" 
+                                    placeholder="Giới thiệu về bản thân và sự nghiệp âm nhạc của bạn"></textarea>
+                                <span asp-validation-for="Bio" class="validation-message"></span>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Ảnh đại diện</label>
+                                    <div class="file-upload">
+                                        <div class="upload-btn w-100">
+                                            <i class="fas fa-cloud-upload-alt me-2"></i>
+                                            Chọn ảnh đại diện
+                                        </div>
+                                        <input type="file" id="ArtistImage" name="ArtistImage" 
+                                            class="form-control" accept="image/*" 
+                                            onchange="previewImage(this, 'imagePreview')" />
+                                    </div>
+                                    <div id="imagePreview" class="image-preview" style="display: none;">
+                                        <img src="" alt="Ảnh đại diện" class="img-fluid" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Ảnh bìa</label>
+                                    <div class="file-upload">
+                                        <div class="upload-btn w-100">
+                                            <i class="fas fa-cloud-upload-alt me-2"></i>
+                                            Chọn ảnh bìa
+                                        </div>
+                                        <input type="file" id="CoverImage" name="CoverImage" 
+                                            class="form-control" accept="image/*" 
+                                            onchange="previewImage(this, 'coverPreview')" />
+                                    </div>
+                                    <div id="coverPreview" class="image-preview" style="display: none;">
+                                        <img src="" alt="Ảnh bìa" class="img-fluid" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-5">
+                                <button type="submit" class="btn btn-primary btn-register">
+                                    <i class="fas fa-music me-2"></i>
+                                    Đăng ký trở thành nghệ sĩ
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .artist-registration {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        min-height: calc(100vh - 60px);
+        padding: 40px 0;
+    }
+
+    .registration-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
+        padding: 25px;
+        border-bottom: none;
+    }
+
+    .card-header h2 {
+        color: white;
+        font-weight: 600;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 12px;
+        border: 2px solid #e1e1e1;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #2575fc;
+        box-shadow: 0 0 0 0.2rem rgba(37, 117, 252, 0.25);
+    }
+
+    .image-preview {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 10px;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-register {
+        background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
+        border: none;
+        padding: 12px 40px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(37, 117, 252, 0.4);
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .validation-message {
+        font-size: 0.875rem;
+        color: #dc3545;
+        margin-top: 5px;
+    }
+
+    .file-upload {
+        position: relative;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+    .file-upload input[type=file] {
+        font-size: 100px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .upload-btn {
+        display: inline-block;
+        padding: 8px 20px;
+        background: #f8f9fa;
+        border: 2px dashed #2575fc;
+        border-radius: 8px;
+        color: #2575fc;
+        font-weight: 500;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .upload-btn:hover {
+        background: #e9ecef;
+    }
+
+    .alert-danger {
+        background-color: #fff5f5;
+        border-color: #fed7d7;
+        color: #e53e3e;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+
+    .alert-danger ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .alert-danger li {
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function previewImage(input, previewId) {
+            var preview = document.getElementById(previewId);
+            var previewImg = preview.querySelector('img');
+            
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                previewImg.src = '';
+                preview.style.display = 'none';
+            }
+        }
+    </script>
+} 

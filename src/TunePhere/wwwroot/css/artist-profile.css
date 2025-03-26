@@ -1,0 +1,482 @@
+.artist-profile {
+    padding-top: 60px;
+    background: #121212;
+    min-height: 100vh;
+    color: white;
+}
+
+.artist-profile-header {
+    position: relative;
+    padding: 32px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.artist-profile-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(transparent 0%, rgba(0, 0, 0, 0.8) 100%);
+    z-index: 1;
+}
+
+.artist-profile-content {
+    position: relative;
+    z-index: 2;
+}
+
+.artist-avatar {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 60px rgba(0, 0, 0, .5);
+}
+
+.artist-name {
+    font-size: 48px;
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+.artist-type {
+    font-size: 14px;
+    color: #b3b3b3;
+    margin-bottom: 24px;
+}
+
+.artist-stats {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+    color: #b3b3b3;
+}
+
+.edit-profile-btn {
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-profile-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+    transform: scale(1.05);
+}
+
+.edit-profile-btn i {
+    font-size: 16px;
+}
+
+.artist-bio {
+    max-width: 800px;
+    line-height: 1.6;
+    margin-top: 32px;
+    color: #b3b3b3;
+}
+
+.profile-header {
+    position: relative;
+    height: 400px;
+    margin-bottom: 30px;
+}
+
+.profile-cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.profile-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom,
+        rgba(0,0,0,0.3) 0%,
+        rgba(0,0,0,0.6) 50%,
+        rgba(18,18,18,1) 100%);
+}
+
+.profile-info {
+    position: absolute;
+    bottom: 50px;
+    left: 50px;
+    right: 50px;
+    display: flex;
+    align-items: flex-end;
+    gap: 30px;
+    z-index: 1;
+}
+
+.profile-avatar {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid #282828;
+    box-shadow: 0 4px 60px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-avatar i {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 100px;
+    color: #666;
+    background: #282828;
+}
+
+.profile-details {
+    flex: 1;
+    margin-bottom: 20px;
+}
+
+.profile-details h1 {
+    font-size: 72px;
+    font-weight: 900;
+    margin: 0 0 20px 0;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    line-height: 1;
+}
+
+.profile-content {
+    padding: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.profile-section {
+    margin-bottom: 48px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.section-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.edit-btn, .view-all {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-btn:hover, .view-all:hover {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.05);
+}
+
+.albums-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px;
+}
+
+.album-card {
+    background: #181818;
+    padding: 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.album-card:hover {
+    background: #282828;
+    transform: translateY(-4px);
+}
+
+.album-image {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.album-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.album-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.album-card:hover .album-overlay {
+    opacity: 1;
+}
+
+.play-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #1DB954;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.play-btn:hover {
+    transform: scale(1.1);
+    background: #1ed760;
+}
+
+.album-info h3 {
+    font-size: 16px;
+    margin: 0 0 4px 0;
+}
+
+.album-info p {
+    font-size: 14px;
+    color: #b3b3b3;
+    margin: 0;
+}
+
+.songs-list {
+    background: #181818;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.song-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 16px;
+    transition: all 0.3s ease;
+}
+
+.song-item:hover {
+    background: #282828;
+}
+
+.song-image {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.song-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.song-image .play-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    opacity: 0;
+}
+
+.song-item:hover .play-btn {
+    opacity: 1;
+}
+
+.song-info {
+    flex: 1;
+}
+
+.song-info h3 {
+    font-size: 16px;
+    margin: 0 0 4px 0;
+}
+
+.song-info p {
+    font-size: 14px;
+    color: #b3b3b3;
+    margin: 0;
+}
+
+.song-duration {
+    color: #b3b3b3;
+    font-size: 14px;
+}
+
+.artists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 24px;
+}
+
+.artist-card {
+    background: #181818;
+    padding: 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.artist-card:hover {
+    background: #282828;
+    transform: translateY(-4px);
+}
+
+.card-img-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.artist-img img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.artist-card:hover .play-overlay {
+    opacity: 1;
+}
+
+.artist-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 12px 0 4px;
+    color: white;
+}
+
+.artist-type {
+    font-size: 14px;
+    color: #b3b3b3;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .profile-header {
+        height: 300px;
+    }
+
+    .profile-info {
+        left: 20px;
+        right: 20px;
+        bottom: 30px;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .profile-avatar {
+        width: 160px;
+        height: 160px;
+    }
+
+    .profile-details h1 {
+        font-size: 42px;
+    }
+
+    .artist-stats {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .artists-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 16px;
+    }
+
+    .artist-card {
+        padding: 12px;
+    }
+
+    .artist-name {
+        font-size: 14px;
+    }
+
+    .artist-type {
+        font-size: 12px;
+    }
+} 

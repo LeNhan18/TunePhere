@@ -7,7 +7,9 @@ namespace TunePhere.Models
     {
         [Key]
         public int ArtistId { get; set; }
-        [Required,StringLength(100)]
+
+        [Required(ErrorMessage = "Vui lòng nhập tên nghệ danh")]
+        [StringLength(100, ErrorMessage = "Tên nghệ danh không được vượt quá 100 ký tự")]
         public required string ArtistName { get; set; }
 
         public string? ImageUrl { get; set; }
@@ -16,19 +18,19 @@ namespace TunePhere.Models
 
         public string? Bio { get; set; }
 
-        [ForeignKey("userId")]
+        [Required]
+        [ForeignKey("AppUser")]
         public required string userId { get; set; }
         public AppUser? AppUser { get; set; }
 
-        //public virtual ICollection<Album> Albums { get; set; }
+        public virtual ICollection<Album> Albums { get; set; }
         public virtual ICollection<Song> Songs { get; set; }
-
         public virtual ICollection<Remix> Remixes { get; set; }
-         
         public virtual ICollection<Playlist> Playlists { get; set; }
 
         public Artists()
         {
+            Albums = new HashSet<Album>();
             Songs = new HashSet<Song>();
             Remixes = new HashSet<Remix>();
             Playlists = new HashSet<Playlist>();

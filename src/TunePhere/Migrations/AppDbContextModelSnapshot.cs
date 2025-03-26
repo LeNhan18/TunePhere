@@ -171,7 +171,12 @@ namespace TunePhere.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AlbumName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("ArtistId")
+                        .HasColumnType("int");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
@@ -186,6 +191,8 @@ namespace TunePhere.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("AlbumId");
+
+                    b.HasIndex("ArtistId");
 
                     b.ToTable("Albums");
                 });
@@ -279,9 +286,6 @@ namespace TunePhere.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ArtistId"));
 
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("ArtistName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -298,11 +302,11 @@ namespace TunePhere.Migrations
 
                     b.Property<string>("userId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ArtistId");
 
-                    b.HasIndex("AppUserId");
+                    b.HasIndex("userId");
 
                     b.ToTable("Artists");
                 });
@@ -549,6 +553,12 @@ namespace TunePhere.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -666,11 +676,24 @@ namespace TunePhere.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TunePhere.Models.Album", b =>
+                {
+                    b.HasOne("TunePhere.Models.Artists", "Artists")
+                        .WithMany("Albums")
+                        .HasForeignKey("ArtistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Artists");
+                });
+
             modelBuilder.Entity("TunePhere.Models.Artists", b =>
                 {
                     b.HasOne("TunePhere.Models.AppUser", "AppUser")
                         .WithMany()
-                        .HasForeignKey("AppUserId");
+                        .HasForeignKey("userId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("AppUser");
                 });
@@ -859,6 +882,8 @@ namespace TunePhere.Migrations
 
             modelBuilder.Entity("TunePhere.Models.Artists", b =>
                 {
+                    b.Navigation("Albums");
+
                     b.Navigation("Playlists");
 
                     b.Navigation("Remixes");
