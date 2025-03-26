@@ -1,4 +1,4 @@
-﻿@model TunePhere.Models.Playlist
+@model TunePhere.Models.Playlist
 @using System.Security.Claims;
 
 @{
@@ -9,50 +9,430 @@
 <link rel="stylesheet" href="~/css/playlist.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-<div class="spotify-container">
-    <div class="spotify-header">
-        <h1 class="spotify-title">Tạo Playlist Mới</h1>
-        <a asp-action="Index" class="spotify-btn spotify-btn-outline">
-            <i class="fa-solid fa-arrow-left"></i> Quay lại
+<div class="create-playlist-page">
+    <div class="page-header">
+        <a asp-action="Index" class="back-btn">
+            <i class="fa-solid fa-arrow-left"></i>
         </a>
+        <h1>Tạo Playlist Mới</h1>
     </div>
 
-    <div class="spotify-form">
-        <form asp-action="Create">
-            <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="create-form-container">
+        <div class="playlist-preview">
+            <div class="playlist-artwork">
+                <div class="artwork-content" id="artworkPreview">
+                    <i class="fa-solid fa-music default-icon"></i>
+                    <img id="uploadedImage" style="display: none;" />
+                </div>
+                <div class="artwork-overlay">
+                    <label for="imageUpload" class="upload-trigger">
+                        <i class="fa-solid fa-camera"></i>
+                        <span>Chọn ảnh</span>
+                    </label>
+                </div>
+            </div>
+            <div class="playlist-preview-info">
+                <p class="preview-label">Playlist của bạn</p>
+                <p class="preview-email">@User.Identity?.Name</p>
+                <p class="preview-time">Vừa tạo</p>
+            </div>
+        </div>
 
-            <input type="hidden" asp-for="UserId" value="@User.FindFirstValue(ClaimTypes.NameIdentifier)" />
+        <form asp-action="Create" class="create-form" enctype="multipart/form-data">
+            <input type="file" id="imageUpload" name="PlaylistImage" accept="image/*" style="display: none;" />
             
             <div class="form-group">
-                <label asp-for="Title" class="control-label">Tên Playlist</label>
-                <input asp-for="Title" class="form-control" placeholder="Nhập tên cho playlist của bạn" />
+                <label asp-for="Title" class="control-label">
+                    <i class="fa-solid fa-headphones"></i>
+                    Tên Playlist
+                </label>
+                <input asp-for="Title" class="form-control" placeholder="Nhập tên cho playlist của bạn" maxlength="200" />
+                <span class="char-count">Tối đa 200 ký tự</span>
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
 
-            <div class="form-group">
-                <label asp-for="IsPublic" class="control-label">Quyền truy cập</label>
-                <div style="display: flex; gap: 20px; margin-top: 10px;">
-                    <div>
-                        <input asp-for="IsPublic" type="radio" id="isPublic" value="true" checked />
-                        <label for="isPublic" style="color: var(--spotify-white); cursor: pointer;">Công khai</label>
-                    </div>
-                    <div>
-                        <input asp-for="IsPublic" type="radio" id="isPrivate" value="false" />
-                        <label for="isPrivate" style="color: var(--spotify-white); cursor: pointer;">Riêng tư</label>
-                    </div>
+            <input type="hidden" asp-for="UserId" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
+
+            <div class="form-group visibility-options">
+                <label class="control-label">
+                    <i class="fa-solid fa-lock"></i>
+                    Quyền truy cập
+                </label>
+                <div class="visibility-choice">
+                    <label class="visibility-option">
+                        <input type="radio" asp-for="IsPublic" value="true" checked />
+                        <div class="option-content">
+                            <i class="fa-solid fa-globe"></i>
+                            <div class="option-text">
+                                <span class="option-title">Công khai</span>
+                                <span class="option-desc">Mọi người có thể tìm thấy playlist này</span>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="visibility-option">
+                        <input type="radio" asp-for="IsPublic" value="false" />
+                        <div class="option-content">
+                            <i class="fa-solid fa-lock"></i>
+                            <div class="option-text">
+                                <span class="option-title">Riêng tư</span>
+                                <span class="option-desc">Chỉ bạn mới có thể xem playlist này</span>
+                            </div>
+                        </div>
+                    </label>
                 </div>
-                <span asp-validation-for="IsPublic" class="text-danger"></span>
             </div>
 
-            <div class="form-group" style="margin-top: 24px;">
-                <button type="submit" class="spotify-btn">Tạo Playlist</button>
+            <div class="form-actions">
+                <button type="submit" class="btn-create">
+                    <i class="fa-solid fa-plus"></i>
+                    Tạo Playlist
+                </button>
+                <a asp-action="Index" class="btn-cancel">Hủy</a>
             </div>
         </form>
     </div>
 </div>
 
+<style>
+.create-playlist-page {
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #1e1e1e, #121212);
+    color: white;
+    padding: 2rem;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.back-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateX(-2px);
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(45deg, #7B2CBF, #9D4EDA);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.create-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 3rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    backdrop-filter: blur(8px);
+}
+
+.playlist-preview {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.playlist-preview:hover {
+    transform: translateY(-5px);
+}
+
+.playlist-artwork {
+    aspect-ratio: 1;
+    background: #282828;
+    position: relative;
+    overflow: hidden;
+}
+
+.artwork-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.artwork-content .default-icon {
+    font-size: 4rem;
+    color: #7B2CBF;
+    transition: all 0.3s ease;
+}
+
+.artwork-content img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.artwork-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.playlist-artwork:hover .artwork-overlay {
+    opacity: 1;
+}
+
+.upload-trigger {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    cursor: pointer;
+    padding: 1rem;
+    background: rgba(123,44,191,0.8);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.upload-trigger:hover {
+    background: rgba(123,44,191,1);
+    transform: scale(1.05);
+}
+
+.upload-trigger i {
+    font-size: 2rem;
+}
+
+.upload-trigger span {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.playlist-preview-info {
+    padding: 1.5rem;
+    background: linear-gradient(to bottom, rgba(123,44,191,0.1), rgba(123,44,191,0.05));
+}
+
+.preview-label {
+    font-size: 0.875rem;
+    color: #b3b3b3;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.preview-email {
+    font-size: 1rem;
+    color: #7B2CBF;
+    margin: 0.5rem 0;
+    font-weight: 600;
+}
+
+.preview-time {
+    font-size: 0.75rem;
+    color: #b3b3b3;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.preview-time::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    background: #7B2CBF;
+    border-radius: 50%;
+}
+
+.create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.control-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.control-label i {
+    color: #7B2CBF;
+}
+
+.form-control {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #7B2CBF;
+    background: rgba(255,255,255,0.08);
+}
+
+.char-count {
+    font-size: 0.75rem;
+    color: #b3b3b3;
+    text-align: right;
+}
+
+.visibility-options {
+    margin-top: 1rem;
+}
+
+.visibility-choice {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.visibility-option {
+    cursor: pointer;
+}
+
+.visibility-option input[type="radio"] {
+    display: none;
+}
+
+.option-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.visibility-option input[type="radio"]:checked + .option-content {
+    background: rgba(123,44,191,0.1);
+    border-color: #7B2CBF;
+}
+
+.option-content i {
+    font-size: 1.25rem;
+    color: #7B2CBF;
+}
+
+.option-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.option-title {
+    font-weight: 600;
+    color: white;
+}
+
+.option-desc {
+    font-size: 0.875rem;
+    color: #b3b3b3;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn-create {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #7B2CBF;
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-create:hover {
+    background: #9D4EDA;
+    transform: translateY(-2px);
+}
+
+.btn-cancel {
+    display: flex;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.text-danger {
+    color: #ff3b30;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+</style>
+
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('uploadedImage');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    document.querySelector('.default-icon').style.display = 'none';
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+    </script>
 }

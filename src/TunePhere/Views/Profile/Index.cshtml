@@ -1,0 +1,141 @@
+@using System.Security.Claims
+
+@model TunePhere.Models.AppUser
+@{
+    ViewData["Title"] = Model.FullName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/profile.css" />
+
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="cover-image" style="background-image: url('@(string.IsNullOrEmpty(Model.CoverImage) ? "/images/default-cover.jpg" : Model.CoverImage)')">
+            @if (User.Identity.Name == Model.UserName)
+            {
+                <button class="edit-cover-btn">
+                    <i class="fa-solid fa-camera"></i>
+                    Thay đổi ảnh bìa
+                </button>
+            }
+        </div>
+        
+        <div class="profile-info">
+            <div class="profile-avatar">
+                <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/default-avatar.jpg" : Model.ImageUrl)" alt="@Model.FullName" />
+                @if (User.Identity.Name == Model.UserName)
+                {
+                    <button class="edit-avatar-btn">
+                        <i class="fa-solid fa-camera"></i>
+                    </button>
+                }
+            </div>
+            
+            <div class="profile-details">
+                <div class="profile-header-top">
+                    <h1 class="profile-name">@Model.FullName</h1>
+                    @if (User.Identity.Name == Model.UserName)
+                    {
+                        <a asp-action="Edit" class="edit-profile-btn">
+                            <i class="fa-solid fa-pen"></i>
+                            Chỉnh sửa hồ sơ
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="follow-btn">
+                            <i class="fa-solid fa-user-plus"></i>
+                            Theo dõi
+                        </button>
+                    }
+                </div>
+                
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">@Model.GetPlaylistCount()</span>
+                        <span class="stat-label">Playlist</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">@Model.GetFollowersCount()</span>
+                        <span class="stat-label">Người theo dõi</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">@Model.GetFollowingCount()</span>
+                        <span class="stat-label">Đang theo dõi</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="profile-nav">
+            <a class="nav-item active" href="#playlists">
+                <i class="fa-solid fa-music"></i>
+                Playlist
+            </a>
+            <a class="nav-item" href="#followers">
+                <i class="fa-solid fa-users"></i>
+                Người theo dõi
+            </a>
+            <a class="nav-item" href="#following">
+                <i class="fa-solid fa-user-group"></i>
+                Đang theo dõi
+            </a>
+        </div>
+
+        <div class="profile-section" id="playlists">
+            <div class="section-header">
+                <h2>Playlist của @Model.FullName</h2>
+                @if (User.Identity.Name == Model.UserName)
+                {
+                    <a asp-controller="Playlists" asp-action="Create" class="create-playlist-btn">
+                        <i class="fa-solid fa-plus"></i>
+                        Tạo Playlist
+                    </a>
+                }
+            </div>
+
+            <div class="playlist-grid">
+                @foreach (var playlist in Model.Playlists.Where(p => p.IsPublic || p.UserId == User.FindFirst(ClaimTypes.NameIdentifier)?.Value))
+                {
+                    <div class="playlist-card">
+                        <div class="playlist-img">
+                            <i class="fa-solid fa-music"></i>
+                        </div>
+                        <div class="playlist-info">
+                            <h3 class="playlist-name">@playlist.Title</h3>
+                            <p class="playlist-meta">
+                                <span>@playlist.PlaylistSongs.Count bài hát</span>
+                                @if (!playlist.IsPublic)
+                                {
+                                    <span class="private-badge">
+                                        <i class="fa-solid fa-lock"></i>
+                                        Riêng tư
+                                    </span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Xử lý chuyển tab
+            $('.nav-item').click(function(e) {
+                e.preventDefault();
+                $('.nav-item').removeClass('active');
+                $(this).addClass('active');
+                
+                const target = $(this).attr('href');
+                $('.profile-section').hide();
+                $(target).show();
+            });
+        });
+    </script>
+}

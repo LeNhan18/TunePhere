@@ -416,6 +416,9 @@ namespace TunePhere.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
 
@@ -561,6 +564,34 @@ namespace TunePhere.Migrations
                     b.HasIndex("ArtistId");
 
                     b.ToTable("Songs");
+                });
+
+            modelBuilder.Entity("TunePhere.Models.UserFollower", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FollowedId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FollowerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FollowedId");
+
+                    b.HasIndex("FollowerId");
+
+                    b.ToTable("UserFollowers");
                 });
 
             modelBuilder.Entity("TunePhere.Models.UserPreference", b =>
@@ -774,6 +805,25 @@ namespace TunePhere.Migrations
                     b.Navigation("Artists");
                 });
 
+            modelBuilder.Entity("TunePhere.Models.UserFollower", b =>
+                {
+                    b.HasOne("TunePhere.Models.AppUser", "Followed")
+                        .WithMany("Followers")
+                        .HasForeignKey("FollowedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TunePhere.Models.AppUser", "Follower")
+                        .WithMany("Following")
+                        .HasForeignKey("FollowerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Followed");
+
+                    b.Navigation("Follower");
+                });
+
             modelBuilder.Entity("TunePhere.Models.UserPreference", b =>
                 {
                     b.HasOne("TunePhere.Models.AppUser", "User")
@@ -792,6 +842,10 @@ namespace TunePhere.Migrations
 
             modelBuilder.Entity("TunePhere.Models.AppUser", b =>
                 {
+                    b.Navigation("Followers");
+
+                    b.Navigation("Following");
+
                     b.Navigation("ListeningRoomParticipants");
 
                     b.Navigation("ListeningRooms");

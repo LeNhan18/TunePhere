@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace TunePhere.Models
@@ -23,13 +23,39 @@ namespace TunePhere.Models
         public virtual ICollection<Remix> Remixes { get; set; } // Danh sách remix của người dùng
         public virtual UserPreference? Preferences { get; set; } // Tùy chọn người dùng
 
+        // Followers and Following
+        public virtual ICollection<UserFollower> Followers { get; set; }
+        public virtual ICollection<UserFollower> Following { get; set; }
+
         public AppUser()
         {
             ListeningRooms = new HashSet<ListeningRoom>();
             ListeningRoomParticipants = new HashSet<ListeningRoomParticipant>();
             Playlists = new HashSet<Playlist>();
             Remixes = new HashSet<Remix>();
+            Followers = new HashSet<UserFollower>();
+            Following = new HashSet<UserFollower>();
         }
 
+        // Helper methods to get counts
+        public int GetPlaylistCount()
+        {
+            return Playlists?.Count ?? 0;
+        }
+
+        public int GetFollowersCount()
+        {
+            return Followers?.Count ?? 0;
+        }
+
+        public int GetFollowingCount()
+        {
+            return Following?.Count ?? 0;
+        }
+
+        public int GetPublicPlaylistCount()
+        {
+            return Playlists?.Count(p => p.IsPublic) ?? 0;
+        }
     }
 }
