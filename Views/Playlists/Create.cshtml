@@ -1,4 +1,4 @@
-﻿@model TunePhere.Models.Playlist
+@model TunePhere.Models.Playlist
 @using System.Security.Claims;
 
 @{
@@ -20,7 +20,7 @@
     <div class="spotify-form">
         <form asp-action="Create">
             <div asp-validation-summary="All" class="text-danger"></div>
-
+            
             <input type="hidden" asp-for="UserId" value="@User.FindFirstValue(ClaimTypes.NameIdentifier)" />
             
             <div class="form-group">
@@ -28,7 +28,7 @@
                 <input asp-for="Title" class="form-control" placeholder="Nhập tên cho playlist của bạn" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
-
+            
             <div class="form-group">
                 <label asp-for="IsPublic" class="control-label">Quyền truy cập</label>
                 <div style="display: flex; gap: 20px; margin-top: 10px;">
@@ -43,7 +43,7 @@
                 </div>
                 <span asp-validation-for="IsPublic" class="text-danger"></span>
             </div>
-
+            
             <div class="form-group" style="margin-top: 24px;">
                 <button type="submit" class="spotify-btn">Tạo Playlist</button>
             </div>
@@ -52,7 +52,5 @@
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

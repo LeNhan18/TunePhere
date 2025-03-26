@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TunePhere.Models;
+using System.Security.Claims; // Thêm để dùng ClaimTypes
 
 namespace TunePhere.Controllers
 {
@@ -35,7 +36,10 @@ namespace TunePhere.Controllers
 
             var playlist = await _context.Playlists
                 .Include(p => p.User)
+                .Include(p => p.PlaylistSongs)
+                    .ThenInclude(ps => ps.Song)
                 .FirstOrDefaultAsync(m => m.PlaylistId == id);
+
             if (playlist == null)
             {
                 return NotFound();
@@ -47,24 +51,61 @@ namespace TunePhere.Controllers
         // GET: Playlists/Create
         public IActionResult Create()
         {
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
+            // Kiểm tra xem người dùng đã đăng nhập chưa
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("Create", "Playlists") });
+            }
+
+            // Thử lấy UserId
+            string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                TempData["Error"] = "Không thể xác định người dùng hiện tại. Vui lòng đăng nhập lại.";
+                return RedirectToAction("Login", "Account");
+            }
+
             return View();
         }
 
-        // POST: Playlists/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PlaylistId,UserId,Title,IsPublic,CreatedAt")] Playlist playlist)
+        public async Task<IActionResult> Create([Bind("Title,IsPublic,Id")] Playlist playlist)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(playlist);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    ModelState.AddModelError("", "Không thể xác định người dùng. Vui lòng đăng nhập lại.");
+                    return View(playlist);
+                }
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                
+                playlist.UserId = userId;
+                playlist.User = user;
+                playlist.CreatedAt = DateTime.Now;
+
+                if (ModelState.IsValid)
+                {
+                    _context.Playlists.Add(playlist);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                
+
+                return View(playlist);
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", playlist.UserId);
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Lỗi: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    ModelState.AddModelError(string.Empty, $"Chi tiết: {ex.InnerException.Message}");
+                }
+            }
+
             return View(playlist);
         }
 
@@ -81,13 +122,18 @@ namespace TunePhere.Controllers
             {
                 return NotFound();
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", playlist.UserId);
+
+            // Kiểm tra quyền chỉnh sửa (nếu cần)
+            string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (playlist.UserId != currentUserId && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             return View(playlist);
         }
 
         // POST: Playlists/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("PlaylistId,UserId,Title,IsPublic,CreatedAt")] Playlist playlist)
@@ -117,7 +163,7 @@ namespace TunePhere.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", playlist.UserId);
+
             return View(playlist);
         }
 
@@ -132,9 +178,17 @@ namespace TunePhere.Controllers
             var playlist = await _context.Playlists
                 .Include(p => p.User)
                 .FirstOrDefaultAsync(m => m.PlaylistId == id);
+
             if (playlist == null)
             {
                 return NotFound();
+            }
+
+            // Kiểm tra quyền xóa (nếu cần)
+            string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (playlist.UserId != currentUserId && !User.IsInRole("Admin"))
+            {
+                return Forbid();
             }
 
             return View(playlist);
@@ -148,6 +202,13 @@ namespace TunePhere.Controllers
             var playlist = await _context.Playlists.FindAsync(id);
             if (playlist != null)
             {
+                // Kiểm tra quyền xóa (nếu cần)
+                string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (playlist.UserId != currentUserId && !User.IsInRole("Admin"))
+                {
+                    return Forbid();
+                }
+
                 _context.Playlists.Remove(playlist);
             }
 

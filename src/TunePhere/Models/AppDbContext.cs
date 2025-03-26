@@ -22,7 +22,6 @@ namespace TunePhere.Models
         public DbSet<Album> Albums { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
             base.OnModelCreating(modelBuilder);
 
             // Cấu hình ListeningRoomParticipant
@@ -61,7 +60,6 @@ namespace TunePhere.Models
                 .OnDelete(DeleteBehavior.NoAction);
 
             // Playlists -> Users
-
             modelBuilder.Entity<Playlist>()
                 .HasOne(p => p.User)
                 .WithMany(u => u.Playlists)
@@ -116,7 +114,6 @@ namespace TunePhere.Models
                 .HasOne(s => s.Albums)
                 .WithMany(a => a.Songs)
                 .HasForeignKey(s => s.AlbumId);
-
         }
     }
 }

@@ -5,6 +5,7 @@ namespace TunePhere.Models
 {
     public class AppUser : IdentityUser
     {
+
         public required string FullName { get; set; } // Họ và tên đầy đủ
 
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Ngày tạo tài khoản

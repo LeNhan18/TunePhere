@@ -1,4 +1,4 @@
-:root {
+﻿:root {
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
     --primary-color: #1DB954;
@@ -296,7 +296,27 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.btn-secondary {
+    background-color: #1DB954; /* Màu xanh giống Spotify */
+    border: none;
+}
 
+.btn-secondary:hover {
+    background-color: #1AA34A; /* Màu xanh đậm hơn khi hover */
+}
+body {
+    background-color: #121212; /* Màu nền tối */
+    color: #ffffff; /* Màu chữ sáng */
+}
+
+.modal-content {
+    background-color: #1e1e1e; /* Màu nền modal tối */
+    color: #ffffff; /* Màu chữ trong modal sáng */
+}
+
+.modal-header, .modal-body {
+    border-color: #333; /* Màu viền cho modal */
+}
 /* Responsive */
 @media (max-width: 1200px) {
     .music-grid {

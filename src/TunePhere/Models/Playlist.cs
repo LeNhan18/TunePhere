@@ -10,14 +10,14 @@ namespace TunePhere.Models
         [Key]
         public int PlaylistId { get; set; } // Khóa chính
 
-        [Required]
+        [Required, ForeignKey("Id")]
         public string UserId { get; set; } // Khóa ngoại liên kết với User
 
-        [ForeignKey("UserId")]
-        public required AppUser User { get; set; } // Quan hệ với bảng Users
+ 
+        public virtual AppUser User { get; set; } // Quan hệ với bảng Users
 
         [Required, StringLength(200)]
-        public required string Title { get; set; } // Tên playlist
+        public string Title { get; set; } // Tên playlist
 
         public bool IsPublic { get; set; } = true; // Playlist công khai hoặc riêng tư
 
