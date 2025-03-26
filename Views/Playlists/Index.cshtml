@@ -1,4 +1,4 @@
-﻿@model IEnumerable<TunePhere.Models.Playlist>
+@model IEnumerable<TunePhere.Models.Playlist>
 
 @{
     ViewData["Title"] = "Playlists";
@@ -15,15 +15,14 @@
     </div>
 
     <div class="playlist-grid">
-        @foreach (var item in Model)
-        {
+        @foreach (var item in Model) {
             <div class="playlist-card">
                 <div class="playlist-img">
                     <i class="fa-solid fa-music"></i>
                 </div>
                 <div class="playlist-name">@item.Title</div>
                 <div class="playlist-info">
-                    <span>@(item.IsPublic ? "Công khai" : "Riêng tư")</span> •
+                    <span>@(item.IsPublic ? "Công khai" : "Riêng tư")</span> • 
                     <span>Tạo ngày @item.CreatedAt.ToString("dd/MM/yyyy")</span>
                 </div>
                 <div class="playlist-actions">
@@ -40,4 +39,4 @@
             </div>
         }
     </div>
-</div>
+</div> 

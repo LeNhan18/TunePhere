@@ -26,9 +26,18 @@
                     <h2>Thư viện</h2>
                 </div>
                 <div class="library-actions">
-                    <button class="add-button" title="Thêm mới">
+                    <button class="add-button" title="Thêm mới" data-bs-toggle="collapse" data-bs-target="#addItemOptions">
                         <i class="fas fa-plus"></i>
                     </button>
+                    <!-- Modal -->
+                    <div class="collapse" id="addItemOptions">
+                        <div class="card" style="background-color: #1e1e1e; border: none;">
+                            <div class="card-body">
+                                <a href="@Url.Action("Index", "Albums")" class="btn btn-secondary w-100 mb-2">Thêm Album</a>
+                                <a href="@Url.Action("Index", "Playlists")" class="btn btn-secondary w-100">Thêm Playlist</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="library-toggle">
