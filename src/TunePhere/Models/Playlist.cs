@@ -8,23 +8,23 @@ namespace TunePhere.Models
     public class Playlist
     {
         [Key]
-        public int PlaylistId { get; set; } // Khóa chính
+        public int PlaylistId { get; set; }
 
-        [Required, ForeignKey("Id")]
-        public string UserId { get; set; } // Khóa ngoại liên kết với User
+        [Required]
+        public string UserId { get; set; }
 
- 
-        public virtual AppUser User { get; set; } // Quan hệ với bảng Users
+        public virtual AppUser? User { get; set; }
 
         [Required, StringLength(200)]
-        public string Title { get; set; } // Tên playlist
+        public string Title { get; set; }
 
-        public bool IsPublic { get; set; } = true; // Playlist công khai hoặc riêng tư
+        public bool IsPublic { get; set; } = true;
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now; // Ngày tạo
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        // Navigation property
-        public virtual ICollection<PlaylistSong> PlaylistSongs { get; set; } // Danh sách bài hát trong playlist
+        public string? ImageUrl { get; set; }
+
+        public virtual ICollection<PlaylistSong> PlaylistSongs { get; set; }
 
         public Playlist()
         {

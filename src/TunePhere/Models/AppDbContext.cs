@@ -20,6 +20,8 @@ namespace TunePhere.Models
 
         public DbSet<Artists> Artists { get; set; }
         public DbSet<Album> Albums { get; set; }
+        public DbSet<UserFollower> UserFollowers { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -114,6 +116,19 @@ namespace TunePhere.Models
                 .HasOne(s => s.Albums)
                 .WithMany(a => a.Songs)
                 .HasForeignKey(s => s.AlbumId);
+
+            // Cấu hình mối quan hệ Followers
+            modelBuilder.Entity<UserFollower>()
+                .HasOne(uf => uf.Follower)
+                .WithMany(u => u.Following)
+                .HasForeignKey(uf => uf.FollowerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<UserFollower>()
+                .HasOne(uf => uf.Followed)
+                .WithMany(u => u.Followers)
+                .HasForeignKey(uf => uf.FollowedId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }
