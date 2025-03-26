@@ -133,27 +133,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-}); 
-
-// Đảm bảo dropdown menu hoạt động ở trang profile
-document.addEventListener('DOMContentLoaded', function () {
-    const userMenuButton = document.querySelector('.user-menu-button');
-    const userDropdownMenu = document.querySelector('.user-dropdown-menu');
-
-    if (userMenuButton && userDropdownMenu) {
-        console.log('Profile page: User menu elements found');
-
-        userMenuButton.addEventListener('click', function (e) {
-            e.stopPropagation();
-            console.log('Profile page: User menu button clicked');
-            userDropdownMenu.classList.toggle('show');
-        });
-
-        // Đóng menu khi click bên ngoài
-        document.addEventListener('click', function (e) {
-            if (!userMenuButton.contains(e.target) && !userDropdownMenu.contains(e.target)) {
-                userDropdownMenu.classList.remove('show');
-            }
-        });
+    // Thêm xử lý cho menu dropdown
+    setupUserMenu();
+    
+    function setupUserMenu() {
+        const userMenuButton = document.querySelector('.user-menu-button');
+        const userDropdownMenu = document.querySelector('.user-dropdown-menu');
+        
+        if (userMenuButton && userDropdownMenu) {
+            console.log('User menu setup in profile page');
+            
+            userMenuButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userDropdownMenu.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!userMenuButton.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+                    userDropdownMenu.classList.remove('show');
+                }
+            });
+        }
     }
 });
