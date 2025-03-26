@@ -51,7 +51,7 @@ using (var scope = app.Services.CreateScope())
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
 
     // Tạo các roles
-    string[] roleNames = { "Administrator", "User" };
+    string[] roleNames = { "Administrator", "User" ,"Artists"};
     foreach (var roleName in roleNames)
     {
         if (!await roleManager.RoleExistsAsync(roleName))

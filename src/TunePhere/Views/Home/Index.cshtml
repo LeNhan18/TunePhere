@@ -96,19 +96,19 @@
         <section class="music-section">
             <h2 class="section-title">Nghệ sĩ phổ biến</h2>
             <div class="music-grid">
-                @for (int i = 0; i < 8; i++)
+                @foreach (var artist in ViewBag.PopularArtists)
                 {
                     <div class="artist-card">
                         <div class="card-img-container artist-img">
-                            <img src="/images/artist-placeholder.jpg" alt="Nghệ sĩ">
+                            <img src="@(string.IsNullOrEmpty(artist.ImageUrl) ? "/images/artist-placeholder.jpg" : artist.ImageUrl)" alt="@artist.ArtistName">
                             <div class="play-overlay">
-                                <button class="play-btn">
+                                <button class="play-btn" onclick="location.href='@Url.Action("Profile", "Artists", new { id = artist.ArtistId })'">
                                     <i class="fas fa-play"></i>
                                 </button>
                             </div>
                         </div>
-                        <h3 class="artist-name">Tên nghệ sĩ</h3>
-                        <p class="artist-type">Nghệ sĩ</p>
+                        <h3 class="artist-name">@artist.ArtistName</h3>
+                        <p class="artist-type">Nghệ sĩ • @artist.Songs.Count bài hát</p>
                     </div>
                 }
             </div>

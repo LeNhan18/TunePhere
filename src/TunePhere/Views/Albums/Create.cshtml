@@ -1,60 +1,173 @@
 ﻿@model TunePhere.Models.Album
 
 @{
-    ViewData["Title"] = "Create";
-
-    Layout = "_Layout";
+    ViewData["Title"] = "Tạo Album Mới";
 }
 
-<h1>Create</h1>
+<link rel="stylesheet" href="~/css/album-create.css" />
 
-<h4>Album</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="AlbumName" class="control-label"></label>
-                <input asp-for="AlbumName" class="form-control" />
-                <span asp-validation-for="AlbumName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AlbumDescription" class="control-label"></label>
-                <input asp-for="AlbumDescription" class="form-control" />
-                <span asp-validation-for="AlbumDescription" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ImageUrl" class="control-label"></label>
-                <input asp-for="ImageUrl" class="form-control" />
-                <span asp-validation-for="ImageUrl" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ReleaseDate" class="control-label"></label>
-                <input asp-for="ReleaseDate" class="form-control" />
-                <span asp-validation-for="ReleaseDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="numberSongs" class="control-label"></label>
-                <input asp-for="numberSongs" class="form-control" />
-                <span asp-validation-for="numberSongs" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Time" class="control-label"></label>
-                <input asp-for="Time" class="form-control" />
-                <span asp-validation-for="Time" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="create-container">
+    <div class="create-header">
+        <h1>Tạo Album Mới</h1>
+        <a href="@Url.Action("Index", "Albums")" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại
+        </a>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+    <form asp-action="Create" method="post" enctype="multipart/form-data" class="create-form">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="form-group">
+            <div class="image-upload-container">
+                <div class="album-cover">
+                    <img id="coverPreview" src="/images/album-placeholder.jpg" alt="Album Cover" />
+                    <div class="image-overlay">
+                        <i class="fas fa-camera"></i>
+                        <span>Thêm ảnh bìa</span>
+                    </div>
+                </div>
+                <input type="file" id="ImageFile" name="ImageFile" class="hidden-input" accept="image/*" required />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="AlbumName">Tên Album</label>
+            <input asp-for="AlbumName" class="form-control" placeholder="Nhập tên album" required />
+            <span asp-validation-for="AlbumName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="AlbumDescription">Mô tả</label>
+            <textarea asp-for="AlbumDescription" class="form-control" rows="4" 
+                      placeholder="Viết một vài điều về album của bạn..."></textarea>
+            <span asp-validation-for="AlbumDescription" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="ReleaseDate">Ngày phát hành</label>
+            <input asp-for="ReleaseDate" type="date" class="form-control" required />
+            <span asp-validation-for="ReleaseDate" class="text-danger"></span>
+        </div>
+
+        <div class="songs-section">
+            <div class="songs-header">
+                <h3>Danh sách bài hát</h3>
+                <button type="button" class="add-song-btn" onclick="addSongRow()">
+                    <i class="fas fa-plus"></i>
+                    Thêm bài hát
+                </button>
+            </div>
+
+            <div class="songs-list" id="songsList">
+                <!-- Các bài hát sẽ được thêm vào đây -->
+            </div>
+
+            <div class="songs-summary">
+                <div class="summary-item">
+                    <span>Số bài hát:</span>
+                    <span id="totalSongs">0</span>
+                    <input type="hidden" asp-for="numberSongs" id="numberSongs" />
+                </div>
+                <div class="summary-item">
+                    <span>Tổng thời lượng:</span>
+                    <span id="totalDuration">0:00</span>
+                    <input type="hidden" asp-for="Time" id="totalTime" />
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="create-btn">
+                <i class="fas fa-plus"></i>
+                Tạo Album
+            </button>
+            <a href="@Url.Action("Index", "Albums")" class="cancel-btn">Hủy</a>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Preview ảnh bìa album
+        document.getElementById('ImageFile').addEventListener('change', function (e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('coverPreview').src = e.target.result;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // Trigger file input khi click vào overlay
+        document.querySelector('.album-cover').addEventListener('click', function() {
+            document.getElementById('ImageFile').click();
+        });
+
+        let songCount = 0;
+
+        function addSongRow() {
+            const songsList = document.getElementById('songsList');
+            const songRow = document.createElement('div');
+            songRow.className = 'song-row';
+            songRow.innerHTML = `
+                <div class="song-info">
+                    <div class="form-group">
+                        <input type="file" name="SongFiles[${songCount}]" class="song-file" accept="audio/*" required onchange="handleSongFile(this)" />
+                        <input type="text" name="SongTitles[${songCount}]" class="form-control" placeholder="Tên bài hát" required />
+                    </div>
+                    <div class="song-duration">
+                        <span>0:00</span>
+                    </div>
+                </div>
+                <button type="button" class="remove-song-btn" onclick="removeSongRow(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            songsList.appendChild(songRow);
+            songCount++;
+            updateSongCount();
+        }
+
+        function removeSongRow(button) {
+            button.parentElement.remove();
+            updateSongCount();
+        }
+
+        function handleSongFile(input) {
+            const file = input.files[0];
+            if (file) {
+                const audio = new Audio(URL.createObjectURL(file));
+                audio.onloadedmetadata = function() {
+                    const duration = Math.round(audio.duration);
+                    const minutes = Math.floor(duration / 60);
+                    const seconds = duration % 60;
+                    const durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    input.parentElement.nextElementSibling.querySelector('span').textContent = durationText;
+                    updateTotalDuration();
+                };
+            }
+        }
+
+        function updateSongCount() {
+            const totalSongs = document.querySelectorAll('.song-row').length;
+            document.getElementById('totalSongs').textContent = totalSongs;
+            document.getElementById('numberSongs').value = totalSongs;
+        }
+
+        function updateTotalDuration() {
+            let totalSeconds = 0;
+            document.querySelectorAll('.song-duration span').forEach(span => {
+                const [minutes, seconds] = span.textContent.split(':').map(Number);
+                totalSeconds += minutes * 60 + seconds;
+            });
+
+            const totalMinutes = Math.floor(totalSeconds / 60);
+            const remainingSeconds = totalSeconds % 60;
+            document.getElementById('totalDuration').textContent = 
+                `${totalMinutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            document.getElementById('totalTime').value = totalMinutes;
+        }
+    </script>
 }

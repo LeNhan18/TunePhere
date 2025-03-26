@@ -204,9 +204,9 @@ body {
 /* Music Grid Styles */
 .music-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 24px;
-    margin-bottom: 36px;
+    margin-bottom: 40px;
 }
 
 .music-card, .artist-card, .chart-card {
@@ -320,7 +320,16 @@ body {
 /* Responsive */
 @media (max-width: 1200px) {
     .music-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+    
+    .artist-card {
+        max-width: 160px;
+    }
+    
+    .artist-card .card-img-container {
+        width: 100px;
+        height: 100px;
     }
 }
 
@@ -349,6 +358,19 @@ body {
     .content.expanded {
         margin-left: 0;
         width: 100%;
+    }
+    
+    .music-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+    
+    .artist-card {
+        max-width: 140px;
+    }
+    
+    .artist-card .card-img-container {
+        width: 90px;
+        height: 90px;
     }
 }
 

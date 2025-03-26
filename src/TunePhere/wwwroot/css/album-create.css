@@ -1,0 +1,338 @@
+.create-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.create-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.create-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #b3b3b3;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.back-btn:hover {
+    color: white;
+}
+
+.create-form {
+    background: #282828;
+    padding: 32px;
+    border-radius: 8px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    color: white;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    background: #3E3E3E;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: white;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #1DB954;
+    background: #4F4F4F;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.image-upload-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+
+.album-cover {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #3E3E3E;
+}
+
+.album-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-overlay i {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.album-cover:hover .image-overlay {
+    opacity: 1;
+}
+
+.hidden-input {
+    display: none;
+}
+
+.form-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 32px;
+}
+
+.create-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #1DB954;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.create-btn:hover {
+    background: #1ed760;
+    transform: scale(1.05);
+}
+
+.cancel-btn {
+    display: flex;
+    align-items: center;
+    padding: 12px 24px;
+    background: transparent;
+    color: #b3b3b3;
+    border: 1px solid #b3b3b3;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+    color: white;
+    border-color: white;
+}
+
+.text-danger {
+    color: #ff4444;
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+}
+
+.songs-section {
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 24px;
+    margin-top: 24px;
+}
+
+.songs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.songs-header h3 {
+    color: white;
+    font-size: 18px;
+    margin: 0;
+}
+
+.add-song-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #1DB954;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-song-btn:hover {
+    background: #1ed760;
+    transform: scale(1.05);
+}
+
+.songs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.song-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #282828;
+    padding: 16px;
+    border-radius: 4px;
+}
+
+.song-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.song-info .form-group {
+    flex: 1;
+    margin: 0;
+    display: flex;
+    gap: 16px;
+}
+
+.song-file {
+    flex: 1;
+    color: white;
+}
+
+.song-duration {
+    color: #b3b3b3;
+    font-size: 14px;
+    min-width: 60px;
+    text-align: right;
+}
+
+.remove-song-btn {
+    background: transparent;
+    border: none;
+    color: #b3b3b3;
+    cursor: pointer;
+    padding: 8px;
+    transition: color 0.3s ease;
+}
+
+.remove-song-btn:hover {
+    color: #ff4444;
+}
+
+.songs-summary {
+    display: flex;
+    justify-content: flex-end;
+    gap: 24px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #3E3E3E;
+}
+
+.summary-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #b3b3b3;
+    font-size: 14px;
+}
+
+.summary-item span:last-child {
+    color: white;
+    font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .form-row .form-group {
+        margin-bottom: 16px;
+    }
+
+    .album-cover {
+        width: 100%;
+        height: 0;
+        padding-bottom: 100%;
+    }
+
+    .song-info {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .song-info .form-group {
+        flex-direction: column;
+    }
+
+    .song-duration {
+        text-align: left;
+    }
+
+    .songs-summary {
+        flex-direction: column;
+        gap: 8px;
+    }
+} 

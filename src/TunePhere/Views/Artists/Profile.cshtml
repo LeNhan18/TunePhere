@@ -1,0 +1,123 @@
+@model TunePhere.Models.Artists
+@{
+    ViewData["Title"] = "Trang nghệ sĩ";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/artist-profile.css" />
+}
+
+<div class="artist-profile">
+    <div class="profile-header">
+        <div class="profile-cover" style="background-image: url('@Model.CoverImageUrl')">
+            <div class="profile-overlay"></div>
+            <div class="profile-info">
+                <div class="profile-avatar">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.ArtistName" />
+                    }
+                    else
+                    {
+                        <i class="fas fa-user-circle"></i>
+                    }
+                </div>
+                <div class="profile-details">
+                    <span class="artist-type">Nghệ sĩ</span>
+                    <h1>@Model.ArtistName</h1>
+                    <div class="artist-stats">
+                        <span><i class="fas fa-music"></i> @Model.Songs.Count() bài hát</span>
+                        <span><i class="fas fa-compact-disc"></i> @Model.Albums.Count() album</span>
+                        <span><i class="fas fa-heart"></i> @Model.Songs.Sum(s => s.LikeCount) lượt thích</span>
+                        <span><i class="fas fa-play"></i> @Model.Songs.Sum(s => s.PlayCount) lượt nghe</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <div class="profile-section">
+            <div class="section-header">
+                <h2>Giới thiệu</h2>
+                <button class="edit-btn" onclick="location.href='@Url.Action("Edit", "Artists")'">
+                    <i class="fas fa-edit"></i> Chỉnh sửa
+                </button>
+            </div>
+            <p class="artist-bio">@Model.Bio</p>
+        </div>
+
+        <div class="profile-section">
+            <div class="section-header">
+                <h2>Album mới nhất</h2>
+                <a href="@Url.Action("Index", "Albums")" class="view-all">Xem tất cả</a>
+            </div>
+            <div class="albums-grid">
+                @foreach (var album in Model.Albums.OrderByDescending(a => a.ReleaseDate).Take(4))
+                {
+                    <div class="album-card">
+                        <div class="album-image">
+                            <img src="@album.ImageUrl" alt="@album.AlbumName" />
+                            <div class="album-overlay">
+                                <button class="play-btn"><i class="fas fa-play"></i></button>
+                            </div>
+                        </div>
+                        <div class="album-info">
+                            <h3>@album.AlbumName</h3>
+                            <p>@(DateTime.TryParse(album.ReleaseDate, out DateTime date) ? date.Year.ToString() : "") • @album.Songs.Count() bài hát</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <div class="section-header">
+                <h2>Bài hát nổi bật</h2>
+                <a href="@Url.Action("Index", "Songs")" class="view-all">Xem tất cả</a>
+            </div>
+            <div class="songs-list">
+                @foreach (var song in Model.Songs.OrderByDescending(s => s.PlayCount).Take(5))
+                {
+                    <div class="song-item">
+                        <div class="song-image">
+                            <img src="@song.ImageUrl" alt="@song.Title" />
+                            <button class="play-btn"><i class="fas fa-play"></i></button>
+                        </div>
+                        <div class="song-info">
+                            <h3>@song.Title</h3>
+                            <p>@song.PlayCount lượt nghe • @song.LikeCount lượt thích</p>
+                        </div>
+                        <div class="song-duration">
+                            <span>@song.Duration.ToString(@"mm\:ss")</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <div class="section-header">
+                <h2>Nghệ sĩ tương tự</h2>
+                <a href="@Url.Action("Index", "Artists")" class="view-all">Xem tất cả</a>
+            </div>
+            <div class="artists-grid">
+                @foreach (var artist in ViewBag.SimilarArtists ?? Enumerable.Empty<Artists>())
+                {
+                    <div class="artist-card">
+                        <div class="card-img-container artist-img">
+                            <img src="@(string.IsNullOrEmpty(artist.ImageUrl) ? "/images/artist-placeholder.jpg" : artist.ImageUrl)" alt="@artist.ArtistName">
+                            <div class="play-overlay">
+                                <button class="play-btn">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h3 class="artist-name">@artist.ArtistName</h3>
+                        <p class="artist-type">Nghệ sĩ</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div> 
