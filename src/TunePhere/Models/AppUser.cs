@@ -11,6 +11,10 @@ namespace TunePhere.Models
 
         public DateTime? LastLogin { get; set; } // Lần đăng nhập gần nhất
 
+        public string? ImageUrl { get; set; } // Đường dẫn ảnh đại diện
+
+        public string? CoverImage { get; set; } // Đường dẫn ảnh nền
+
         // Các thuộc tính điều hướng (Navigation properties)
         public virtual ICollection<ListeningRoom> ListeningRooms { get; set; } // Danh sách phòng do người dùng tạo
         public virtual ICollection<ListeningRoomParticipant> ListeningRoomParticipants { get; set; } // Danh sách phòng đã tham gia
