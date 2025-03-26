@@ -38,23 +38,4 @@
             }
         });
     });
-
-    // Cải thiện chức năng menu người dùng
-    const userMenuButton = document.querySelector('.user-menu-button');
-    const userDropdownMenu = document.querySelector('.user-dropdown-menu');
-    
-    if (userMenuButton && userDropdownMenu) {
-        // Khi nhấn vào nút user menu
-        userMenuButton.addEventListener('click', function (e) {
-            e.stopPropagation();
-            userDropdownMenu.classList.toggle('show');
-        });
-        
-        // Chỉ đóng menu khi click ra ngoài menu và nút
-        document.addEventListener('click', function (e) {
-            if (!userMenuButton.contains(e.target) && !userDropdownMenu.contains(e.target)) {
-                userDropdownMenu.classList.remove('show');
-            }
-        });
-    }
 });

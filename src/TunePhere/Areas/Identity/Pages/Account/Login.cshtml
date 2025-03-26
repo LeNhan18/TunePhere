@@ -1,83 +1,188 @@
 ﻿@page
 @model LoginModel
-
 @{
     ViewData["Title"] = "Đăng nhập";
+    Layout = null;
 }
 
-<h1>@ViewData["Title"]</h1>
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <form id="account" method="post">
-                <h2>Sử dụng tài khoản của bạn để đăng nhập.</h2>
-                <hr />
-                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label asp-for="Input.Email" class="form-label">Email</label>
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label asp-for="Input.Password" class="form-label">Mật khẩu</label>
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                </div>
-                <div class="checkbox mb-3">
-                    <label asp-for="Input.RememberMe" class="form-label">
-                        <input class="form-check-input" asp-for="Input.RememberMe" />
-                        Ghi nhớ đăng nhập
-                    </label>
-                </div>
-                <div>
-                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Đăng nhập</button>
-                </div>
-                <div>
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Quên mật khẩu?</a>
-                    </p>
-                    <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Đăng ký tài khoản mới</a>
-                    </p>
-                    <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Gửi lại email xác nhận</a>
-                    </p>
-                </div>
-            </form>
-        </section>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Sử dụng dịch vụ khác để đăng nhập.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            Không có dịch vụ xác thực bên ngoài nào được cấu hình. Xem <a href="https://go.microsoft.com/fwlink/?LinkID=532715">bài viết này
-                            về cách thiết lập ứng dụng ASP.NET này để hỗ trợ đăng nhập qua các dịch vụ bên ngoài</a>.
-                        </p>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - TunePhere</title>
+    <link rel="stylesheet" href="~/css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="~/js/loginheader.js"></script>
+</head>
+<body>
+    <div class="container sign-in-mode">
+        <div class="particle"></div>
+        <div class="forms-container">
+            <div class="signin-signup">
+                <form id="account" method="post" class="sign-in-form">
+                    <h2 class="title">Đăng nhập</h2>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="input-field">
+                        <i class="fas fa-user"></i>
+                        <input asp-for="Input.Email" type="email" placeholder="Email" />
                     </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins!)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Đăng nhập bằng tài khoản @provider.DisplayName">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
-            }
-        </section>
-    </div>
-</div>
+                    <div class="input-field">
+                        <i class="fas fa-lock"></i>
+                        <input asp-for="Input.Password" type="password" placeholder="Mật khẩu" />
+                    </div>
+                    
+                    <div class="checkbox-field">
+                        <input asp-for="Input.RememberMe" type="checkbox" />
+                        <label asp-for="Input.RememberMe">Ghi nhớ đăng nhập?</label>
+                    </div>
+                    
+                    <button id="login-submit" type="submit" class="btn solid">
+                        <i class="fas fa-headphones-alt"></i>
+                        Đăng nhập
+                    </button>
+                    
+                    <p class="social-text">Hoặc đăng nhập với</p>
+                    <div class="social-media">
+                        @{
+                            if ((Model.ExternalLogins?.Count ?? 0) > 0)
+                            {
+                                <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                                    @foreach (var provider in Model.ExternalLogins!)
+                                    {
+                                        if (provider.Name.ToLower().Contains("facebook"))
+                                        {
+                                            <a href="javascript:void(0)" onclick="document.getElementById('provider-@provider.Name').click()" class="social-icon facebook">
+                                                <i class="fab fa-facebook-f"></i>
+                                            </a>
+                                            <button type="submit" id="provider-@provider.Name" name="provider" value="@provider.Name" style="display:none"></button>
+                                        }
+                                        else if (provider.Name.ToLower().Contains("google"))
+                                        {
+                                            <a href="javascript:void(0)" onclick="document.getElementById('provider-@provider.Name').click()" class="social-icon google">
+                                                <i class="fab fa-google"></i>
+                                            </a>
+                                            <button type="submit" id="provider-@provider.Name" name="provider" value="@provider.Name" style="display:none"></button>
+                                        }
+                                    }
+                                </form>
+                            }
+                            else
+                            {
+                                <a href="#" class="social-icon facebook">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                                <a href="#" class="social-icon google">
+                                    <i class="fab fa-google"></i>
+                                </a>
+                            }
+                        }
+                    </div>
+                </form>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+                <form id="registerForm" asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="sign-up-form">
+                    <h2 class="title">Đăng ký</h2>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="input-field">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="Input.FullName" placeholder="Họ tên" required />
+                    </div>
+                    <div class="input-field">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" name="Input.Email" placeholder="Email" required />
+                    </div>
+                    <div class="input-field">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="Input.Password" placeholder="Mật khẩu" required />
+                    </div>
+                    <div class="input-field">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="Input.ConfirmPassword" placeholder="Xác nhận mật khẩu" required />
+                    </div>
+                    
+                    <button id="sign-in-btn" class="btn transparent">
+                        <i class="fas fa-headphones-alt"></i> Đăng Nhập
+                    </button>
+                    
+                    <p class="social-text">Hoặc đăng ký với</p>
+                    <div class="social-media">
+                        @{
+                            if ((Model.ExternalLogins?.Count ?? 0) > 0)
+                            {
+                                <form id="external-account-register" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                                    @foreach (var provider in Model.ExternalLogins!)
+                                    {
+                                        if (provider.Name.ToLower().Contains("facebook"))
+                                        {
+                                            <a href="javascript:void(0)" onclick="document.getElementById('provider-register-@provider.Name').click()" class="social-icon facebook">
+                                                <i class="fab fa-facebook-f"></i>
+                                            </a>
+                                            <button type="submit" id="provider-register-@provider.Name" name="provider" value="@provider.Name" style="display:none"></button>
+                                        }
+                                        else if (provider.Name.ToLower().Contains("google"))
+                                        {
+                                            <a href="javascript:void(0)" onclick="document.getElementById('provider-register-@provider.Name').click()" class="social-icon google">
+                                                <i class="fab fa-google"></i>
+                                            </a>
+                                            <button type="submit" id="provider-register-@provider.Name" name="provider" value="@provider.Name" style="display:none"></button>
+                                        }
+                                    }
+                                </form>
+                            }
+                            else
+                            {
+                                <a href="#" class="social-icon facebook">
+                                    <i class="fab fa-facebook-f"></i>
+                                </a>
+                                <a href="#" class="social-icon google">
+                                    <i class="fab fa-google"></i>
+                                </a>
+                            }
+                        }
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="panels-container">
+            <div class="panel left-panel">
+                <div class="content">
+                    <h3>Chưa có tài khoản? <i class="fas fa-music"></i></h3>
+                    <p>Hãy đăng ký ngay để trải nghiệm thế giới âm nhạc tuyệt vời cùng TunePhere!</p>
+                    <button onclick="animateThenRedirect('/Identity/Account/Register')" class="btn transparent">
+                        <i class="fas fa-headphones-alt"></i> Đăng ký
+                    </button>
+                </div>
+                <img src="~/img/log.svg" class="image" alt="" />
+            </div>
+
+            <div class="panel right-panel">
+                <div class="content">
+                    <h3>Đã có tài khoản? <i class="fas fa-music"></i></h3>
+                    <p>Đăng nhập ngay để tiếp tục trải nghiệm âm nhạc cùng TunePhere!</p>
+                    <button id="sign-in-btn" class="btn transparent">
+                        <i class="fas fa-headphones-alt"></i> Đăng Nhập
+                    </button>
+                </div>
+                <img src="~/img/register.svg" class="image" alt="" />
+            </div>
+        </div>
+
+        <div class="music-notes"></div>
+        <div class="equalizer">
+            @for (int i = 0; i < 5; i++)
+            {
+                <div class="bar"></div>
+            }
+        </div>
+    </div>
+
+    <script src="~/js/login.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

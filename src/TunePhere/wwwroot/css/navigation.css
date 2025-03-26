@@ -139,6 +139,7 @@
 /* Menu người dùng */
 .user-menu-container {
     position: relative;
+    z-index: 9999;
 }
 
 .user-menu-button {
@@ -150,6 +151,8 @@
     padding: 5px 10px;
     cursor: pointer;
     transition: background-color 0.3s;
+    height: 40px;
+    pointer-events: auto;
 }
 
 .user-menu-button:hover {
@@ -166,6 +169,7 @@
     justify-content: center;
     color: #ffffff;
     font-size: 16px;
+    overflow: hidden;
 }
 
 .user-name {
@@ -187,12 +191,17 @@
     border-radius: 4px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     display: none;
-    z-index: 1001;
+    z-index: 9999;
 }
 
-/* Thêm class mới để hiển thị menu thông qua JavaScript */
 .user-dropdown-menu.show {
     display: block;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .dropdown-item {
@@ -229,7 +238,6 @@
     font-weight: 500;
 }
 
-/* Thêm mũi tên chỉ vị trí menu */
 .user-dropdown-menu::before {
     content: '';
     position: absolute;
@@ -240,4 +248,11 @@
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
     border-bottom: 8px solid #181818;
+}
+
+.rounded-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
 }

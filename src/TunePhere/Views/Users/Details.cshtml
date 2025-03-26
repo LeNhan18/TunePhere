@@ -1,56 +1,200 @@
-﻿@model TunePhere.Models.AppUser
-
+﻿@model AppUser
 @{
-    ViewData["Title"] = "Details";
-
-    Layout = "_Layout";
+    ViewData["Title"] = "Hồ sơ người dùng";
 }
 
-<h1>Details</h1>
+@await Html.PartialAsync("_NavigationPartial")
+<link rel="stylesheet" href="~/css/user-profile.css">
 
-<div>
-    <h4>User</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UserName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UserName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PasswordHash)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PasswordHash)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FullName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FullName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastLogin)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastLogin)
-        </dd>
-    </dl>
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-cover-photo">
+            @if (!string.IsNullOrEmpty(Model.CoverImage))
+            {
+                <img src="@Model.CoverImage" alt="Cover" />
+            }
+            <div class="gradient-overlay"></div>
+        </div>
+        
+        <div class="profile-info">
+            <div class="profile-avatar">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" alt="Profile" />
+                }
+                else
+                {
+                    <div class="default-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                }
+                <div class="photo-overlay">
+                    <button class="change-photo-btn" id="open-edit-modal">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="profile-details">
+                <div class="profile-type">Hồ sơ</div>
+                <h1 class="profile-name">@Model.FullName</h1>
+                <div class="profile-stats">
+                    <div class="stat">
+                        <span class="stat-count">0</span> Playlist
+                    </div>
+                    <div class="stat">
+                        <span class="stat-count">0</span> Đang theo dõi
+                    </div>
+                    <div class="stat">
+                        <span class="stat-count">0</span> Người theo dõi
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="profile-actions">
+            <a href="/Users/Edit" class="edit-profile-btn" id="edit-profile-btn">
+                <i class="fas fa-edit"></i> Chỉnh sửa hồ sơ
+            </a>
+            <div class="dropdown settings-dropdown">
+                <button class="settings-btn">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <div class="dropdown-menu">
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-share-alt"></i> Chia sẻ hồ sơ
+                    </a>
+                    <a href="/Identity/Account/Manage" class="dropdown-item">
+                        <i class="fas fa-cog"></i> Cài đặt tài khoản
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="profile-tabs">
+        <div class="tab active">Tổng quan</div>
+        <div class="tab">Playlist</div>
+        <div class="tab">Bài hát đã lưu</div>
+        <div class="tab">Nghệ sĩ đã theo dõi</div>
+    </div>
+    
+    <div class="profile-content">
+        <div class="section recently-played">
+            <div class="section-header">
+                <h2>Phát gần đây</h2>
+                <a href="#" class="see-all">Xem tất cả</a>
+            </div>
+            <div class="music-grid">
+                @for (int i = 0; i < 6; i++)
+                {
+                    <div class="music-card">
+                        <div class="music-thumbnail">
+                            <img src="~/images/music-placeholder.jpg" alt="Music" />
+                            <div class="play-button">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                        <h3 class="music-title">Bài hát mẫu</h3>
+                        <p class="music-artist">Nghệ sĩ</p>
+                    </div>
+                }
+            </div>
+        </div>
+        
+        <div class="section top-artists">
+            <div class="section-header">
+                <h2>Nghệ sĩ yêu thích</h2>
+                <a href="#" class="see-all">Xem tất cả</a>
+            </div>
+            <div class="artist-grid">
+                @for (int i = 0; i < 6; i++)
+                {
+                    <div class="artist-card">
+                        <div class="artist-thumbnail">
+                            <img src="~/images/artist-placeholder.jpg" alt="Artist" />
+                        </div>
+                        <h3 class="artist-name">Nghệ sĩ mẫu</h3>
+                        <p class="artist-type">Nghệ sĩ</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<!-- Modal Chỉnh sửa hồ sơ -->
+<div class="modal-overlay" id="edit-profile-modal">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2>Chi tiết hồ sơ</h2>
+            <button class="close-modal" id="close-modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="edit-profile-form" asp-controller="Users" asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
+            <div class="modal-body">
+                <div class="profile-upload-section">
+                    <div class="cover-upload-section">
+                        <h4>Ảnh nền</h4>
+                        <div class="cover-preview" id="cover-preview">
+                            @if (!string.IsNullOrEmpty(Model.CoverImage))
+                            {
+                                <img src="@Model.CoverImage" alt="Cover Preview" />
+                            }
+                            else
+                            {
+                                <div class="default-cover-preview">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            }
+                        </div>
+                        <input type="file" id="cover-image-upload" name="CoverImage" accept="image/*" class="hidden-file-input" />
+                        <input type="hidden" id="current-cover-url" name="CurrentCoverUrl" value="@Model.CoverImage" />
+                        <button type="button" class="choose-file-btn" id="choose-cover-image">
+                            Chọn ảnh nền
+                        </button>
+                    </div>
+                    
+                    <div class="avatar-upload">
+                        <div class="avatar-preview" id="avatar-preview">
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <img src="@Model.ImageUrl" alt="Profile Preview" />
+                            }
+                            else
+                            {
+                                <div class="default-avatar-preview">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="upload-hint">
+                            Bằng cách tiếp tục, bạn đồng ý cho phép TunePhere truy cập vào hình ảnh bạn đã chọn để tải lên. Vui lòng đảm bảo bạn có quyền tải lên hình ảnh.
+                        </div>
+                        <input type="file" id="profile-image-upload" name="ProfileImage" accept="image/*" class="hidden-file-input" />
+                        <input type="hidden" id="current-image-url" name="CurrentImageUrl" value="@Model.ImageUrl" />
+                        <button type="button" class="choose-file-btn" id="choose-profile-image">
+                            Chọn ảnh
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fullname">Tên người dùng</label>
+                    <input type="text" id="fullname" name="FullName" value="@Model.FullName" required class="form-control" />
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="submit" class="save-btn">Lưu</button>
+            </div>
+        </form>
 </div>
+</div>
+
+<script src="~/js/user-profile.js"></script>
+<script src="~/js/navigation.js"></script>
+
+
