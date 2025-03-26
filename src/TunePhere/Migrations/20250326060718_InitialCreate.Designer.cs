@@ -12,7 +12,7 @@ using TunePhere.Models;
 namespace TunePhere.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250325153247_InitialCreate")]
+    [Migration("20250326060718_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
