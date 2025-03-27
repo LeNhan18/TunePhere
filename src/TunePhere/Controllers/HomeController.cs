@@ -39,9 +39,16 @@ namespace TunePhere.Controllers
                 .Take(8)
                 .ToListAsync();
 
+            // Lấy danh sách album nổi tiếng
+            var popularAlbums = await _context.Albums
+                .Include(a => a.Songs)
+                .OrderByDescending(a => a.Songs.Sum(s => s.PlayCount))
+                .Take(8)
+                .ToListAsync();
             ViewBag.SuggestedPlaylists = suggestedPlaylists;
             ViewBag.TrendingRemixes = trendingRemixes;
             ViewBag.PopularArtists = popularArtists;
+            ViewBag.PopularAlbums = popularAlbums;
             return View(topSongs);
         }
     }
