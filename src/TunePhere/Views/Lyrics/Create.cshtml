@@ -1,8 +1,10 @@
 ﻿@model TunePhere.Models.Lyric
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 @{
     ViewData["Title"] = "Thêm lời bài hát";
     Layout = "_Layout";
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 
 <div class="container mt-5">
@@ -24,21 +26,18 @@
                     <form asp-action="Create" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         
+                        <input type="hidden" name="__RequestVerificationToken" value="@token" />
+                        
                         <div class="form-group mb-3">
                             <label asp-for="SongId" class="control-label">Bài hát</label>
                             @if (ViewData["SongId"] != null)
                             {
                                 <select asp-for="SongId" class="form-control form-select bg-dark text-white" asp-items="ViewBag.SongId"></select>
+                                <input type="hidden" name="SongId" value="@Model.SongId" />
                             }
                             else
                             {
-                                <select asp-for="SongId" class="form-control form-select bg-dark text-white">
-                                    <option value="">-- Chọn bài hát --</option>
-                                    @foreach (var song in ViewBag.Songs ?? new List<TunePhere.Models.Song>())
-                                    {
-                                        <option value="@song.SongId">@song.Title</option>
-                                    }
-                                </select>
+                                <select asp-for="SongId" class="form-control form-select bg-dark text-white" asp-items="ViewBag.SongId" required></select>
                             }
                             <span asp-validation-for="SongId" class="text-danger"></span>
                         </div>
@@ -120,3 +119,41 @@
         border-color: #1ed760;
     }
 </style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', function(e) {
+            // Kiểm tra SongId
+            const songId = document.querySelector('#SongId').value;
+            if (!songId || songId <= 0) {
+                alert('Vui lòng chọn bài hát');
+                e.preventDefault();
+                return false;
+            }
+
+            // Kiểm tra Content
+            const content = document.querySelector('#Content').value;
+            if (!content || content.trim() === '') {
+                alert('Vui lòng nhập lời bài hát');
+                e.preventDefault();
+                return false;
+            }
+
+            // Kiểm tra Language
+            const language = document.querySelector('#Language').value;
+            if (!language) {
+                alert('Vui lòng chọn ngôn ngữ');
+                e.preventDefault();
+                return false;
+            }
+
+            // Log dữ liệu gửi đi để debug
+            console.log('Dữ liệu gửi đi:', {
+                SongId: songId,
+                Content: content,
+                Language: language
+            });
+        });
+    });
+</script>

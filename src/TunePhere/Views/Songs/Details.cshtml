@@ -1,8 +1,10 @@
 ﻿@model TunePhere.Models.Song
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 @{
     ViewData["Title"] = Model.Title;
     Layout = null;
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 @await Html.PartialAsync("_NavigationPartial") 
 <!DOCTYPE html>
@@ -10,6 +12,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="__RequestVerificationToken" content="@token" />
     <title>@Model.Title - TunePhere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -18,12 +21,25 @@
     <link rel="stylesheet" href="~/css/navigation.css">
 </head>
 <body>
+    <!-- Nút quay lại - Được tạo mới và đặt ở vị trí tốt hơn -->
+    <div class="back-button-wrapper">
+        <a href="@Url.Action("Index", "Home")" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+    </div>
+
     <div class="song-player">
         <div class="song-content">
             <div class="left-column">
                 <div class="song-image">
                     <img src="@Model.ImageUrl" alt="@Model.Title" />
                     <div class="music-icon"><i class="fas fa-music"></i> Ngải Thần</div>
+                    
+                    <!-- Nút thêm lyric, làm nổi bật hơn -->
+                    <div class="add-lyric-button" id="addLyricButton">
+                        <i class="fas fa-plus"></i>
+                        <span>Thêm lời bài hát</span>
+                    </div>
                 </div>
                 
                 <div class="song-info">
@@ -44,22 +60,14 @@
                     <div class="lyrics-content">
                         @foreach (var lyric in Model.Lyrics)
                         {
-                            <p>@lyric.Content</p>
+                            <pre class="lyric-text">@Html.Raw(lyric.Content)</pre>
                         }
                     </div>
                 }
                 else
                 {
                     <div class="lyrics-content">
-                        <p>我制访问记录的时候有多慌张</p>
-                        <p>他会看见吗 曾经只有彭能看的模样</p>
-                        <p>从夜深人静 一直进过到天亮</p>
-                        <p>你反正不会再担心</p>
-                        <p>我隐藏作废的心脏</p>
-                        <p>好像遇到我 你才对自由向往</p>
-                        <p>怎么为他 失去一切也无妨</p>
-                        <p>可能是我跌跌吧</p>
-                        <p>可能跑得太快了</p>
+                        <p>Chưa có lời bài hát</p>
                     </div>
                 }
             </div>
@@ -109,6 +117,36 @@
         </div>
     </div>
 
+    <!-- Modal thêm lời bài hát -->
+    <div class="modal fade" id="addLyricModal" tabindex="-1" aria-labelledby="addLyricModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addLyricModalLabel">Thêm lời cho bài hát: @Model.Title</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/Lyrics/AddLyric" method="post">
+                    <div class="modal-body">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="SongId" value="@Model.SongId" />
+                        <input type="hidden" name="Language" value="vi" />
+                        
+                        <div class="mb-3">
+                            <label for="Content" class="form-label">Lời bài hát</label>
+                            <textarea class="form-control bg-dark text-white" name="Content" rows="10" 
+                                      placeholder="Nhập lời bài hát ở đây..." required></textarea>
+                            <small class="form-text text-muted">Mỗi dòng sẽ được hiển thị theo đúng định dạng xuống dòng</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-success">Lưu lại</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Hidden audio element -->
     <audio id="audioPlayer" style="display: none;"></audio>
 
@@ -118,9 +156,37 @@
             fileUrl: '@Model.FileUrl',
             imageUrl: '@Model.ImageUrl',
             title: '@Model.Title',
-            artist: '@Model.Artists?.ArtistName'
+            artist: '@Model.Artists?.ArtistName',
+            songId: '@Model.SongId',
+                   artistId: '@Model.ArtistId',
+        userIsAdmin: '@User.IsInRole("Admin")' === 'True',
+        userIsOwner: '@(User.Identity.Name == Model.Artists?.ArtistName || User.Claims.Any(c => c.Type == "ArtistId" && c.Value == Model.ArtistId.ToString()))' === 'True'
         };
     </script>
     <script src="~/js/song-details.js"></script>
+
+    <!-- Thêm ngay sau thẻ <body> -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" 
+             style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 300px;">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 </body>
 </html>
+
+@functions {
+    public static string FormatLyricContent(string content)
+    {
+        if (string.IsNullOrEmpty(content))
+            return string.Empty;
+            
+        // Chuyển đổi xuống dòng thành thẻ <br>
+        return content
+            .Replace("\r\n", "<br>")
+            .Replace("\n", "<br>")
+            .Replace("\r", "<br>");
+    }
+}

@@ -50,6 +50,78 @@ document.addEventListener('DOMContentLoaded', function () {
         isPlaying = false;
         updatePlayPauseButton();
     });
+    
+    // Xử lý hiển thị nút thêm lời bài hát chỉ khi người dùng là admin hoặc người sở hữu
+    const addLyricButton = document.getElementById('addLyricButton');
+    
+    // Thêm đoạn log để debug
+    console.log("User is admin:", window.songData.userIsAdmin);
+    console.log("User is owner:", window.songData.userIsOwner);
+    
+    // Tạm thời luôn hiển thị nút để kiểm tra
+    addLyricButton.style.display = 'flex';
+    
+    // Thêm sự kiện click
+    if (addLyricButton) {
+        addLyricButton.addEventListener('click', function() {
+            // Hiển thị modal
+            new bootstrap.Modal(document.getElementById('addLyricModal')).show();
+        });
+    }
+    
+    // Xử lý nút lưu lyrics
+    const saveLyricBtn = document.getElementById('saveLyricBtn');
+    if (saveLyricBtn) {
+        saveLyricBtn.addEventListener('click', function() {
+            const songId = document.getElementById('lyricSongId').value;
+            const content = document.getElementById('lyricContent').value;
+            
+            if (!content || content.trim() === '') {
+                alert('Vui lòng nhập lời bài hát');
+                return;
+            }
+            
+            // Hiển thị loading
+            saveLyricBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+            saveLyricBtn.disabled = true;
+            
+            // Sử dụng FormData thay vì tạo form thủ công để giữ nguyên xuống dòng
+            const formData = new FormData();
+            formData.append('SongId', songId);
+            formData.append('Content', content);
+            formData.append('Language', 'vi');
+            
+            // Lấy token CSRF
+            const token = document.querySelector('meta[name="__RequestVerificationToken"]').content;
+            formData.append('__RequestVerificationToken', token);
+            
+            // Gửi request bằng fetch
+            fetch('/Lyrics/AddLyric', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': token
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload(); // Tải lại trang sau khi lưu
+                } else {
+                    alert('Có lỗi xảy ra khi lưu lời bài hát');
+                    saveLyricBtn.innerHTML = 'Lưu lại';
+                    saveLyricBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi:', error);
+                alert('Có lỗi xảy ra khi lưu lời bài hát');
+                saveLyricBtn.innerHTML = 'Lưu lại';
+                saveLyricBtn.disabled = false;
+            });
+        });
+    }
+
+    console.log("Lyrics data:", Model.Lyrics); // Kiểm tra dữ liệu lyrics
 });
 
 // Phát nhạc
@@ -163,3 +235,66 @@ function showVideo(url) {
     document.getElementById('videoFrame').src = embedUrl;
     new bootstrap.Modal(document.getElementById('videoModal')).show();
 }
+
+// Xử lý nút thêm lời bài hát
+document.addEventListener('DOMContentLoaded', function() {
+    const addLyricButton = document.getElementById('addLyricButton');
+    if (addLyricButton) {
+        addLyricButton.addEventListener('click', function() {
+            // Hiển thị modal
+            new bootstrap.Modal(document.getElementById('addLyricModal')).show();
+        });
+    }
+    
+    // Xử lý nút lưu lyrics
+    const saveLyricBtn = document.getElementById('saveLyricBtn');
+    if (saveLyricBtn) {
+        saveLyricBtn.addEventListener('click', function() {
+            const songId = document.getElementById('lyricSongId').value;
+            const content = document.getElementById('lyricContent').value;
+            
+            if (!content || content.trim() === '') {
+                alert('Vui lòng nhập lời bài hát');
+                return;
+            }
+            
+            // Hiển thị loading
+            saveLyricBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+            saveLyricBtn.disabled = true;
+            
+            // Sử dụng FormData thay vì tạo form thủ công để giữ nguyên xuống dòng
+            const formData = new FormData();
+            formData.append('SongId', songId);
+            formData.append('Content', content);
+            formData.append('Language', 'vi');
+            
+            // Lấy token CSRF
+            const token = document.querySelector('meta[name="__RequestVerificationToken"]').content;
+            formData.append('__RequestVerificationToken', token);
+            
+            // Gửi request bằng fetch
+            fetch('/Lyrics/AddLyric', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': token
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload(); // Tải lại trang sau khi lưu
+                } else {
+                    alert('Có lỗi xảy ra khi lưu lời bài hát');
+                    saveLyricBtn.innerHTML = 'Lưu lại';
+                    saveLyricBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi:', error);
+                alert('Có lỗi xảy ra khi lưu lời bài hát');
+                saveLyricBtn.innerHTML = 'Lưu lại';
+                saveLyricBtn.disabled = false;
+            });
+        });
+    }
+});

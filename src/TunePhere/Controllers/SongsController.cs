@@ -47,6 +47,7 @@ namespace TunePhere.Controllers
 
             var song = await _context.Songs
                 .Include(s => s.Artists)
+                .Include(s => s.Lyrics)
                 .FirstOrDefaultAsync(m => m.SongId == id);
             if (song == null)
             {
