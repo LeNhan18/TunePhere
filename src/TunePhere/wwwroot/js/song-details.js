@@ -159,15 +159,21 @@ function togglePlay() {
     updatePlayPauseButton();
 }
 
-// Cập nhật nút play/pause
+// Cập nhật nút play/pause - đảm bảo nút hiển thị đúng
 function updatePlayPauseButton() {
     const button = document.getElementById('playPauseButton');
+    if (!button) return;
+    
     const icon = button.querySelector('i');
+    if (!icon) return;
+    
+    // Log để debug
+    console.log("Cập nhật trạng thái nút, isPlaying =", isPlaying);
     
     if (isPlaying) {
-        icon.className = 'fas fa-pause';
+        icon.className = 'fas fa-pause'; // Hiển thị nút tạm dừng khi đang phát
     } else {
-        icon.className = 'fas fa-play';
+        icon.className = 'fas fa-play';  // Hiển thị nút phát khi đang dừng
     }
 }
 
@@ -313,4 +319,65 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+});
+
+// Thêm code xử lý đóng modal
+document.addEventListener('DOMContentLoaded', function() {
+    // Lấy tham chiếu đến modal
+    const lyricModal = document.getElementById('addLyricModal');
+    
+    // Thêm sự kiện khi modal ẩn đi (hidden.bs.modal)
+    lyricModal.addEventListener('hidden.bs.modal', function() {
+        // Đảm bảo xóa backdrop
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+        
+        // Đảm bảo body không còn class 'modal-open'
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    });
+    
+    // Xử lý nút Hủy trong modal
+    const cancelButton = lyricModal.querySelector('.btn-secondary');
+    if (cancelButton) {
+        cancelButton.addEventListener('click', function() {
+            // Đóng modal đúng cách
+            const modalInstance = bootstrap.Modal.getInstance(lyricModal);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        });
+    }
+    
+    // Code xử lý khác...
+});
+
+// Thêm sự kiện lắng nghe trạng thái audio
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+    
+    // Thêm các sự kiện lắng nghe âm thanh
+    audioPlayer.addEventListener('play', function() {
+        isPlaying = true;
+        updatePlayPauseButton();
+    });
+    
+    audioPlayer.addEventListener('pause', function() {
+        isPlaying = false;
+        updatePlayPauseButton();
+    });
+    
+    // Thêm lắng nghe sự kiện khi tương tác với thanh trình phát
+    const playPauseButton = document.getElementById('playPauseButton');
+    if (playPauseButton) {
+        playPauseButton.addEventListener('click', function() {
+            // Thêm thời gian chờ ngắn để đảm bảo DOM cập nhật sau khi xử lý
+            setTimeout(updatePlayPauseButton, 50);
+        });
+    }
+    
+    // ... existing code ...
 });
