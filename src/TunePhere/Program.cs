@@ -5,27 +5,45 @@ using TunePhere.Repository;
 using TunePhere.Repository.EFRepository;
 using TunePhere.Repository.IMPRepository;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+
 var Configuration = builder.Configuration;
 
 // Đăng ký DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddDefaultIdentity<AppUser>(options => {
-    options.SignIn.RequireConfirmedAccount = false; // Không yêu cầu xác nhận email
-    options.SignIn.RequireConfirmedEmail = false; // Không yêu cầu xác nhận email
+// Cấu hình Identity
+builder.Services.AddIdentity<AppUser, IdentityRole>(options => {
+    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedEmail = false;
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false; // Không yêu cầu ký tự đặc biệt
-    options.Password.RequireUppercase = false; // Không yêu cầu chữ hoa
-    options.Password.RequireLowercase = false; // Không yêu cầu chữ thường
-}).AddRoles<IdentityRole>()
-.AddEntityFrameworkStores<AppDbContext>();
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultUI()
+.AddDefaultTokenProviders();
+
+// Cấu hình Cookie
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    options.Cookie.Name = "TunePhereCookie";
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+});
 
 // Đăng ký các Repository
 builder.Services.AddScoped<ISongRepository, EFSongRepository>();
@@ -33,10 +51,8 @@ builder.Services.AddScoped<IPlaylistRepository, EFPlaylistRepository>();
 builder.Services.AddScoped<IRemixRepository,EFRemixRepository>();
 builder.Services.AddScoped<IUserRepository, EFUserRepository>();
 
-builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
-
 var app = builder.Build();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -86,7 +102,6 @@ using (var scope = app.Services.CreateScope())
         await userManager.AddToRoleAsync(adminUser, "Administrator");
     }
 }
-
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

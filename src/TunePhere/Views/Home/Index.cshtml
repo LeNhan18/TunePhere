@@ -204,7 +204,7 @@
             <div class="music-grid">
                 @foreach (var artist in ViewBag.PopularArtists)
                 {
-                    <div class="artist-card">
+                    <div class="artist-card" onclick="location.href='/Artists/Profile/@artist.ArtistId'">
                         <div class="card-img-container artist-img">
                             <img src="@(string.IsNullOrEmpty(artist.ImageUrl) ? "/images/artist-placeholder.jpg" : artist.ImageUrl)" alt="@artist.ArtistName">
                             <div class="play-overlay">
