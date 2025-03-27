@@ -58,15 +58,20 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log("User is admin:", window.songData.userIsAdmin);
     console.log("User is owner:", window.songData.userIsOwner);
     
-    // Tạm thời luôn hiển thị nút để kiểm tra
-    addLyricButton.style.display = 'flex';
+    // Kiểm tra quyền truy cập
+    const userIsAdmin = window.songData.userIsAdmin === true;
+    const userIsOwner = window.songData.userIsOwner === true;
     
-    // Thêm sự kiện click
-    if (addLyricButton) {
+    // Chỉ hiển thị nút khi người dùng có quyền
+    if (userIsAdmin || userIsOwner) {
+        // Thêm sự kiện click
         addLyricButton.addEventListener('click', function() {
             // Hiển thị modal
             new bootstrap.Modal(document.getElementById('addLyricModal')).show();
         });
+    } else {
+        // Ẩn nút nếu không có quyền
+        addLyricButton.style.display = 'none';
     }
     
     // Xử lý nút lưu lyrics
@@ -240,10 +245,21 @@ function showVideo(url) {
 document.addEventListener('DOMContentLoaded', function() {
     const addLyricButton = document.getElementById('addLyricButton');
     if (addLyricButton) {
-        addLyricButton.addEventListener('click', function() {
-            // Hiển thị modal
-            new bootstrap.Modal(document.getElementById('addLyricModal')).show();
-        });
+        // Kiểm tra quyền truy cập
+        const userIsAdmin = window.songData.userIsAdmin === true;
+        const userIsOwner = window.songData.userIsOwner === true;
+        
+        // Chỉ hiển thị nút khi người dùng có quyền
+        if (userIsAdmin || userIsOwner) {
+            // Thêm sự kiện click
+            addLyricButton.addEventListener('click', function() {
+                // Hiển thị modal
+                new bootstrap.Modal(document.getElementById('addLyricModal')).show();
+            });
+        } else {
+            // Ẩn nút nếu không có quyền
+            addLyricButton.style.display = 'none';
+        }
     }
     
     // Xử lý nút lưu lyrics

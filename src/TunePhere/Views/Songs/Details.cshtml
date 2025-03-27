@@ -1,4 +1,5 @@
-﻿@model TunePhere.Models.Song
+﻿@using System.Security.Claims
+@model TunePhere.Models.Song
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 @{
@@ -35,11 +36,14 @@
                     <img src="@Model.ImageUrl" alt="@Model.Title" />
                     <div class="music-icon"><i class="fas fa-music"></i> Ngải Thần</div>
                     
-                    <!-- Nút thêm lyric, làm nổi bật hơn -->
-                    <div class="add-lyric-button" id="addLyricButton">
-                        <i class="fas fa-plus"></i>
-                        <span>Thêm lời bài hát</span>
-                    </div>
+                    <!-- Nút thêm lyric, chỉ hiển thị cho artist và admin -->
+                    @if (User.IsInRole("Admin") || (User.Identity.IsAuthenticated && Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier)))
+                    {
+                        <div class="add-lyric-button" id="addLyricButton">
+                            <i class="fas fa-plus"></i>
+                            <span>Thêm lời bài hát</span>
+                        </div>
+                    }
                 </div>
                 
                 <div class="song-info">
@@ -158,9 +162,11 @@
             title: '@Model.Title',
             artist: '@Model.Artists?.ArtistName',
             songId: '@Model.SongId',
-                   artistId: '@Model.ArtistId',
-        userIsAdmin: '@User.IsInRole("Admin")' === 'True',
-        userIsOwner: '@(User.Identity.Name == Model.Artists?.ArtistName || User.Claims.Any(c => c.Type == "ArtistId" && c.Value == Model.ArtistId.ToString()))' === 'True'
+            artistId: '@Model.ArtistId',
+            userId: '@User.FindFirstValue(ClaimTypes.NameIdentifier)',
+            artistUserId: '@Model.Artists?.userId',
+            userIsAdmin: '@User.IsInRole("Admin")' === 'True',
+            userIsOwner: '@(Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier))' === 'True'
         };
     </script>
     <script src="~/js/song-details.js"></script>
