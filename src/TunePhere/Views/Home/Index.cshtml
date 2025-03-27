@@ -306,10 +306,10 @@
         <div class="volume-bar-container">
             <input type="range" id="volumeBar" value="100" class="volume-bar">
             <div class="volume-bar-bg"></div>
+            <button onclick="showVideo(currentSong?.videoUrl)" class="control-button" id="videoButton" style="display: none;">
+                <i class="fas fa-video"></i>
+            </button>
         </div>
-        <button onclick="showVideo(currentSong?.videoUrl)" class="control-button" id="videoButton" style="display: none;">
-            <i class="fas fa-video"></i>
-        </button>
     </div>
 </div>
 
@@ -350,7 +350,10 @@
         
         // Xử lý âm lượng
         volumeBar.addEventListener('input', () => {
-            audioPlayer.volume = volumeBar.value / 100;
+            const value = volumeBar.value;
+            audioPlayer.volume = value / 100;
+            volumeBar.style.setProperty('--volume-percentage', `${value}%`);
+            
             if (audioPlayer.volume > 0) {
                 const icon = document.querySelector('#volumeButton i');
                 icon.classList.remove('fa-volume-mute');
@@ -404,6 +407,20 @@
             });
         });
     });
+
+    // Chuyển đến bài tiếp theo
+    function nextSong() {
+        if (currentSongIndex < songs.length - 1) {
+            playByIndex(currentSongIndex + 1);
+        }
+    }
+
+    // Chuyển về bài trước
+    function previousSong() {
+        if (currentSongIndex > 0) {
+            playByIndex(currentSongIndex - 1);
+        }
+    }
 
     // Hàm phát nhạc theo index
     function playByIndex(index) {
@@ -468,20 +485,6 @@
         }
         
         updatePlayPauseButton();
-    }
-
-    // Phát bài tiếp theo
-    function nextSong() {
-        if (currentSongIndex < songs.length - 1) {
-            playSong(currentSongIndex + 1);
-        }
-    }
-
-    // Phát bài trước
-    function previousSong() {
-        if (currentSongIndex > 0) {
-            playSong(currentSongIndex - 1);
-        }
     }
 
     // Xử lý âm lượng
