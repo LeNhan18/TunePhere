@@ -567,6 +567,9 @@ namespace TunePhere.Migrations
                     b.Property<DateTime>("UploadDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("VideoUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("SongId");
 
                     b.HasIndex("AlbumId");
