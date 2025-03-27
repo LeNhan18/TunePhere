@@ -213,16 +213,12 @@ body {
     background-color: var(--background-lighter);
     padding: 16px;
     border-radius: var(--card-border-radius);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: var(--transition-quick);
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
 }
 
     .music-card:hover, .artist-card:hover, .chart-card:hover {
         background-color: var(--background-elevated);
-        transform: translateY(-8px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
     }
 
 .card-img-container {
@@ -238,13 +234,13 @@ body {
         width: 100%;
         aspect-ratio: 1/1;
         object-fit: cover;
-        transition: transform 0.5s ease;
+        transition: transform 0.3s ease;
     }
 
 .music-card:hover .card-img-container img,
 .artist-card:hover .card-img-container img,
 .chart-card:hover .card-img-container img {
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .artist-img img {
@@ -256,8 +252,7 @@ body {
     bottom: 8px;
     right: 8px;
     opacity: 0;
-    transition: all 0.3s ease;
-    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0) 100%);
+    transition: var(--transition-smooth);
 }
 
 .play-btn {
@@ -272,17 +267,15 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: scale(0.8);
+    transition: var(--transition-quick);
+    transform: translateY(10px);
     opacity: 0;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
     .play-btn:hover {
         background-color: var(--primary-dark);
-        transform: scale(1.1);
-        opacity: 1;
-        box-shadow: 0 0 20px rgba(30, 215, 96, 0.5);
+        transform: scale(1.05) translateY(0) !important;
     }
 
 .song-title, .artist-name, .chart-title {
@@ -293,7 +286,6 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: all 0.3s ease;
 }
 
 .artist-name, .artist-type, .chart-desc {
@@ -407,7 +399,7 @@ body {
     min-height: 500px;
     color: white;
     cursor: pointer;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
 }
 
 .video-background {
@@ -428,7 +420,6 @@ body {
         height: 100%;
         background: linear-gradient(to right, rgba(10, 17, 40, 0.4) 0%, rgba(10, 17, 40, 0.2) 100%);
         z-index: 1;
-        transition: all 0.5s ease;
     }
 
 .video-container {
@@ -445,7 +436,6 @@ body {
         height: 100%;
         transform: translate(-50%, -50%) scale(1.5);
         pointer-events: none;
-        transition: transform 0.5s ease;
     }
 
 .playlist-content {
@@ -485,7 +475,6 @@ body {
     align-items: center;
     gap: 16px;
     margin-bottom: 32px;
-    transition: all 0.3s ease;
 }
 
 .likes {
@@ -498,7 +487,6 @@ body {
 
     .likes i {
         color: #ff4545;
-        transition: all 0.3s ease;
     }
 
 .play-button {
@@ -511,14 +499,13 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
     .play-button:hover {
-        transform: scale(1.1) rotate(360deg);
+        transform: scale(1.1);
         background: #1ed760;
-        box-shadow: 0 0 30px rgba(30, 215, 96, 0.5);
     }
 
     .play-button i {
@@ -572,7 +559,7 @@ body {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     padding: 20px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     cursor: pointer;
     position: relative;
     overflow: hidden;
@@ -583,8 +570,7 @@ body {
 
     .song-item:hover {
         background: rgba(255, 255, 255, 0.1);
-        transform: translateY(-8px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        transform: translateY(-4px);
     }
 
     .song-item img {
@@ -593,11 +579,11 @@ body {
         object-fit: cover;
         border-radius: 12px;
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        transition: transform 0.5s ease;
+        transition: all 0.3s ease;
     }
 
     .song-item:hover img {
-        transform: scale(1.1);
+        transform: scale(1.05);
     }
 
     .song-item h3 {
@@ -630,20 +616,19 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: scale(0.8) translateX(20px);
     opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
 }
 
 .song-item:hover .video-btn {
     opacity: 1;
-    transform: scale(1) translateX(0);
+    transform: translateY(0);
 }
 
 .video-btn:hover {
-    background: #ff0000;
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    background: #1ed760;
+    transform: scale(1.1) !important;
 }
 
 .music-section {
@@ -658,8 +643,6 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    position: relative;
-    display: inline-block;
 }
 
     .section-title::before {
@@ -670,21 +653,6 @@ body {
         border-radius: 2px;
         display: inline-block;
     }
-
-.section-title::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 0;
-    width: 0;
-    height: 3px;
-    background: linear-gradient(to right, #1ed760, #8e2de2);
-    transition: width 0.3s ease;
-}
-
-.section-title:hover::after {
-    width: 100%;
-}
 
 .music-grid {
     display: grid;
@@ -697,14 +665,13 @@ body {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     padding: 20px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     cursor: pointer;
 }
 
     .music-card:hover {
         background: rgba(255, 255, 255, 0.1);
-        transform: translateY(-8px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        transform: translateY(-4px);
     }
 
 .card-img-container {
@@ -718,11 +685,11 @@ body {
         width: 100%;
         aspect-ratio: 1;
         object-fit: cover;
-        transition: transform 0.5s ease;
+        transition: all 0.3s ease;
     }
 
 .music-card:hover .card-img-container img {
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .play-overlay {
@@ -756,7 +723,7 @@ body {
     justify-content: center;
     cursor: pointer;
     transform: translateY(20px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
 }
 
 .music-card:hover .play-btn {
@@ -822,42 +789,4 @@ body {
     .music-card {
         padding: 16px;
     }
-}
-
-/* Animation cho nút play trong featured playlist */
-.playlist-card .play-button {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.playlist-card .play-button:hover {
-    transform: scale(1.1) rotate(360deg);
-    background: #1ed760;
-    box-shadow: 0 0 30px rgba(30, 215, 96, 0.5);
-}
-
-/* Hiệu ứng pulse cho nút play */
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(30, 215, 96, 0.4);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(30, 215, 96, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(30, 215, 96, 0);
-    }
-}
-
-.playlist-card .play-button:hover {
-    animation: pulse 1.5s infinite;
-}
-
-/* Hiệu ứng cho playlist stats */
-.playlist-card:hover .playlist-stats {
-    transform: translateY(-5px);
-}
-
-.playlist-card:hover .likes i {
-    color: #ff4545;
-    transform: scale(1.2);
 }
