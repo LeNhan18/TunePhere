@@ -1,72 +1,276 @@
 ﻿@model IEnumerable<TunePhere.Models.Song>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Danh sách bài hát";
     Layout = "_Layout";
+    var firstSong = Model.FirstOrDefault();
+    var artist = firstSong?.Artists;
 }
 
-<h1>Index</h1>
+<div class="container-fluid p-0">
+    <!-- Header với ảnh nghệ sĩ -->
+    <div class="artist-header position-relative" style="height: 400px;">
+        <div class="position-absolute w-100 h-100" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(13, 13, 13, 0.9)), url('@(artist?.ImageUrl ?? "")') no-repeat center center; background-size: cover; filter: brightness(1.2) contrast(1.1);">
+        </div>
+        <div class="position-absolute bottom-0 text-white p-5">
+            <span class="artist-label mb-2">NGHỆ SĨ</span>
+            <h1 class="display-4 fw-bold text-shadow text-glow">@(artist?.ArtistName ?? "Nghệ sĩ")</h1>
+            <p class="lead opacity-90">@Model.Count() bài hát</p>
+        </div>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Artists)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Genre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Duration)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FileUrl)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ImageUrl)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UploadDate)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Artists)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Genre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Duration)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FileUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ImageUrl)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UploadDate)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.SongId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.SongId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.SongId">Delete</a>
-            </td>
-        </tr>
+    <!-- Nút thêm bài hát -->
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a asp-action="Create" class="btn btn-create">
+                    <i class="fas fa-plus-circle me-2"></i> Thêm bài hát mới
+                </a>
+            </div>
+        </div>
+
+        <!-- Danh sách bài hát -->
+        <div class="song-list">
+            <table class="table table-hover">
+                <thead>
+                    <tr class="text-muted">
+                        <th scope="col" width="50">#</th>
+                        <th scope="col">Tiêu đề</th>
+                        <th scope="col">Thể loại</th>
+                        <th scope="col" width="100">Thời lượng</th>
+                        <th scope="col" width="120">Lượt nghe</th>
+                        <th scope="col" width="120">Lượt thích</th>
+                        <th scope="col" width="120">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var (item, index) in Model.Select((song, index) => (song, index + 1)))
+                    {
+                        <tr class="align-middle song-item">
+                            <th scope="row" class="text-muted">@index</th>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="song-image-container me-3">
+                                        <img src="@item.ImageUrl" alt="@item.Title" class="song-image">
+                                        <div class="play-overlay">
+                                            <i class="fas fa-play"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 song-title">@item.Title</h6>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="genre-badge">@item.Genre</span></td>
+                            <td class="text-muted">@item.Duration.ToString(@"mm\:ss")</td>
+                            <td>
+                                <i class="fas fa-play text-accent me-1"></i>
+                                <span class="text-muted">@item.PlayCount</span>
+                            </td>
+                            <td>
+                                <i class="fas fa-heart text-accent me-1"></i>
+                                <span class="text-muted">@item.LikeCount</span>
+                            </td>
+                            <td>
+                                <div class="btn-group action-buttons">
+                                    <a asp-action="Edit" asp-route-id="@item.SongId" class="btn btn-action">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.SongId" class="btn btn-action">
+                                        <i class="fas fa-info-circle"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.SongId" class="btn btn-action btn-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1f1f1f;
+            --primary-light: #2d2d2d;
+            --primary-dark: #121212;
+            --accent-color: #bb86fc;
+            --accent-color-hover: #9d4edd;
+            --text-color: #ffffff;
+            --text-muted: #9e9e9e;
+            --background-color: #121212;
+            --card-background: #1f1f1f;
+            --border-color: #333333;
+            --hover-color: rgba(187, 134, 252, 0.1);
+            --danger-color: #cf6679;
+            --heading-color: #ffffff;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .artist-header {
+            margin-top: -24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .text-shadow {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3), 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .artist-label {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: var(--accent-color);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            text-transform: uppercase;
+        }
+
+        .song-list {
+            background-color: var(--card-background);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .song-image-container {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .song-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            filter: brightness(1.1) contrast(1.05);
+        }
+
+        .song-title {
+            color: var(--heading-color);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .table > thead > tr > th {
+            color: var(--heading-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+            padding-bottom: 1.2rem;
+        }
+
+        .genre-badge {
+            background-color: var(--accent-color);
+            color: var(--primary-dark);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .btn-create {
+            background-color: var(--accent-color);
+            color: var(--primary-dark);
+            border-radius: 30px;
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            letter-spacing: 0.3px;
+        }
+
+            .btn-create:hover {
+                background-color: var(--accent-color-hover);
+                color: var(--text-color);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(187, 134, 252, 0.2);
+            }
+
+        .action-buttons .btn-action {
+            background-color: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px;
+            transition: all 0.3s ease;
+        }
+
+            .action-buttons .btn-action:hover {
+                color: var(--accent-color);
+                transform: translateY(-2px);
+            }
+
+        .action-buttons .btn-delete:hover {
+            color: var(--danger-color);
+        }
+
+        .table {
+            color: var(--text-color);
+        }
+
+            .table > :not(caption) > * > * {
+                padding: 1rem;
+                vertical-align: middle;
+                border-bottom-color: var(--border-color);
+                background-color: var(--card-background);
+            }
+
+            .table > tbody > tr {
+                transition: all 0.3s ease;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+                .table > tbody > tr:hover {
+                    background-color: var(--hover-color);
+                }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        .text-accent {
+            color: var(--accent-color) !important;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--accent-color-hover);
+            }
+    </style>
 }
-    </tbody>
-</table>
