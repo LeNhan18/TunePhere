@@ -1,61 +1,126 @@
 ﻿@model TunePhere.Models.Song
 
 @{
-    ViewData["Title"] = "Details";
-    Layout = "_Layout";
+    ViewData["Title"] = Model.Title;
+    Layout = null;
 }
+@await Html.PartialAsync("_NavigationPartial") 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.Title - TunePhere</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/song-details.css" />
+    <link rel="stylesheet" href="~/css/player.css" />
+    <link rel="stylesheet" href="~/css/navigation.css">
+</head>
+<body>
+    <div class="song-player">
+        <div class="song-content">
+            <div class="left-column">
+                <div class="song-image">
+                    <img src="@Model.ImageUrl" alt="@Model.Title" />
+                    <div class="music-icon"><i class="fas fa-music"></i> Ngải Thần</div>
+                </div>
+                
+                <div class="song-info">
+                    <h1 class="song-title">@Model.Title @(Model.Title.Contains("Remix") ? "" : "")</h1>
+                    <div class="artist-row">
+                        <span class="artist-name">@Model.Artists?.ArtistName</span>
+                    </div>
+                    <div class="like-row">
+                        <i class="fas fa-heart heart-icon"></i>
+                        <span class="like-count">@Model.LikeCount</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="lyrics-container">
+                @if (Model.Lyrics != null && Model.Lyrics.Any())
+                {
+                    <div class="lyrics-content">
+                        @foreach (var lyric in Model.Lyrics)
+                        {
+                            <p>@lyric.Content</p>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="lyrics-content">
+                        <p>我制访问记录的时候有多慌张</p>
+                        <p>他会看见吗 曾经只有彭能看的模样</p>
+                        <p>从夜深人静 一直进过到天亮</p>
+                        <p>你反正不会再担心</p>
+                        <p>我隐藏作废的心脏</p>
+                        <p>好像遇到我 你才对自由向往</p>
+                        <p>怎么为他 失去一切也无妨</p>
+                        <p>可能是我跌跌吧</p>
+                        <p>可能跑得太快了</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <!-- Thanh phát nhạc kiểu mới (giống Index.cshtml) -->
+    <div id="nowPlayingBar" class="now-playing-bar">
+        <div class="now-playing-left">
+            <div class="now-playing-cover">
+                <img id="nowPlayingImage" src="@Model.ImageUrl" alt="@Model.Title">
+            </div>
+            <div class="track-info">
+                <span id="nowPlayingTitle" class="song-name">@Model.Title</span>
+                <span id="nowPlayingArtist" class="artist-name">@Model.Artists?.ArtistName</span>
+            </div>
+        </div>
+        <div class="now-playing-center">
+            <div class="player-controls">
+                <button onclick="previousSong()" class="control-button">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button onclick="togglePlay()" class="control-button play-pause-btn" id="playPauseButton">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button onclick="nextSong()" class="control-button">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+            </div>
+            <div class="playback-bar">
+                <span id="currentTime" class="time">0:00</span>
+                <div class="progress-bar">
+                    <input type="range" id="seekBar" value="0" class="seek-bar">
+                    <div class="progress-bar-bg"></div>
+                </div>
+                <span id="duration" class="time">0:00</span>
+            </div>
+        </div>
+        <div class="now-playing-right">
+            <button onclick="toggleMute()" class="control-button" id="volumeButton">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <div class="volume-bar-container">
+                <input type="range" id="volumeBar" value="100" class="volume-bar">
+                <div class="volume-bar-bg"></div>
+            </div>
+        </div>
+    </div>
 
-<h1>Details</h1>
+    <!-- Hidden audio element -->
+    <audio id="audioPlayer" style="display: none;"></audio>
 
-<div>
-    <h4>Song</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Artists.ArtistName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Artists.ArtistName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Genre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Genre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Duration)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Duration)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FileUrl)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FileUrl)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageUrl)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageUrl)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UploadDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UploadDate)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.SongId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.songData = {
+            fileUrl: '@Model.FileUrl',
+            imageUrl: '@Model.ImageUrl',
+            title: '@Model.Title',
+            artist: '@Model.Artists?.ArtistName'
+        };
+    </script>
+    <script src="~/js/song-details.js"></script>
+</body>
+</html>

@@ -45,10 +45,43 @@ namespace TunePhere.Controllers
         }
 
         // GET: Lyrics/Create
-        public IActionResult Create()
+        public IActionResult Create(int? songId)
         {
-            ViewData["SongId"] = new SelectList(_context.Songs, "SongId", "Artist");
-            return View();
+            try
+            {
+                if (songId.HasValue)
+                {
+                    // Nếu có songId được truyền vào, tự động chọn bài hát
+                    var song = _context.Songs.Find(songId.Value);
+                    if (song != null)
+                    {
+                        ViewData["SongName"] = song.Title;
+                        ViewData["SongId"] = new SelectList(_context.Songs, "SongId", "Title", songId.Value);
+                        
+                        // Tạo đối tượng Lyric mới với SongId đã được thiết lập
+                        var lyric = new Lyric
+                        {
+                            SongId = songId.Value,
+                            Language = "vi",
+                            CreatedAt = DateTime.Now,
+                            Content = "" // Chỉ cần thiết lập Content, KHÔNG cần thiết lập Song
+                        };
+                        
+                        return View(lyric);
+                    }
+                }
+                
+                // Nếu không có songId hoặc không tìm thấy bài hát
+                ViewData["SongId"] = new SelectList(_context.Songs, "SongId", "Title");
+                return View(new Lyric { Language = "vi", CreatedAt = DateTime.Now, Content = "" });
+            }
+            catch (Exception ex)
+            {
+                // Xử lý exception
+                ViewData["Error"] = ex.Message;
+                ViewData["SongId"] = new SelectList(_context.Songs, "SongId", "Title");
+                return View(new Lyric { Language = "vi", CreatedAt = DateTime.Now, Content = "" });
+            }
         }
 
         // POST: Lyrics/Create
@@ -56,15 +89,33 @@ namespace TunePhere.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("LyricId,SongId,Content,Language,CreatedAt,UpdatedAt")] Lyric lyric)
+        public async Task<IActionResult> Create([Bind("SongId,Content,Language")] Lyric lyric)
         {
-            if (ModelState.IsValid)
+            try 
             {
-                _context.Add(lyric);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    // Thiết lập các giá trị mặc định
+                    lyric.CreatedAt = DateTime.Now;
+                    
+                    // KHÔNG CẦN thiết lập Song ở đây, Entity Framework sẽ tự động xử lý quan hệ này
+                    // dựa trên SongId khi lưu vào cơ sở dữ liệu
+                    
+                    // Thêm lyrics vào database
+                    _context.Add(lyric);
+                    await _context.SaveChangesAsync();
+                    
+                    // Chuyển hướng đến trang chi tiết bài hát
+                    return RedirectToAction("Details", "Songs", new { id = lyric.SongId });
+                }
             }
-            ViewData["SongId"] = new SelectList(_context.Songs, "SongId", "Artist", lyric.SongId);
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Có lỗi xảy ra: " + ex.Message);
+            }
+            
+            // Nếu không thành công, hiển thị lại form với dữ liệu đã nhập
+            ViewData["SongId"] = new SelectList(_context.Songs, "SongId", "Title", lyric.SongId);
             return View(lyric);
         }
 

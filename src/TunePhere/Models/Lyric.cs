@@ -13,7 +13,7 @@ namespace TunePhere.Models
         public int SongId { get; set; } // Khóa ngoại liên kết với Song
 
         [ForeignKey("SongId")]
-        public required Song Song { get; set; } // Quan hệ với bài hát
+        public virtual Song? Song { get; set; } // Đánh dấu là nullable để tránh lỗi
 
         [Required]
         public required string Content { get; set; } // Nội dung lời bài hát (định dạng JSON hoặc LRC)

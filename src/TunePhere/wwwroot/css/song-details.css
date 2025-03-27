@@ -1,0 +1,283 @@
+﻿/* Thiết lập cơ bản */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #121212; /* Thay đổi màu nền thành màu tối giống thanh nav */
+    color: #ffffff;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 200px;
+    background-color: #333;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding-top: 20px;
+    z-index: 100;
+}
+
+.sidebar-logo {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 0 20px;
+    margin-bottom: 30px;
+}
+
+.sidebar-menu {
+    list-style: none;
+}
+
+.sidebar-menu li {
+    padding: 10px 20px;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar-menu li:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-menu li i {
+    width: 20px;
+}
+
+.sidebar-section {
+    color: #777;
+    font-size: 14px;
+    padding: 10px 20px;
+    margin-top: 20px;
+}
+
+/* Main container */
+.main-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Top navigation */
+.top-navigation {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    color: #a7a7a7;
+    cursor: pointer;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 5px 10px;
+    width: 240px;
+}
+
+.search-bar input {
+    background: none;
+    border: none;
+    color: white;
+    margin-left: 10px;
+    outline: none;
+    width: 100%;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.user-menu-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.user-btn {
+    background: none;
+    border: none;
+    color: #a7a7a7;
+    cursor: pointer;
+}
+
+/* Main song player container */
+.song-player {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    width: 100%;
+    padding-bottom: 90px; /* Thêm padding để không bị đè bởi thanh player */
+}
+
+/* Song content container - Dịch chuyển sang phải */
+.song-content {
+    display: flex;
+    width: 1000px;
+    margin: 0 auto;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 60px;
+    transform: translateX(100px); /* Dịch phải 100px để căn giữa */
+}
+
+/* Song image container */
+.left-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.song-image {
+    width: 350px;
+    height: 350px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.song-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.music-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 14px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+/* Song info section */
+.song-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 350px;
+}
+
+.song-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-top: 10px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.artist-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.artist-name {
+    font-size: 16px;
+    color: #b0b0b0;
+}
+
+.artist-follow {
+    margin-left: 8px;
+    font-size: 13px;
+    color: #b0b0b0;
+    border: 1px solid #b0b0b0;
+    padding: 0px 8px;
+    border-radius: 10px;
+}
+
+.like-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.heart-icon {
+    color: #ff4757;
+    font-size: 20px;
+}
+
+.like-count {
+    color: #b0b0b0;
+    font-size: 16px;
+}
+
+/* Lyrics container */
+.lyrics-container {
+    width: 450px;
+    height: 400px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.lyrics-container::-webkit-scrollbar {
+    display: none;
+}
+
+.lyrics-content p {
+    margin-bottom: 15px;
+    line-height: 2;
+    color: #e0e0e0;
+    font-size: 18px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .song-content {
+        transform: translateX(50px);
+    }
+}
+
+@media (max-width: 992px) {
+    .song-content {
+        transform: translateX(0);
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .lyrics-container {
+        width: 350px;
+    }
+}
