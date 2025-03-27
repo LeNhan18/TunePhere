@@ -33,9 +33,9 @@
     justify-content: center;
 }
 
-.nav-icon.home-icon:hover {
-    color: #1ed760; /* Màu xanh Spotify khi hover */
-}
+    .nav-icon.home-icon:hover {
+        color: #1ed760; /* Màu xanh Spotify khi hover */
+    }
 
 /* Thanh tìm kiếm */
 .search-container {
@@ -51,9 +51,9 @@
     width: 360px;
 }
 
-.search-bar:focus-within {
-    border: 1px solid #ffffff;
-}
+    .search-bar:focus-within {
+        border: 1px solid #ffffff;
+    }
 
 .search-icon {
     color: #7f7f7f;
@@ -71,10 +71,10 @@
     padding: 5px 0;
 }
 
-.search-bar input::placeholder {
-    color: #a7a7a7;
-    font-weight: 400;
-}
+    .search-bar input::placeholder {
+        color: #a7a7a7;
+        font-weight: 400;
+    }
 
 /* Phần bên phải */
 .navbar-right {
@@ -90,9 +90,9 @@
     text-decoration: none;
 }
 
-.nav-link:hover {
-    color: #ffffff;
-}
+    .nav-link:hover {
+        color: #ffffff;
+    }
 
 .download-link {
     display: flex;
@@ -117,24 +117,24 @@
     transition: all 0.3s ease;
 }
 
-.nav-button.signup {
-    color: #a7a7a7;
-    border: none;
-}
+    .nav-button.signup {
+        color: #a7a7a7;
+        border: none;
+    }
 
-.nav-button.signup:hover {
-    color: #ffffff;
-    transform: scale(1.05);
-}
+        .nav-button.signup:hover {
+            color: #ffffff;
+            transform: scale(1.05);
+        }
 
-.nav-button.login {
-    background-color: #ffffff;
-    color: #000000;
-}
+    .nav-button.login {
+        background-color: #ffffff;
+        color: #000000;
+    }
 
-.nav-button.login:hover {
-    transform: scale(1.05);
-}
+        .nav-button.login:hover {
+            transform: scale(1.05);
+        }
 
 /* Menu người dùng */
 .user-menu-container {
@@ -155,9 +155,9 @@
     pointer-events: auto;
 }
 
-.user-menu-button:hover {
-    background-color: #333333;
-}
+    .user-menu-button:hover {
+        background-color: #333333;
+    }
 
 .user-avatar {
     width: 30px;
@@ -194,14 +194,21 @@
     z-index: 9999;
 }
 
-.user-dropdown-menu.show {
-    display: block;
-    animation: fadeIn 0.2s ease-in-out;
-}
+    .user-dropdown-menu.show {
+        display: block;
+        animation: fadeIn 0.2s ease-in-out;
+    }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dropdown-item {
@@ -216,9 +223,9 @@
     font-weight: 500;
 }
 
-.dropdown-item:hover {
-    background-color: #333333;
-}
+    .dropdown-item:hover {
+        background-color: #333333;
+    }
 
 .dropdown-divider {
     height: 1px;
