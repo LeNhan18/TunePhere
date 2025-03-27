@@ -1,4 +1,4 @@
-﻿@model IEnumerable<TunePhere.Models.Song>
+@model IEnumerable<TunePhere.Models.Song>
 
 @using Microsoft.Extensions.DependencyInjection
 @inject AppDbContext DbContext
@@ -118,19 +118,19 @@
         <section class="music-section">
             <h2 class="section-title">Album nổi tiếng</h2>
             <div class="music-grid">
-                @for (int i = 0; i < 8; i++)
+                @foreach (var album in ViewBag.PopularAlbums)
                 {
                     <div class="music-card">
                         <div class="card-img-container">
-                            <img src="/images/album-placeholder.jpg" alt="Album">
+                            <img src="@(string.IsNullOrEmpty(album.ImageUrl) ? "/images/album-placeholder.jpg" : album.ImageUrl)" alt="@album.AlbumName">
                             <div class="play-overlay">
-                                <button class="play-btn">
+                                <button class="play-btn" onclick="location.href='@Url.Action("Details", "Albums", new { id = album.AlbumId })'">
                                     <i class="fas fa-play"></i>
                                 </button>
                             </div>
                         </div>
-                        <h3 class="song-title">Tên album</h3>
-                        <p class="artist-name">Tên nghệ sĩ</p>
+                        <h3 class="song-title">@album.AlbumName</h3>
+                        <p class="artist-name">@album.Artists.ArtistName</p>
                     </div>
                 }
             </div>
@@ -140,6 +140,7 @@
         <section class="music-section">
             <h2 class="section-title">Bảng xếp hạng nổi bật</h2>
             <div class="music-grid">
+         
                 @for (int i = 0; i < 8; i++)
                 {
                     <div class="chart-card">

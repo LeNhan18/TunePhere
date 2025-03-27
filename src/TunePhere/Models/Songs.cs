@@ -35,6 +35,8 @@ namespace TunePhere.Models
         public int PlayCount { get; set; } = 0; // Số lượt nghe
         public int LikeCount { get; set; } = 0;
 
+        public string? VideoUrl { get; set; }
+
         public virtual Artists Artists { get; set; }
         public virtual Album Albums { get; set; }
 
