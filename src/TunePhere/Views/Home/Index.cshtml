@@ -444,11 +444,35 @@
         // Hiển thị thanh phát nhạc
         document.getElementById('nowPlayingBar').style.display = 'flex';
         
-        // Phát nhạc
+        // Phát nhạc và tăng lượt nghe
+        playAndIncrementCount(currentSong);
+    }
+
+    // Hàm phát nhạc và tăng lượt nghe
+    function playAndIncrementCount(song) {
         audioPlayer.play()
             .then(() => {
                 isPlaying = true;
                 updatePlayPauseButton();
+                
+                // Gọi API để tăng lượt nghe
+                fetch(`/Songs/IncrementPlayCount/${song.id}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Cập nhật số lượt nghe trên giao diện nếu có
+                    const playCountElements = document.querySelectorAll('.play-count');
+                    playCountElements.forEach(element => {
+                        if (element.closest('.music-card')?.dataset.songId === song.id) {
+                            element.textContent = `${data.playCount} lượt nghe`;
+                        }
+                    });
+                })
+                .catch(error => console.error('Lỗi khi tăng lượt nghe:', error));
             })
             .catch(error => {
                 console.error('Lỗi phát nhạc:', error);
@@ -472,7 +496,7 @@
     // Xử lý play/pause
     function togglePlay() {
         if (currentSongIndex === -1 && songs.length > 0) {
-            playSong(0);
+            playByIndex(0);
             return;
         }
         
@@ -480,8 +504,7 @@
             audioPlayer.pause();
             isPlaying = false;
         } else {
-            audioPlayer.play();
-            isPlaying = true;
+            playAndIncrementCount(currentSong);
         }
         
         updatePlayPauseButton();
