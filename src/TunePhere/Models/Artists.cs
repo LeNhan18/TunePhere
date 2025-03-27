@@ -27,6 +27,7 @@ namespace TunePhere.Models
         public virtual ICollection<Song> Songs { get; set; }
         public virtual ICollection<Remix> Remixes { get; set; }
         public virtual ICollection<Playlist> Playlists { get; set; }
+        public virtual ICollection<ArtistFollower> Followers { get; set; }
 
         public Artists()
         {
@@ -34,6 +35,12 @@ namespace TunePhere.Models
             Songs = new HashSet<Song>();
             Remixes = new HashSet<Remix>();
             Playlists = new HashSet<Playlist>();
+            Followers = new HashSet<ArtistFollower>();
+        }
+
+        public int GetFollowersCount()
+        {
+            return Followers?.Count ?? 0;
         }
     }
 }

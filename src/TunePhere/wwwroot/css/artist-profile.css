@@ -54,9 +54,29 @@
 
 .artist-stats {
     display: flex;
-    gap: 24px;
-    margin-bottom: 24px;
-    color: #b3b3b3;
+    gap: 20px;
+    margin-top: 20px;
+    color: #888;
+}
+
+.artist-stats span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.artist-stats i {
+    font-size: 16px;
+}
+
+.stat-link {
+    text-decoration: none;
+    color: #888;
+    transition: color 0.3s ease;
+}
+
+.stat-link:hover {
+    color: #fff;
 }
 
 .edit-profile-btn {
@@ -431,6 +451,47 @@
     font-size: 14px;
     color: #b3b3b3;
     margin: 0;
+}
+
+.profile-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.follow-btn {
+    background: #1DB954;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.follow-btn:hover {
+    transform: scale(1.05);
+    background: #1ed760;
+}
+
+.follow-btn.following {
+    background: transparent;
+    border: 1px solid white;
+}
+
+.follow-btn.following:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1);
+}
+
+.follow-btn i {
+    font-size: 16px;
 }
 
 @media (max-width: 768px) {
