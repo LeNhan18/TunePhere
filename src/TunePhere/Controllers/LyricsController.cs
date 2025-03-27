@@ -93,25 +93,57 @@ namespace TunePhere.Controllers
         {
             try 
             {
+                // Thêm debug log
+                Console.WriteLine($"Received lyric: SongId={lyric.SongId}, Language={lyric.Language}, Content length={lyric?.Content?.Length ?? 0}");
+                
+                // Kiểm tra dữ liệu thủ công
+                if (lyric.SongId <= 0)
+                {
+                    ModelState.AddModelError("SongId", "SongId không hợp lệ");
+                    Console.WriteLine("SongId không hợp lệ");
+                }
+                
+                if (string.IsNullOrEmpty(lyric.Content))
+                {
+                    ModelState.AddModelError("Content", "Nội dung lời bài hát không được để trống");
+                    Console.WriteLine("Content trống");
+                }
+                
+                if (string.IsNullOrEmpty(lyric.Language))
+                {
+                    lyric.Language = "vi"; // Mặc định là tiếng Việt nếu không chọn
+                    Console.WriteLine("Thiết lập Language = vi");
+                }
+
                 if (ModelState.IsValid)
                 {
                     // Thiết lập các giá trị mặc định
                     lyric.CreatedAt = DateTime.Now;
                     
-                    // KHÔNG CẦN thiết lập Song ở đây, Entity Framework sẽ tự động xử lý quan hệ này
-                    // dựa trên SongId khi lưu vào cơ sở dữ liệu
-                    
                     // Thêm lyrics vào database
-                    _context.Add(lyric);
+                    _context.Lyrics.Add(lyric);
                     await _context.SaveChangesAsync();
+                    Console.WriteLine($"Đã lưu lyric với ID {lyric.LyricId}");
                     
                     // Chuyển hướng đến trang chi tiết bài hát
                     return RedirectToAction("Details", "Songs", new { id = lyric.SongId });
                 }
+                else
+                {
+                    // Log tất cả lỗi trong ModelState
+                    foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        Console.WriteLine($"Model error: {error.ErrorMessage}");
+                    }
+                }
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Có lỗi xảy ra: " + ex.Message);
+                // Log lỗi chi tiết
+                Console.WriteLine($"Lỗi khi thêm lyric: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                ModelState.AddModelError("", $"Có lỗi xảy ra: {ex.Message}");
             }
             
             // Nếu không thành công, hiển thị lại form với dữ liệu đã nhập
@@ -209,6 +241,98 @@ namespace TunePhere.Controllers
         private bool LyricExists(int id)
         {
             return _context.Lyrics.Any(e => e.LyricId == id);
+        }
+
+        // Thêm API endpoint này
+        [HttpPost]
+        [Route("api/lyrics/create")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateLyric([FromBody] Lyric lyric)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                // Thiết lập giá trị mặc định
+                lyric.CreatedAt = DateTime.Now;
+                
+                // Thêm vào database
+                _context.Lyrics.Add(lyric);
+                await _context.SaveChangesAsync();
+                
+                return Ok(new { success = true, lyricId = lyric.LyricId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        // Thêm phương thức này vào controller
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddLyric(int SongId, string Content, string Language = "vi")
+        {
+            try
+            {
+                Console.WriteLine($"LyricsController.AddLyric - Dữ liệu nhận được: SongId={SongId}, Content length={Content?.Length ?? 0}, Language={Language}");
+                
+                // Kiểm tra dữ liệu đầu vào
+                if (SongId <= 0)
+                {
+                    TempData["Error"] = "ID bài hát không hợp lệ";
+                    return RedirectToAction("Details", "Songs", new { id = SongId });
+                }
+                
+                if (string.IsNullOrEmpty(Content))
+                {
+                    TempData["Error"] = "Nội dung lời bài hát không được để trống";
+                    return RedirectToAction("Details", "Songs", new { id = SongId });
+                }
+
+                // Kiểm tra bài hát có tồn tại không
+                var song = await _context.Songs.FindAsync(SongId);
+                if (song == null)
+                {
+                    TempData["Error"] = "Không tìm thấy bài hát";
+                    return RedirectToAction("Index", "Songs");
+                }
+
+                // In nội dung lời bài hát để debug
+                Console.WriteLine("Nội dung lời bài hát:");
+                Console.WriteLine(Content);
+                
+                // Tạo đối tượng Lyric mới
+                var lyric = new Lyric
+                {
+                    SongId = SongId,
+                    Content = Content, // Đảm bảo giữ nguyên định dạng
+                    Language = string.IsNullOrEmpty(Language) ? "vi" : Language,
+                    CreatedAt = DateTime.Now
+                };
+
+                // Thêm vào cơ sở dữ liệu
+                _context.Lyrics.Add(lyric);
+                await _context.SaveChangesAsync();
+                
+                Console.WriteLine($"LyricsController.AddLyric - Đã lưu thành công lời bài hát với ID={lyric.LyricId}");
+
+                // Chuyển hướng về trang details
+                return RedirectToAction("Details", "Songs", new { id = SongId });
+            }
+            catch (Exception ex)
+            {
+                // Ghi log chi tiết lỗi
+                Console.WriteLine($"LyricsController.AddLyric - LỖI: {ex.Message}");
+                Console.WriteLine($"LyricsController.AddLyric - Stack trace: {ex.StackTrace}");
+                
+                // Lưu lỗi vào TempData để hiển thị
+                TempData["Error"] = $"Lỗi: {ex.Message}";
+                return RedirectToAction("Details", "Songs", new { id = SongId });
+            }
         }
     }
 }
