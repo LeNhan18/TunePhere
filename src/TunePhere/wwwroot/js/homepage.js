@@ -37,5 +37,5 @@
                 playBtn.style.transform = 'translateY(10px)';
             }
         });
-    });
+    }); 
 });

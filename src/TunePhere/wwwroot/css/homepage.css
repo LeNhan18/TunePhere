@@ -22,10 +22,21 @@ body {
     overflow-x: hidden;
 }
 
+html, body {
+    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    overflow-x: hidden;
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
+}
+
 .main-container {
     display: flex;
     margin-top: 64px; /* Cho navbar fixed */
     height: calc(100vh - 64px);
+    overflow: hidden;
 }
 
 /* Sidebar Styles */
@@ -190,8 +201,10 @@ body {
     flex: 1;
     padding: 20px 32px;
     background: linear-gradient(to bottom, #1a1a1a, var(--background-color) 15%);
-    overflow-y: auto;
+    overflow-y: scroll;
     transition: var(--transition-smooth);
+    height: 100%;
+    box-sizing: border-box;
 }
 
 .section-title {
