@@ -175,7 +175,7 @@
             <div class="music-grid">
                 @foreach (var song in Model.OrderByDescending(s => s.PlayCount).Take(4))
                 {
-                    <div class="music-card" data-song-id="@song.SongId" data-title="@song.Title" data-artist="@song.Artists?.ArtistName" data-audio-url="@song.FileUrl" data-image-url="@song.ImageUrl">
+                    <div class="music-card" data-song-id="@song.SongId" data-title="@song.Title" data-artist="@song.Artists?.ArtistName" data-audio-url="@song.FileUrl" data-image-url="@song.ImageUrl" data-video-url="@song.VideoUrl">
                         <div class="card-img-container">
                             <img src="@song.ImageUrl" alt="@song.Title">
                             <div class="play-overlay">
@@ -307,6 +307,9 @@
             <input type="range" id="volumeBar" value="100" class="volume-bar">
             <div class="volume-bar-bg"></div>
         </div>
+        <button onclick="showVideo(currentSong?.videoUrl)" class="control-button" id="videoButton" style="display: none;">
+            <i class="fas fa-video"></i>
+        </button>
     </div>
 </div>
 
@@ -317,33 +320,109 @@
     let currentSongIndex = -1;
     let songs = [];
     let isPlaying = false;
+    let currentSong = null;
 
     // Khởi tạo danh sách bài hát
     function initializeSongs() {
-        const songElements = document.querySelectorAll('.music-card');
+        const songElements = document.querySelectorAll('.music-card, .song-item');
         songs = Array.from(songElements).map(card => ({
             id: card.dataset.songId,
             title: card.dataset.title,
             artist: card.dataset.artist,
             audioUrl: card.dataset.audioUrl,
-            imageUrl: card.dataset.imageUrl
+            imageUrl: card.dataset.imageUrl,
+            videoUrl: card.dataset.videoUrl
         }));
     }
 
-    // Phát bài hát theo index
-    function playSong(index) {
+    // Khởi tạo các event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeSongs();
+        
+        const seekBar = document.getElementById('seekBar');
+        const volumeBar = document.getElementById('volumeBar');
+        
+        // Xử lý tua nhạc
+        seekBar.addEventListener('input', () => {
+            const time = (seekBar.value / 100) * audioPlayer.duration;
+            audioPlayer.currentTime = time;
+        });
+        
+        // Xử lý âm lượng
+        volumeBar.addEventListener('input', () => {
+            audioPlayer.volume = volumeBar.value / 100;
+            if (audioPlayer.volume > 0) {
+                const icon = document.querySelector('#volumeButton i');
+                icon.classList.remove('fa-volume-mute');
+                icon.classList.add('fa-volume-up');
+            }
+        });
+        
+        // Cập nhật tiến trình
+        audioPlayer.addEventListener('timeupdate', () => {
+            const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            seekBar.value = percent;
+            seekBar.style.background = `linear-gradient(to right, #1ed760 ${percent}%, #535353 ${percent}%)`;
+            
+            document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime);
+            document.getElementById('duration').textContent = formatTime(audioPlayer.duration);
+        });
+        
+        // Xử lý khi bài hát kết thúc
+        audioPlayer.addEventListener('ended', () => {
+            nextSong();
+        });
+
+        // Thêm sự kiện click cho các music card và song item
+        document.querySelectorAll('.music-card, .song-item').forEach((card, index) => {
+            card.addEventListener('click', () => {
+                playByIndex(index);
+            });
+        });
+
+        // Thêm sự kiện click cho các nút play
+        document.querySelectorAll('.play-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const card = button.closest('.music-card, .song-item');
+                const index = Array.from(document.querySelectorAll('.music-card, .song-item')).indexOf(card);
+                if (index !== -1) {
+                    playByIndex(index);
+                }
+            });
+        });
+
+        // Thêm sự kiện click cho các nút video
+        document.querySelectorAll('.video-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const card = button.closest('.music-card, .song-item');
+                const videoUrl = card.dataset.videoUrl;
+                if (videoUrl) {
+                    showVideo(videoUrl, card);
+                }
+            });
+        });
+    });
+
+    // Hàm phát nhạc theo index
+    function playByIndex(index) {
         if (index < 0 || index >= songs.length) return;
         
-        const song = songs[index];
+        currentSong = songs[index];
         currentSongIndex = index;
         
         // Cập nhật nguồn audio
-        audioPlayer.src = song.audioUrl;
+        audioPlayer.src = currentSong.audioUrl;
         
         // Cập nhật thông tin hiển thị
-        document.getElementById('nowPlayingTitle').textContent = song.title;
-        document.getElementById('nowPlayingArtist').textContent = song.artist;
-        document.getElementById('nowPlayingImage').src = song.imageUrl;
+        document.getElementById('nowPlayingTitle').textContent = currentSong.title;
+        document.getElementById('nowPlayingArtist').textContent = currentSong.artist;
+        document.getElementById('nowPlayingImage').src = currentSong.imageUrl;
+        
+        // Hiển thị/ẩn nút video
+        const videoButton = document.getElementById('videoButton');
+        videoButton.style.display = currentSong.videoUrl ? 'block' : 'none';
         
         // Hiển thị thanh phát nhạc
         document.getElementById('nowPlayingBar').style.display = 'flex';
@@ -421,45 +500,6 @@
         }
     }
 
-    // Khởi tạo các event listeners
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeSongs();
-        
-        const seekBar = document.getElementById('seekBar');
-        const volumeBar = document.getElementById('volumeBar');
-        
-        // Xử lý tua nhạc
-        seekBar.addEventListener('input', () => {
-            const time = (seekBar.value / 100) * audioPlayer.duration;
-            audioPlayer.currentTime = time;
-        });
-        
-        // Xử lý âm lượng
-        volumeBar.addEventListener('input', () => {
-            audioPlayer.volume = volumeBar.value / 100;
-            if (audioPlayer.volume > 0) {
-                const icon = document.querySelector('#volumeButton i');
-                icon.classList.remove('fa-volume-mute');
-                icon.classList.add('fa-volume-up');
-            }
-        });
-        
-        // Cập nhật tiến trình
-        audioPlayer.addEventListener('timeupdate', () => {
-            const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-            seekBar.value = percent;
-            seekBar.style.background = `linear-gradient(to right, #1ed760 ${percent}%, #535353 ${percent}%)`;
-            
-            document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime);
-            document.getElementById('duration').textContent = formatTime(audioPlayer.duration);
-        });
-        
-        // Xử lý khi bài hát kết thúc
-        audioPlayer.addEventListener('ended', () => {
-            nextSong();
-        });
-    });
-
     // Hàm format thời gian
     function formatTime(seconds) {
         if (isNaN(seconds)) return '0:00';
@@ -469,14 +509,7 @@
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
 
-    // Thêm sự kiện click cho các music card
-    document.querySelectorAll('.music-card').forEach((card, index) => {
-        card.addEventListener('click', () => {
-            playSong(index);
-        });
-    });
-
-    function showVideo(url) {
+    function showVideo(url, card) {
         if (!url) return;
         
         let videoId = "";
@@ -490,10 +523,39 @@
             videoId = url.split("youtu.be/")[1];
         }
         
-        const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-        document.getElementById('videoFrame').src = embedUrl;
-        new bootstrap.Modal(document.getElementById('videoModal')).show();
+        // Tạo URL nhúng cho video với mute=1 để tắt âm thanh
+        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=1&showinfo=0&rel=0&modestbranding=1&fs=1`;
+        
+        // Tìm container video trong featured playlist
+        const featuredVideo = document.querySelector('.featured-playlist .video-container iframe');
+        if (featuredVideo) {
+            featuredVideo.src = embedUrl;
+        }
+        
+        // Cập nhật thông tin bài hát trong featured playlist
+        const playlistTitle = document.querySelector('.playlist-title');
+        const playlistDescription = document.querySelector('.playlist-description');
+        
+        // Lấy thông tin từ card nếu có
+        if (card instanceof HTMLElement) {
+            const title = card.dataset.title;
+            const artist = card.dataset.artist;
+            if (playlistTitle) playlistTitle.textContent = title;
+            if (playlistDescription) playlistDescription.textContent = `By ${artist}`;
+        }
+        // Nếu không có card, sử dụng currentSong
+        else if (currentSong) {
+            if (playlistTitle) playlistTitle.textContent = currentSong.title;
+            if (playlistDescription) playlistDescription.textContent = `By ${currentSong.artist}`;
+        }
     }
+
+    // Cập nhật onclick cho nút video trong thanh player
+    document.getElementById('videoButton').onclick = function() {
+        if (currentSong?.videoUrl) {
+            showVideo(currentSong.videoUrl);
+        }
+    };
 </script>
 
 @* <!-- Add this CSS to your homepage.css file --> *@
