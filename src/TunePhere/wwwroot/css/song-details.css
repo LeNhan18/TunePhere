@@ -198,6 +198,9 @@ body {
     margin-bottom: 20px;
     position: relative;
     overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
 }
 
 .song-image img {
@@ -218,14 +221,14 @@ body {
     border-radius: 12px;
 }
 
-/* Nút thêm lời bài hát - đảm bảo hiển thị đúng */
+/* Nút thêm lời bài hát - hiệu ứng mượt mà */
 .add-lyric-button {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
     padding: 12px;
-    background-color: #1db954; /* Màu xanh Spotify */
+    background-color: rgba(29, 185, 84, 0.9); /* Màu xanh Spotify với độ trong suốt */
     color: white;
     text-align: center;
     font-weight: 500;
@@ -233,17 +236,34 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s;
     border: none;
     font-size: 14px;
+    transform: translateY(100%); /* Bắt đầu ẩn phía dưới */
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67), 
+                opacity 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67),
+                background-color 0.2s ease;
+    pointer-events: none; /* Tránh lỗi khi hover */
+}
+
+/* Hiện nút khi hover vào ảnh */
+.song-image:hover .add-lyric-button {
+    transform: translateY(0); /* Di chuyển lên */
+    opacity: 1;
+    pointer-events: auto; /* Cho phép tương tác khi hiện */
+}
+
+.add-lyric-button:hover {
+    background-color: rgba(30, 215, 96, 1); /* Màu đậm hơn khi hover */
 }
 
 .add-lyric-button i {
     margin-right: 8px;
+    transition: transform 0.2s ease;
 }
 
-.add-lyric-button:hover {
-    background-color: #1ed760;
+.add-lyric-button:hover i {
+    transform: scale(1.2); /* Icon to hơn khi hover */
 }
 
 /* Song info section */
@@ -380,3 +400,4 @@ body {
     background-color: #1ed760;
     border-color: #1ed760;
 }
+
