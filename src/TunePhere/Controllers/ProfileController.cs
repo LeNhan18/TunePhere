@@ -19,7 +19,8 @@ namespace TunePhere.Controllers
         }
 
         // GET: Profile
-        [Authorize]
+ 
+        [AllowAnonymous]
         public async Task<IActionResult> Index(string? username)
         {
             AppUser user;
@@ -31,7 +32,9 @@ namespace TunePhere.Controllers
                     .Include(u => u.Playlists)
                         .ThenInclude(p => p.PlaylistSongs)
                     .Include(u => u.Followers)
+                        .ThenInclude(f => f.Follower)
                     .Include(u => u.Following)
+                        .ThenInclude(f => f.Following)
                     .FirstOrDefaultAsync(u => u.Id == currentUserId);
             }
             else
@@ -41,7 +44,9 @@ namespace TunePhere.Controllers
                     .Include(u => u.Playlists)
                         .ThenInclude(p => p.PlaylistSongs)
                     .Include(u => u.Followers)
+                        .ThenInclude(f => f.Follower)
                     .Include(u => u.Following)
+                        .ThenInclude(f => f.Following)
                     .FirstOrDefaultAsync(u => u.UserName == username);
             }
 
@@ -51,6 +56,44 @@ namespace TunePhere.Controllers
             }
 
             return View(user);
+        }
+
+        // POST: Profile/ToggleFollow
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> ToggleFollow(string userId)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            // Không cho phép follow chính mình
+            if (currentUserId == userId)
+            {
+                return Json(new { success = false, message = "Không thể theo dõi chính mình" });
+            }
+
+            // Kiểm tra xem đã follow chưa
+            var existingFollow = await _context.UserFollowers
+                .FirstOrDefaultAsync(f => f.FollowerId == currentUserId && f.FollowingId == userId);
+
+            if (existingFollow != null)
+            {
+                // Unfollow
+                _context.UserFollowers.Remove(existingFollow);
+            }
+            else
+            {
+                // Follow
+                var newFollow = new UserFollower
+                {
+                    FollowerId = currentUserId,
+                    FollowingId = userId,
+                    FollowedAt = DateTime.Now
+                };
+                _context.UserFollowers.Add(newFollow);
+            }
+
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
         }
     }
 }

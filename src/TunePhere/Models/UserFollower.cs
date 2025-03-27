@@ -12,14 +12,14 @@ namespace TunePhere.Models
         public string FollowerId { get; set; }  // ID của người theo dõi
 
         [Required]
-        public string FollowedId { get; set; }  // ID của người được theo dõi
+        public string FollowingId { get; set; }  // ID của người được theo dõi
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime FollowedAt { get; set; } = DateTime.Now;
 
         [ForeignKey("FollowerId")]
         public virtual AppUser Follower { get; set; }  // Người theo dõi
 
-        [ForeignKey("FollowedId")]
-        public virtual AppUser Followed { get; set; }  // Người được theo dõi
+        [ForeignKey("FollowingId")]
+        public virtual AppUser Following { get; set; }  // Người được theo dõi
     }
 }
