@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Numerics;
+using System.Text.Json.Serialization;
 
 namespace TunePhere.Models
 {
@@ -32,23 +34,41 @@ namespace TunePhere.Models
 
         [ForeignKey("ArtistId")]
         public int ArtistId { get; set; } // Khóa ngoại liên kết với Artist
+        
         public int PlayCount { get; set; } = 0; // Số lượt nghe
         public int LikeCount { get; set; } = 0;
 
         public string? VideoUrl { get; set; }
 
-        public virtual Artists Artists { get; set; }
-        public virtual Album Albums { get; set; }
+        [JsonIgnore]
+        public virtual Artists? Artists { get; set; }
+        
+        [JsonIgnore]
+        public virtual Album? Albums { get; set; }
 
         // Navigation properties
-        public virtual ICollection<Lyric> Lyrics { get; set; } // Lời bài hát
-        public virtual ICollection<Remix> Remixes { get; set; } // Danh sách remix
-        public virtual ICollection<PlaylistSong> PlaylistSongs { get; set; } // Danh sách playlist chứa bài hát này
+        [JsonIgnore]
+        public virtual ICollection<Lyric>? Lyrics { get; set; } // Lời bài hát
+        
+        [JsonIgnore]
+        public virtual ICollection<Remix>? Remixes { get; set; } // Danh sách remix
+        
+        [JsonIgnore]
+        public virtual ICollection<PlaylistSong>? PlaylistSongs { get; set; } // Danh sách playlist chứa bài hát này
+        
         public Song()
         {
             Lyrics = new HashSet<Lyric>();
             Remixes = new HashSet<Remix>();
             PlaylistSongs = new HashSet<PlaylistSong>();
+            Title = "";
+            Genre = "";
+            FileUrl = "";
+            ImageUrl = "";
+            UploadDate = DateTime.Now;
+            PlayCount = 0;
+            LikeCount = 0;
         }
+       
     }
 }
