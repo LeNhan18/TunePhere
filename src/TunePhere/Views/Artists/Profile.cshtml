@@ -72,7 +72,7 @@
             <div class="albums-grid">
                 @foreach (var album in Model.Albums.OrderByDescending(a => a.ReleaseDate).Take(4))
                 {
-                    <div class="album-card">
+                    <a href="@Url.Action("Details", "Albums", new { id = album.AlbumId })" class="album-card">
                         <div class="album-image">
                             <img src="@album.ImageUrl" alt="@album.AlbumName" />
                             <div class="album-overlay">
@@ -83,7 +83,7 @@
                             <h3>@album.AlbumName</h3>
                             <p>@(DateTime.TryParse(album.ReleaseDate, out DateTime date) ? date.Year.ToString() : "") • @album.Songs.Count() bài hát</p>
                         </div>
-                    </div>
+                    </a>
                 }
             </div>
         </div>
