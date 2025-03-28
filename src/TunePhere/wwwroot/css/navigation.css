@@ -33,9 +33,9 @@
     justify-content: center;
 }
 
-.nav-icon.home-icon:hover {
-    color: #1ed760; /* Màu xanh Spotify khi hover */
-}
+    .nav-icon.home-icon:hover {
+        color: #1ed760; /* Màu xanh Spotify khi hover */
+    }
 
 /* Thanh tìm kiếm */
 .search-container {
@@ -51,9 +51,9 @@
     width: 360px;
 }
 
-.search-bar:focus-within {
-    border: 1px solid #ffffff;
-}
+    .search-bar:focus-within {
+        border: 1px solid #ffffff;
+    }
 
 .search-icon {
     color: #7f7f7f;
@@ -71,16 +71,32 @@
     padding: 5px 0;
 }
 
-.search-bar input::placeholder {
-    color: #a7a7a7;
-    font-weight: 400;
-}
+    .search-bar input::placeholder {
+        color: #a7a7a7;
+        font-weight: 400;
+    }
 
 /* Phần bên phải */
 .navbar-right {
-    display: flex;
-    align-items: center;
-    gap: 24px;
+    display: flex !important;
+    align-items: center !important;
+    gap: 24px !important;
+}
+
+.navbar-right .nav-link {
+    margin: 8px !important;
+    padding: 0 !important;
+}
+
+.vertical-line {
+    height: 24px;
+    width: 1px;
+    background-color: #a7a7a7;
+    margin: 0 12px !important;
+}
+
+.navbar-right a, .navbar-right div {
+    margin: 8px !important;
 }
 
 .nav-link {
@@ -90,21 +106,14 @@
     text-decoration: none;
 }
 
-.nav-link:hover {
-    color: #ffffff;
-}
+    .nav-link:hover {
+        color: #ffffff;
+    }
 
 .download-link {
     display: flex;
     align-items: center;
     gap: 4px;
-}
-
-.vertical-line {
-    height: 24px;
-    width: 1px;
-    background-color: #a7a7a7;
-    margin: 0 8px;
 }
 
 /* Nút Đăng ký và Đăng nhập */
@@ -115,26 +124,27 @@
     padding: 8px 32px;
     border-radius: 20px;
     transition: all 0.3s ease;
+    margin-left: 12px !important;
 }
 
-.nav-button.signup {
-    color: #a7a7a7;
-    border: none;
-}
+    .nav-button.signup {
+        color: #a7a7a7;
+        border: none;
+    }
 
-.nav-button.signup:hover {
-    color: #ffffff;
-    transform: scale(1.05);
-}
+        .nav-button.signup:hover {
+            color: #ffffff;
+            transform: scale(1.05);
+        }
 
-.nav-button.login {
-    background-color: #ffffff;
-    color: #000000;
-}
+    .nav-button.login {
+        background-color: #ffffff;
+        color: #000000;
+    }
 
-.nav-button.login:hover {
-    transform: scale(1.05);
-}
+        .nav-button.login:hover {
+            transform: scale(1.05);
+        }
 
 /* Menu người dùng */
 .user-menu-container {
@@ -145,7 +155,7 @@
 .user-menu-button {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     background-color: #1a1a1a;
     border-radius: 20px;
     padding: 5px 10px;
@@ -155,9 +165,9 @@
     pointer-events: auto;
 }
 
-.user-menu-button:hover {
-    background-color: #333333;
-}
+    .user-menu-button:hover {
+        background-color: #333333;
+    }
 
 .user-avatar {
     width: 30px;
@@ -194,14 +204,21 @@
     z-index: 9999;
 }
 
-.user-dropdown-menu.show {
-    display: block;
-    animation: fadeIn 0.2s ease-in-out;
-}
+    .user-dropdown-menu.show {
+        display: block;
+        animation: fadeIn 0.2s ease-in-out;
+    }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dropdown-item {
@@ -216,9 +233,9 @@
     font-weight: 500;
 }
 
-.dropdown-item:hover {
-    background-color: #333333;
-}
+    .dropdown-item:hover {
+        background-color: #333333;
+    }
 
 .dropdown-divider {
     height: 1px;
@@ -256,3 +273,130 @@
     border-radius: 50%;
     object-fit: cover;
 }
+
+.user-menu-container {
+    position: relative;
+}
+
+.user-menu-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+    .user-menu-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.user-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #121212;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    min-width: 220px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.user-menu-container:hover .user-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.nav-menu {
+    padding: 8px;
+    background: #121212;
+    border-radius: 12px;
+}
+
+    .nav-menu a {
+        display: flex;
+        align-items: center;
+        padding: 10px 16px;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+        .nav-menu a:hover {
+            background: #282828;
+            color: #1DB954;
+            transform: translateX(5px);
+        }
+
+    .nav-menu i {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+        font-size: 1.1em;
+        color: #b3b3b3;
+    }
+
+    .nav-menu a:hover i {
+        color: #1DB954;
+    }
+
+    .nav-menu hr {
+        border: none;
+        height: 1px;
+        background: #282828;
+        margin: 8px 0;
+    }
+
+.logout-button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 10px 16px;
+    color: #ffffff;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+}
+
+    .logout-button:hover {
+        background: #282828;
+        color: #1DB954;
+        transform: translateX(5px);
+    }
+
+    .logout-button i {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+        font-size: 1.1em;
+        color: #b3b3b3;
+    }
+
+    .logout-button:hover i {
+        color: #1DB954;
+    }

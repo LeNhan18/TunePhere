@@ -1,64 +1,305 @@
 ﻿@model TunePhere.Models.Song
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Xóa bài hát";
     Layout = "_Layout";
 }
 
-<h1>Delete</h1>
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="create-header position-relative" style="height: 200px;">
+        <div class="position-absolute w-100 h-100" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(13, 13, 13, 0.9));">
+            <div class="h-100 d-flex align-items-center justify-content-center">
+                <div class="text-center">
+                    <span class="header-label mb-2">XÓA BÀI HÁT</span>
+                    <h1 class="display-5 fw-bold text-white text-shadow text-glow mt-3">Bạn có chắc chắn muốn xóa bài hát này?</h1>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Song</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Artists.ArtistName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Artists.ArtistName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Genre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Genre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Duration)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Duration)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FileUrl)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FileUrl)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageUrl)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageUrl)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UploadDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UploadDate)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="SongId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+    <div class="container mt-4">
+        <div class="create-form-container">
+            <div class="row">
+                <!-- Cột trái - Ảnh và Audio Preview -->
+                <div class="col-md-5">
+                    <div class="upload-section">
+                        <!-- Ảnh bìa -->
+                        <div class="preview-item mb-5">
+                            <div class="preview-container">
+                                <img src="@Model.ImageUrl" alt="@Model.Title" class="preview-image">
+                            </div>
+                            <p class="preview-label">Ảnh bìa bài hát</p>
+                        </div>
+
+                        <!-- Audio preview -->
+                        <div class="preview-item">
+                            <div class="preview-container audio-preview">
+                                <i class="fas fa-music"></i>
+                                <audio controls class="w-100 mt-3">
+                                    <source src="@Model.FileUrl" type="audio/mpeg">
+                                    Trình duyệt của bạn không hỗ trợ phát audio.
+                                </audio>
+                            </div>
+                            <p class="preview-label">File âm thanh</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải - Thông tin -->
+                <div class="col-md-7">
+                    <div class="info-section">
+                        <div class="info-group mb-4">
+                            <label class="info-label">Tên bài hát</label>
+                            <p class="info-value">@Model.Title</p>
+                        </div>
+
+                        <div class="info-group mb-4">
+                            <label class="info-label">Thể loại</label>
+                            <p class="info-value">@Model.Genre</p>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.VideoUrl))
+                        {
+                            <div class="info-group mb-4">
+                                <label class="info-label">Video URL</label>
+                                <p class="info-value">@Model.VideoUrl</p>
+                            </div>
+                        }
+
+                        <div class="info-group">
+                            <label class="info-label">Thời lượng</label>
+                            <p class="info-value">
+                                @{
+                                    var duration = Model.Duration;
+                                    @(duration.Hours > 0 ? $"{duration.Hours:00}:" : "")
+
+                                    @($"{duration.Minutes:00}:{duration.Seconds:00}")
+                                }
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form asp-action="Delete" class="mt-4">
+                <input type="hidden" asp-for="SongId" />
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-delete me-2">
+                        <i class="fas fa-trash-alt me-2"></i>Xóa bài hát
+                    </button>
+                    <a asp-action="Index" class="btn btn-cancel">
+                        <i class="fas fa-arrow-left me-2"></i>Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1f1f1f;
+            --primary-light: #2d2d2d;
+            --primary-dark: #121212;
+            --accent-color: #bb86fc;
+            --accent-color-hover: #9d4edd;
+            --text-color: #ffffff;
+            --text-muted: #9e9e9e;
+            --background-color: #121212;
+            --card-background: #1f1f1f;
+            --border-color: #333333;
+            --hover-color: rgba(187, 134, 252, 0.1);
+            --danger-color: #cf6679;
+            --heading-color: #ffffff;
+            --input-background: #2d2d2d;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .create-header {
+            margin-top: -24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-label {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: var(--danger-color);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .text-shadow {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3), 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .create-form-container {
+            background-color: var(--card-background);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-section, .info-section {
+            background-color: var(--primary-dark);
+            border-radius: 12px;
+            padding: 24px;
+            height: 100%;
+        }
+
+        .preview-item {
+            margin-bottom: 24px;
+        }
+
+        .preview-container {
+            width: 100%;
+            height: 200px;
+            background-color: var(--input-background);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .audio-preview {
+            padding: 20px;
+        }
+
+            .audio-preview i {
+                font-size: 3rem;
+                color: var(--accent-color);
+                margin-bottom: 1rem;
+            }
+
+        .preview-label {
+            color: var(--text-muted);
+            margin: 8px 0 0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .info-group {
+            margin-bottom: 20px;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .info-value {
+            color: var(--text-color);
+            font-size: 1.1rem;
+            margin: 0;
+            padding: 8px 12px;
+            background-color: var(--input-background);
+            border-radius: 8px;
+            word-break: break-all;
+        }
+
+        .btn-delete {
+            background-color: var(--danger-color);
+            color: var(--text-color);
+            border-radius: 30px;
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            letter-spacing: 0.3px;
+        }
+
+            .btn-delete:hover {
+                background-color: #e57373;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(207, 102, 121, 0.2);
+            }
+
+        .btn-cancel {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            letter-spacing: 0.3px;
+        }
+
+            .btn-cancel:hover {
+                background-color: var(--primary-light);
+                color: var(--text-color);
+                border-color: var(--text-muted);
+            }
+
+        .form-actions {
+            margin-top: 32px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        audio {
+            width: 100%;
+            height: 40px;
+            border-radius: 20px;
+            background-color: var(--primary-light);
+        }
+
+            audio::-webkit-media-controls-panel {
+                background-color: var(--primary-light);
+            }
+
+            audio::-webkit-media-controls-current-time-display,
+            audio::-webkit-media-controls-time-remaining-display {
+                color: var(--text-color);
+            }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--accent-color-hover);
+            }
+
+        @@media (max-width: 768px) {
+            .upload-section, .info-section {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+}

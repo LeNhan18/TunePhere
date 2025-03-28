@@ -35,62 +35,76 @@
         @if (SignInManager.IsSignedIn(User))
         {
             var user = await UserManager.GetUserAsync(User);
-            if (user != null)
-            {
-                var isArtist = await UserManager.IsInRoleAsync(user, "Artist");
-                
-                <div class="user-menu-container">
-                    <div class="user-menu-button">
-                        <div class="user-avatar">
-                            @if (!string.IsNullOrEmpty(user.ImageUrl))
+
+            var isArtist = await UserManager.IsInRoleAsync(user, "Artist");
+            
+            <div class="user-menu-container">
+                <div class="user-menu-button">
+                    <div class="user-avatar">
+                        @if (isArtist)
+                        {
+                            // Lấy thông tin nghệ sĩ từ database
+                            var artist = DbContext.Artists.FirstOrDefault(a => a.userId == user.Id);
+                            
+                            @if (artist != null && !string.IsNullOrEmpty(artist.ImageUrl))
+                            {
+                                <img src="@artist.ImageUrl" alt="Artist Profile" class="rounded-avatar" />
+                            }
+                            else if (!string.IsNullOrEmpty(user.ImageUrl))
                             {
                                 <img src="@user.ImageUrl" alt="Profile" class="rounded-avatar" />
                             }
                             else
                             {
-                                <i class="fas fa-user-circle"></i>
+                                <i class="fas fa-music"></i>
                             }
-                        </div>
-                        <span class="user-name">@user.FullName</span>
-                        <i class="fas fa-caret-down"></i>
-                    </div>
-                    <div class="user-dropdown-menu">
-                        <nav class="nav-menu">
-                            @if (isArtist)
+                        }
+                        else
+                        {
+                            @if (!string.IsNullOrEmpty(user.ImageUrl))
                             {
-                                <a href="/Artists/Dashboard" class="@(ViewContext.RouteData.Values["Action"].ToString() == "Dashboard" ? "active" : "")">
-                                    <i class="fas fa-chart-line"></i>
-                                    Bảng điều khiển
-                                </a>
-                                <a href="/Albums/Create">
-                                    <i class="fas fa-plus-circle"></i>
-                                    Tạo album mới
-                                </a>
-                                <a href="/Songs/Create">
-                                    <i class="fas fa-upload"></i>
-                                    Tải bài hát lên
-                                </a>
-                                <a href="/Artists/Profile">
-                                    <i class="fas fa-user"></i>
-                                    Trang nghệ sĩ
-                                </a>
-                                
-                                <hr>
+                                <img src="@user.ImageUrl" alt="Profile" class="rounded-avatar" />   
                             }
                             else
                             {
-                                <a href="/Users/Details">
-                                    <i class="fas fa-user"></i>
-                                    Hồ sơ cá nhân
-                                </a>
-                                <a href="/ArtistRegistration/Register">
-                                    <i class="fas fa-music"></i>
-                                    Đăng ký nghệ sĩ
-                                </a>
-                                
-                                <hr>
+                                <i class="fas fa-user-circle"></i>
                             }
-                            
+                        }
+                    </div>
+                    <span class="user-name">
+                        @if (isArtist)
+                        {
+                            var artist = DbContext.Artists.FirstOrDefault(a => a.userId == user.Id);
+                            @(artist != null ? artist.ArtistName : user.FullName)
+                        }
+                        else
+                        {
+                            @user.FullName
+                        }
+                    </span>
+                    <i class="fas fa-caret-down"></i>
+                </div>
+                <div class="user-dropdown-menu">
+                    <nav class="nav-menu">
+                        @if (isArtist)
+                        {
+                            <a href="/Artists/Dashboard" class="@(ViewContext.RouteData.Values["Action"].ToString() == "Dashboard" ? "active" : "")">
+                                <i class="fas fa-chart-line"></i>
+                                Bảng điều khiển
+                            </a>
+                            <a href="/Albums/Create">
+                                <i class="fas fa-plus-circle"></i>
+                                Tạo album mới
+                            </a>
+                            <a href="/Songs/Create">
+                                <i class="fas fa-upload"></i>
+                                Tải bài hát lên
+                            </a>
+                            <a href="/Artists/Profile">
+                                <i class="fas fa-user"></i>
+                                Trang nghệ sĩ
+                            </a>
+           
                             <a href="/Account/ChangePassword">
                                 <i class="fas fa-key"></i>
                                 Đổi mật khẩu
@@ -146,132 +160,3 @@
         });
     </script>
 }
-
-<style>
-    .user-menu-container {
-        position: relative;
-    }
-
-    .user-menu-button {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px;
-        cursor: pointer;
-        border-radius: 20px;
-        transition: all 0.3s ease;
-    }
-
-    .user-menu-button:hover {
-        background: rgba(255, 255, 255, 0.1);
-    }
-
-    .user-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        overflow: hidden;
-    }
-
-    .user-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .user-dropdown-menu {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        background: #121212;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        min-width: 220px;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(10px);
-        transition: all 0.3s ease;
-        z-index: 1000;
-    }
-
-    .user-menu-container:hover .user-dropdown-menu {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-    }
-
-    .nav-menu {
-        padding: 8px;
-        background: #121212;
-        border-radius: 12px;
-    }
-
-    .nav-menu a {
-        display: flex;
-        align-items: center;
-        padding: 10px 16px;
-        color: #ffffff;
-        text-decoration: none;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        font-weight: 500;
-    }
-
-    .nav-menu a:hover {
-        background: #282828;
-        color: #1DB954;
-        transform: translateX(5px);
-    }
-
-    .nav-menu i {
-        margin-right: 12px;
-        width: 20px;
-        text-align: center;
-        font-size: 1.1em;
-        color: #b3b3b3;
-    }
-
-    .nav-menu a:hover i {
-        color: #1DB954;
-    }
-
-    .nav-menu hr {
-        border: none;
-        height: 1px;
-        background: #282828;
-        margin: 8px 0;
-    }
-
-    .logout-button {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        padding: 10px 16px;
-        color: #ffffff;
-        background: none;
-        border: none;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        font-weight: 500;
-        cursor: pointer;
-        text-align: left;
-    }
-
-    .logout-button:hover {
-        background: #282828;
-        color: #1DB954;
-        transform: translateX(5px);
-    }
-
-    .logout-button i {
-        margin-right: 12px;
-        width: 20px;
-        text-align: center;
-        font-size: 1.1em;
-        color: #b3b3b3;
-    }
-
-    .logout-button:hover i {
-        color: #1DB954;
-    }
-</style>

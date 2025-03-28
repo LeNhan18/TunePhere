@@ -1,8 +1,9 @@
 @model TunePhere.Models.Artists
+@using System.Security.Claims
 @{
     ViewData["Title"] = "Trang nghệ sĩ";
 }
-
+@await Html.PartialAsync("_NavigationPartial")
 @section Styles {
     <link rel="stylesheet" href="~/css/artist-profile.css" />
 }
@@ -23,9 +24,25 @@
                     }
                 </div>
                 <div class="profile-details">
-                    <span class="artist-type">Nghệ sĩ</span>
-                    <h1>@Model.ArtistName</h1>
+                    <div class="profile-top">
+                        <div>
+                            <span class="artist-type">Nghệ sĩ</span>
+                            <h1>@Model.ArtistName</h1>
+                        </div>
+                        @if (User.Identity.IsAuthenticated && User.FindFirstValue(ClaimTypes.NameIdentifier) != Model.userId)
+                        {
+                            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                            var isFollowing = Model.Followers != null && Model.Followers.Any(f => f.UserId == currentUserId);
+                            <button class="follow-btn @(isFollowing ? "following" : "")" data-artist-id="@Model.ArtistId">
+                                <i class="fas @(isFollowing ? "fa-user-check" : "fa-user-plus")"></i>
+                                <span>@(isFollowing ? "Đang theo dõi" : "Theo dõi")</span>
+                            </button>
+                        }
+                    </div>
                     <div class="artist-stats">
+                        <a href="@Url.Action("Followers", "Artists", new { id = Model.ArtistId })" class="stat-link">
+                            <span><i class="fas fa-users"></i> <span id="followers-count">@Model.GetFollowersCount()</span> người theo dõi</span>
+                        </a>
                         <span><i class="fas fa-music"></i> @Model.Songs.Count() bài hát</span>
                         <span><i class="fas fa-compact-disc"></i> @Model.Albums.Count() album</span>
                         <span><i class="fas fa-heart"></i> @Model.Songs.Sum(s => s.LikeCount) lượt thích</span>
@@ -79,7 +96,7 @@
             <div class="songs-list">
                 @foreach (var song in Model.Songs.OrderByDescending(s => s.PlayCount).Take(5))
                 {
-                    <div class="song-item">
+                    <a href="@Url.Action("Details", "Songs", new { id = song.SongId })" class="song-item">
                         <div class="song-image">
                             <img src="@song.ImageUrl" alt="@song.Title" />
                             <button class="play-btn"><i class="fas fa-play"></i></button>
@@ -91,7 +108,7 @@
                         <div class="song-duration">
                             <span>@song.Duration.ToString(@"mm\:ss")</span>
                         </div>
-                    </div>
+                    </a>
                 }
             </div>
         </div>
@@ -120,4 +137,48 @@
             </div>
         </div>
     </div>
-</div> 
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.follow-btn').click(function(e) {
+                e.preventDefault();
+                const button = $(this);
+                const artistId = parseInt(button.data('artist-id'));
+
+                // Thêm loading state
+                button.prop('disabled', true);
+                
+                $.ajax({
+                    url: '/Artists/ToggleFollow',
+                    type: 'POST',
+                    data: { artistId: artistId },
+                    success: function(response) {
+                        if (response.success) {
+                            if (response.isFollowing) {
+                                button.addClass('following');
+                                button.html('<i class="fas fa-user-check"></i><span>Đang theo dõi</span>');
+                            } else {
+                                button.removeClass('following');
+                                button.html('<i class="fas fa-user-plus"></i><span>Theo dõi</span>');
+                            }
+                            $('#followers-count').text(response.followersCount);
+                            if (response.message) {
+                                alert(response.message);
+                            }
+                        } else {
+                            alert(response.message || 'Có lỗi xảy ra, vui lòng thử lại sau');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Có lỗi xảy ra: ' + (xhr.responseJSON?.message || error || 'Vui lòng thử lại sau'));
+                    },
+                    complete: function() {
+                        button.prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
+} 
