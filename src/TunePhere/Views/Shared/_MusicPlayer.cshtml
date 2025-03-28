@@ -1,0 +1,28 @@
+<div id="music-player" class="music-player">
+    <div class="player-controls">
+        <div class="song-info">
+            <img id="player-thumbnail" src="" alt="Thumbnail" class="song-thumbnail">
+            <div class="song-details">
+                <span id="player-title" class="song-title"></span>
+                <span id="player-artist" class="song-artist"></span>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="prev-button"><i class="fas fa-step-backward"></i></button>
+            <button id="play-button"><i class="fas fa-play"></i></button>
+            <button id="next-button"><i class="fas fa-step-forward"></i></button>
+        </div>
+        <div class="progress-container">
+            <span id="current-time">0:00</span>
+            <div class="progress-bar">
+                <div id="progress"></div>
+            </div>
+            <span id="duration">0:00</span>
+        </div>
+        <div class="volume-control">
+            <i class="fas fa-volume-up"></i>
+            <input type="range" id="volume-slider" min="0" max="100" value="100">
+        </div>
+    </div>
+    <audio id="audio-player"></audio>
+</div>
