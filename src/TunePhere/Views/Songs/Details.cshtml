@@ -66,8 +66,8 @@
                     <div class="lyrics-content">
                         @if (!string.IsNullOrEmpty(Model.Lyrics.First().SyncedContent))
                         {
-                            <!-- Hiển thị lyrics đồng bộ -->
-                            <div id="syncedLyricsDisplay" 
+                            <!-- Hiển thị lyrics đồng bộ với container rộng hơn -->
+                            <div id="syncedLyricsDisplay" class="synced-lyrics-display"
                                  data-synced-content="@Model.Lyrics.First().SyncedContent"></div>
                         }
                         else
