@@ -56,6 +56,38 @@
     </dl>
 </div>
 <div>
+    <button class="btn btn-primary play-song-btn" 
+            data-song-id="@Model.SongId" 
+            data-title="@Model.Title" 
+            data-artist="@Model.Artists.ArtistName" 
+            data-file-url="@Model.FileUrl" 
+            data-image-url="@Model.ImageUrl">
+        <i class="fas fa-play"></i> Phát nhạc
+    </button>
+</div>
+<div>
     <a asp-action="Edit" asp-route-id="@Model?.SongId">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const playButton = document.querySelector('.play-song-btn');
+            if (playButton) {
+                playButton.addEventListener('click', function() {
+                    const song = {
+                        songId: this.getAttribute('data-song-id'),
+                        title: this.getAttribute('data-title'),
+                        artistName: this.getAttribute('data-artist'),
+                        fileUrl: this.getAttribute('data-file-url'),
+                        imageUrl: this.getAttribute('data-image-url')
+                    };
+                    
+                    // Gọi hàm phát nhạc từ MusicPlayer
+                    MusicPlayer.playSong(song);
+                });
+            }
+        });
+    </script>
+}
