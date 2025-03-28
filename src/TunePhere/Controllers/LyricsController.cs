@@ -173,35 +173,35 @@ namespace TunePhere.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("LyricId,SongId,Content,Language,CreatedAt,UpdatedAt")] Lyric lyric)
+        public async Task<IActionResult> Edit([Bind("LyricId,SongId,Content,Language")] Lyric lyric)
         {
-            if (id != lyric.LyricId)
+            try
             {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                if (ModelState.IsValid)
                 {
-                    _context.Update(lyric);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!LyricExists(lyric.LyricId))
+                    var existingLyric = await _context.Lyrics.FindAsync(lyric.LyricId);
+                    if (existingLyric == null)
                     {
                         return NotFound();
                     }
-                    else
-                    {
-                        throw;
-                    }
+
+                    // Cập nhật nội dung và thời gian
+                    existingLyric.Content = lyric.Content;
+                    existingLyric.UpdatedAt = DateTime.Now;
+
+                    _context.Update(existingLyric);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction("Details", "Songs", new { id = lyric.SongId });
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["SongId"] = new SelectList(_context.Songs, "SongId", "Artist", lyric.SongId);
-            return View(lyric);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi cập nhật lyric: {ex.Message}");
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật lời bài hát";
+            }
+
+            return RedirectToAction("Details", "Songs", new { id = lyric.SongId });
         }
 
         // GET: Lyrics/Delete/5

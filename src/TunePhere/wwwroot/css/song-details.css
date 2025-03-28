@@ -240,9 +240,7 @@ body {
     font-size: 14px;
     transform: translateY(100%); /* Bắt đầu ẩn phía dưới */
     opacity: 0;
-    transition: transform 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67), 
-                opacity 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67),
-                background-color 0.2s ease;
+    transition: all 0.3s ease;
     pointer-events: none; /* Tránh lỗi khi hover */
 }
 
@@ -254,16 +252,25 @@ body {
 }
 
 .add-lyric-button:hover {
-    background-color: rgba(30, 215, 96, 1); /* Màu đậm hơn khi hover */
+    background-color: #1ed760;
 }
 
 .add-lyric-button i {
     margin-right: 8px;
-    transition: transform 0.2s ease;
+    transition: transform 0.3s ease;
 }
 
 .add-lyric-button:hover i {
-    transform: scale(1.2); /* Icon to hơn khi hover */
+    transform: scale(1.1);
+}
+
+/* Thêm style cho trạng thái edit */
+.add-lyric-button.edit-mode {
+    background-color: #1DB954;
+}
+
+.add-lyric-button.edit-mode:hover {
+    background-color: #1ed760;
 }
 
 /* Song info section */

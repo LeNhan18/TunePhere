@@ -1,53 +1,56 @@
 ﻿@model TunePhere.Models.Lyric
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 @{
-    ViewData["Title"] = "Edit";
-    Layout = "UserController";
+    ViewData["Title"] = "Chỉnh sửa lời bài hát";
+    Layout = "_Layout";
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 
-<h1>Edit</h1>
-
-<h4>Lyric</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="LyricId" />
-            <div class="form-group">
-                <label asp-for="SongId" class="control-label"></label>
-                <select asp-for="SongId" class="form-control" asp-items="ViewBag.SongId"></select>
-                <span asp-validation-for="SongId" class="text-danger"></span>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card bg-dark text-white">
+                <div class="card-header bg-dark">
+                    <h2>Chỉnh sửa lời bài hát</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="LyricId" />
+                        <input type="hidden" asp-for="SongId" />
+                        <input type="hidden" name="__RequestVerificationToken" value="@token" />
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Language" class="control-label">Ngôn ngữ</label>
+                            <select asp-for="Language" class="form-control form-select bg-dark text-white">
+                                <option value="vi">Tiếng Việt</option>
+                                <option value="en">Tiếng Anh</option>
+                                <option value="ko">Tiếng Hàn</option>
+                                <option value="ja">Tiếng Nhật</option>
+                                <option value="zh">Tiếng Trung</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Content" class="control-label">Lời bài hát</label>
+                            <textarea asp-for="Content" class="form-control bg-dark text-white" 
+                                    rows="15" required>@Model.Content</textarea>
+                            <span asp-validation-for="Content" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group text-center mt-4">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Lưu thay đổi
+                            </button>
+                            <a href="javascript:history.back()" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Content" class="control-label"></label>
-                <input asp-for="Content" class="form-control" />
-                <span asp-validation-for="Content" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Language" class="control-label"></label>
-                <input asp-for="Language" class="form-control" />
-                <span asp-validation-for="Language" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UpdatedAt" class="control-label"></label>
-                <input asp-for="UpdatedAt" class="form-control" />
-                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
