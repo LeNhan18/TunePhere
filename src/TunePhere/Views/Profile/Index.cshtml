@@ -43,9 +43,9 @@
                     }
                     else
                     {
-                        <button class="follow-btn">
+                        <button class="follow-btn" data-user-id="@Model.Id">
                             <i class="fa-solid fa-user-plus"></i>
-                            Theo dõi
+                            @(Model.Followers.Any(f => f.FollowerId == User.FindFirst(ClaimTypes.NameIdentifier)?.Value) ? "Đang theo dõi" : "Theo dõi")
                         </button>
                     }
                 </div>
@@ -120,6 +120,48 @@
                 }
             </div>
         </div>
+
+        <div class="profile-section" id="followers">
+            <div class="section-header">
+                <h2>Người theo dõi @Model.FullName</h2>
+            </div>
+
+            <div class="followers-grid">
+                @foreach (var follower in Model.Followers)
+                {
+                    <div class="follower-card">
+                        <img src="@(string.IsNullOrEmpty(follower.Follower.ImageUrl) ? "/images/default-avatar.jpg" : follower.Follower.ImageUrl)" 
+                             alt="@follower.Follower.FullName" 
+                             class="follower-avatar" />
+                        <h3 class="follower-name">@follower.Follower.FullName</h3>
+                        <a asp-action="Index" asp-route-username="@follower.Follower.UserName" class="view-profile-btn">
+                            Xem hồ sơ
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="profile-section" id="following">
+            <div class="section-header">
+                <h2>@Model.FullName đang theo dõi</h2>
+            </div>
+
+            <div class="following-grid">
+                @foreach (var following in Model.Following)
+                {
+                    <div class="following-card">
+                        <img src="@(string.IsNullOrEmpty(following.Following.ImageUrl) ? "/images/default-avatar.jpg" : following.Following.ImageUrl)" 
+                             alt="@following.Following.FullName" 
+                             class="following-avatar" />
+                        <h3 class="following-name">@following.Following.FullName</h3>
+                        <a asp-action="Index" asp-route-username="@following.Following.UserName" class="view-profile-btn">
+                            Xem hồ sơ
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 </div>
 
@@ -135,6 +177,26 @@
                 const target = $(this).attr('href');
                 $('.profile-section').hide();
                 $(target).show();
+            });
+
+            // Xử lý follow/unfollow
+            $('.follow-btn').click(function() {
+                const userId = $(this).data('user-id');
+                const button = $(this);
+                const isFollowing = button.text().trim() === 'Đang theo dõi';
+
+                $.post('/Profile/ToggleFollow', { userId: userId }, function(response) {
+                    if (response.success) {
+                        if (isFollowing) {
+                            button.html('<i class="fa-solid fa-user-plus"></i> Theo dõi');
+                        } else {
+                            button.html('<i class="fa-solid fa-user-check"></i> Đang theo dõi');
+                        }
+                        // Cập nhật số lượng followers
+                        const followersCount = $('.stat-item:nth-child(2) .stat-value');
+                        followersCount.text(parseInt(followersCount.text()) + (isFollowing ? -1 : 1));
+                    }
+                });
             });
         });
     </script>

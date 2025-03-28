@@ -27,6 +27,7 @@ namespace TunePhere.Controllers
         }
 
         // GET: Artists/Dashboard
+        [AllowAnonymous]
         public async Task<IActionResult> Dashboard()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -236,27 +237,115 @@ namespace TunePhere.Controllers
             return _context.Artists.Any(e => e.ArtistId == id);
         }
 
-        public async Task<IActionResult> Profile()
+        [AllowAnonymous]
+        public async Task<IActionResult> Profile(int? id = null)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var artist = await _context.Artists
-                .Include(a => a.Songs)
-                .Include(a => a.Albums)
-                .FirstOrDefaultAsync(a => a.userId == userId);
+            Artists artist;
+            if (id == null)
+            {
+                // Nếu không có id, lấy profile của artist đang đăng nhập
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                artist = await _context.Artists
+                    .Include(a => a.Songs)
+                    .Include(a => a.Albums)
+                    .Include(a => a.Followers)
+                    .FirstOrDefaultAsync(a => a.userId == userId);
+            }
+            else
+            {
+                // Lấy profile của artist theo id được truyền vào
+                artist = await _context.Artists
+                    .Include(a => a.Songs)
+                    .Include(a => a.Albums)
+                    .Include(a => a.Followers)
+                    .FirstOrDefaultAsync(a => a.ArtistId == id);
+            }
 
             if (artist == null)
             {
                 return NotFound();
             }
 
-            // Lấy danh sách nghệ sĩ tương tự (cùng thể loại)
-            var similarArtists = await _context.Artists
-                .Where(a => a.ArtistId != artist.ArtistId)
-                .OrderByDescending(a => a.Songs.Count)
-                .Take(8)
-                .ToListAsync();
+            return View(artist);
+        }
 
-            ViewBag.SimilarArtists = similarArtists;
+        // POST: Artists/ToggleFollow
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> ToggleFollow(int artistId)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { success = false, message = "Bạn cần đăng nhập để thực hiện chức năng này" });
+                }
+
+                var artist = await _context.Artists
+                    .Include(a => a.Followers)
+                    .FirstOrDefaultAsync(a => a.ArtistId == artistId);
+
+                if (artist == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy nghệ sĩ" });
+                }
+
+                if (artist.userId == userId)
+                {
+                    return Json(new { success = false, message = "Bạn không thể theo dõi chính mình" });
+                }
+
+                var existingFollow = await _context.ArtistFollowers
+                    .FirstOrDefaultAsync(f => f.ArtistId == artistId && f.UserId == userId);
+
+                if (existingFollow != null)
+                {
+                    _context.ArtistFollowers.Remove(existingFollow);
+                }
+                else
+                {
+                    var follow = new ArtistFollower
+                    {
+                        ArtistId = artistId,
+                        UserId = userId,
+                        FollowedAt = DateTime.Now
+                    };
+                    _context.ArtistFollowers.Add(follow);
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Refresh artist data to get updated follower count
+                artist = await _context.Artists
+                    .Include(a => a.Followers)
+                    .FirstOrDefaultAsync(a => a.ArtistId == artistId);
+
+                return Json(new { 
+                    success = true, 
+                    isFollowing = existingFollow == null,
+                    followersCount = artist.GetFollowersCount(),
+                    message = existingFollow == null ? "Đã theo dõi nghệ sĩ" : "Đã hủy theo dõi nghệ sĩ"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Followers(int id)
+        {
+            var artist = await _context.Artists
+                .Include(a => a.Followers)
+                    .ThenInclude(f => f.User)
+                .FirstOrDefaultAsync(a => a.ArtistId == id);
+
+            if (artist == null)
+            {
+                return NotFound();
+            }
 
             return View(artist);
         }
