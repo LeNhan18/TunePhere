@@ -396,6 +396,9 @@ namespace TunePhere.Migrations
                     b.Property<int>("SongId")
                         .HasColumnType("int");
 
+                    b.Property<string>("SyncedContent")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 

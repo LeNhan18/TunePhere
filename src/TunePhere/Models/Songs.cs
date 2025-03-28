@@ -46,10 +46,9 @@ namespace TunePhere.Models
         [JsonIgnore]
         public virtual Album? Albums { get; set; }
 
-        // Navigation properties
         [JsonIgnore]
-        public virtual ICollection<Lyric>? Lyrics { get; set; } // Lời bài hát
-        
+        public virtual ICollection<Lyric>? Lyrics { get; set; }
+
         [JsonIgnore]
         public virtual ICollection<Remix>? Remixes { get; set; } // Danh sách remix
         
