@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TunePhere.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TunePhere.Controllers
 {
@@ -165,6 +167,100 @@ namespace TunePhere.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        // POST: PlaylistSongs/AddSongToPlaylist
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> AddSongToPlaylist(int playlistId, int songId)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                
+                // Kiểm tra playlist có tồn tại và thuộc về user hiện tại
+                var playlist = await _context.Playlists
+                    .FirstOrDefaultAsync(p => p.PlaylistId == playlistId && p.UserId == userId);
+
+                if (playlist == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy playlist hoặc bạn không có quyền thêm bài hát vào playlist này" });
+                }
+
+                // Kiểm tra bài hát đã có trong playlist chưa
+                var existingSong = await _context.PlaylistSongs
+                    .FirstOrDefaultAsync(ps => ps.PlaylistId == playlistId && ps.SongId == songId);
+
+                if (existingSong != null)
+                {
+                    return Json(new { success = false, message = "Bài hát đã có trong playlist" });
+                }
+
+                // Thêm bài hát vào playlist
+                var playlistSong = new PlaylistSong
+                {
+                    PlaylistId = playlistId,
+                    SongId = songId,
+                    AddedByUserId = userId,
+                    AddedAt = DateTime.Now,
+                    VoteCount = 0
+                };
+
+                _context.PlaylistSongs.Add(playlistSong);
+                await _context.SaveChangesAsync();
+
+                return Json(new { 
+                    success = true, 
+                    message = "Đã thêm bài hát vào playlist",
+                    songCount = await _context.PlaylistSongs.CountAsync(ps => ps.PlaylistId == playlistId)
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        // POST: PlaylistSongs/RemoveSongFromPlaylist
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> RemoveSongFromPlaylist(int playlistId, int songId)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                
+                // Kiểm tra playlist có tồn tại và thuộc về user hiện tại
+                var playlist = await _context.Playlists
+                    .FirstOrDefaultAsync(p => p.PlaylistId == playlistId && p.UserId == userId);
+
+                if (playlist == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy playlist hoặc bạn không có quyền xóa bài hát khỏi playlist này" });
+                }
+
+                // Tìm và xóa bài hát khỏi playlist
+                var playlistSong = await _context.PlaylistSongs
+                    .FirstOrDefaultAsync(ps => ps.PlaylistId == playlistId && ps.SongId == songId);
+
+                if (playlistSong == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bài hát trong playlist" });
+                }
+
+                _context.PlaylistSongs.Remove(playlistSong);
+                await _context.SaveChangesAsync();
+
+                return Json(new { 
+                    success = true, 
+                    message = "Đã xóa bài hát khỏi playlist",
+                    songCount = await _context.PlaylistSongs.CountAsync(ps => ps.PlaylistId == playlistId)
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
         }
 
         private bool PlaylistSongExists(int id)

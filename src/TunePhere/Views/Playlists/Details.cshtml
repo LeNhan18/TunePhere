@@ -1,26 +1,16 @@
-﻿@model TunePhere.Models.Playlist
+﻿@using System.Security.Claims
+@model TunePhere.Models.Playlist
 
 @{
     ViewData["Title"] = Model.Title;
 }
 
-<div class="playlist-details-page">
-    <div class="page-header">
-        <a asp-action="Index" class="back-btn">
-            <i class="fa-solid fa-arrow-left"></i>
-        </a>
-        <div class="header-actions">
-            <a asp-action="Edit" asp-route-id="@Model.PlaylistId" class="action-btn edit-btn">
-                <i class="fa-solid fa-pen"></i>
-                <span>Chỉnh sửa</span>
-            </a>
-            <a asp-action="Delete" asp-route-id="@Model.PlaylistId" class="action-btn delete-btn">
-                <i class="fa-solid fa-trash"></i>
-                <span>Xóa</span>
-            </a>
-        </div>
-    </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/playlist-details.css" />
+    <link rel="stylesheet" href="~/css/playlist-modal.css" />
+}
 
+<div class="playlist-details-page">
     <div class="playlist-hero">
         <div class="playlist-cover">
             @if (!string.IsNullOrEmpty(Model.ImageUrl))
@@ -65,51 +55,83 @@
     <div class="playlist-content">
         <div class="content-header">
             <h2>Danh sách bài hát</h2>
-            <button class="add-song-btn">
-                <i class="fa-solid fa-plus"></i>
-                Thêm bài hát
-            </button>
+            @if (User.Identity.IsAuthenticated && User.FindFirstValue(ClaimTypes.NameIdentifier) == Model.UserId)
+            {
+                <button class="add-song-btn" onclick="showAddSongModal()">
+                    <i class="fa-solid fa-plus"></i>
+                    Thêm bài hát
+                </button>
+            }
         </div>
 
         @if (Model.PlaylistSongs.Any())
         {
             <div class="songs-table">
                 <div class="table-header">
-                    <div class="col-index">#</div>
-                    <div class="col-title">Tiêu đề</div>
+                    <div class="col-number">#</div>
+                    <div class="col-title">Bài hát</div>
                     <div class="col-artist">Nghệ sĩ</div>
                     <div class="col-album">Album</div>
                     <div class="col-actions"></div>
                 </div>
-
-                @foreach (var item in Model.PlaylistSongs.Select((value, i) => new { value, i }))
+                @foreach (var playlistSong in Model.PlaylistSongs.OrderBy(ps => ps.AddedAt))
                 {
                     <div class="song-row">
-                        <div class="col-index">@(item.i + 1)</div>
+                        <div class="col-number">
+                            <i class="fa-solid fa-play"></i>
+                        </div>
                         <div class="col-title">
                             <div class="song-info">
-                                @if (!string.IsNullOrEmpty(item.value.Song.ImageUrl))
+                                @if (playlistSong.Song != null && !string.IsNullOrEmpty(playlistSong.Song.ImageUrl))
                                 {
-                                    <img src="@item.value.Song.ImageUrl" alt="@item.value.Song.Title" class="song-thumb" />
+                                    <img src="@playlistSong.Song.ImageUrl" alt="@playlistSong.Song.Title" class="song-thumb" />
                                 }
                                 else
                                 {
-                                    <div class="song-thumb default-thumb">
+                                    <div class="default-thumb">
                                         <i class="fa-solid fa-music"></i>
                                     </div>
                                 }
-                                <span class="song-title">@item.value.Song.Title</span>
+                                <div class="song-details">
+                                    <div class="song-title">
+                                        <a href="@Url.Action("Details", "Songs", new { id = playlistSong.Song?.SongId })" class="song-link">
+                                            @(playlistSong.Song?.Title ?? "Không có tiêu đề")
+                                        </a>
+                                    </div>
+                                    @if (playlistSong.Song?.Duration != null)
+                                    {
+                                        <div class="song-duration">@(((TimeSpan)playlistSong.Song.Duration).ToString(@"mm\:ss"))</div>
+                                    }
+                                </div>
                             </div>
                         </div>
-                        <div class="col-artist">@item.value.Song.Artists?.ArtistName</div>
-                        <div class="col-album">@item.value.Song.Albums?.AlbumName</div>
+                        <div class="col-artist">
+                            @if (playlistSong.Song?.Artists != null)
+                            {
+                                <a href="@Url.Action("Profile", "Artists", new { id = playlistSong.Song.ArtistId })" class="artist-link">
+                                    @playlistSong.Song.Artists.ArtistName
+                                </a>
+                            }
+                            else
+                            {
+                                <span>Không có nghệ sĩ</span>
+                            }
+                        </div>
+                        <div class="col-album">
+                            @if (playlistSong.Song?.Albums != null && playlistSong.Song.AlbumId != null)
+                            {
+                                <a href="@Url.Action("Details", "Albums", new { id = playlistSong.Song.AlbumId })" class="album-link">
+                                    @playlistSong.Song.Albums.AlbumName
+                                </a>
+                            }
+                        </div>
                         <div class="col-actions">
-                            <button class="action-btn play-btn" title="Phát">
-                                <i class="fa-solid fa-play"></i>
-                            </button>
-                            <button class="action-btn remove-btn" title="Xóa khỏi playlist">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
+                            @if (User.Identity.IsAuthenticated && User.FindFirstValue(ClaimTypes.NameIdentifier) == Model.UserId)
+                            {
+                                <button class="action-btn remove-btn" onclick="removeSong(@playlistSong.SongId)">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            }
                         </div>
                     </div>
                 }
@@ -119,351 +141,44 @@
         {
             <div class="empty-state">
                 <i class="fa-solid fa-music"></i>
-                <p>Chưa có bài hát nào trong playlist này</p>
-                <button class="add-song-btn">
-                    <i class="fa-solid fa-plus"></i>
-                    Thêm bài hát đầu tiên
-                </button>
+                <p>Chưa có bài hát nào trong playlist</p>
+                @if (User.Identity.IsAuthenticated && User.FindFirstValue(ClaimTypes.NameIdentifier) == Model.UserId)
+                {
+                    <button class="add-song-btn" onclick="showAddSongModal()">
+                        <i class="fa-solid fa-plus"></i>
+                        Thêm bài hát đầu tiên
+                    </button>
+                }
             </div>
         }
     </div>
 </div>
 
-<style>
-.playlist-details-page {
-    min-height: 100vh;
-    background: linear-gradient(to bottom, #1e1e1e, #121212);
-    color: white;
-    padding: 2rem;
-}
+<!-- Modal Thêm Bài Hát -->
+<div id="addSongModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Thêm bài hát vào playlist</h3>
+            <button class="close-btn" onclick="closeAddSongModal()">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="search-box">
+                <input type="text" id="songSearch" placeholder="Tìm kiếm bài hát..." />
+                <i class="fa-solid fa-search"></i>
+            </div>
+            <div id="searchResults" class="search-results">
+                <!-- Kết quả tìm kiếm sẽ được hiển thị ở đây -->
+            </div>
+        </div>
+    </div>
+</div>
 
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
+@section Scripts {
+    <script>
+        // Khai báo biến playlistId để sử dụng trong file JavaScript
+        const playlistId = @Model.PlaylistId;
+    </script>
+    <script src="~/js/playlist-details.js"></script>
 }
-
-.back-btn {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.1);
-    color: white;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.back-btn:hover {
-    background: rgba(255,255,255,0.2);
-    transform: translateX(-2px);
-}
-
-.header-actions {
-    display: flex;
-    gap: 1rem;
-}
-
-.action-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 30px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.edit-btn {
-    background: #7B2CBF;
-    color: white;
-}
-
-.edit-btn:hover {
-    background: #9D4EDA;
-    transform: translateY(-2px);
-}
-
-.delete-btn {
-    background: rgba(255,59,48,0.1);
-    color: #ff3b30;
-}
-
-.delete-btn:hover {
-    background: rgba(255,59,48,0.2);
-    transform: translateY(-2px);
-}
-
-.playlist-hero {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 2rem;
-    margin-bottom: 3rem;
-    padding: 2rem;
-    background: rgba(255,255,255,0.05);
-    border-radius: 20px;
-    backdrop-filter: blur(10px);
-}
-
-.playlist-cover {
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-}
-
-.cover-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.default-cover {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(45deg, rgba(123,44,191,0.2), rgba(157,78,218,0.2));
-}
-
-.default-cover i {
-    font-size: 5rem;
-    color: #7B2CBF;
-}
-
-.playlist-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-}
-
-.playlist-type {
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #b3b3b3;
-    margin-bottom: 0.5rem;
-}
-
-.playlist-title {
-    font-size: 4rem;
-    font-weight: 800;
-    margin: 0 0 1rem;
-    background: linear-gradient(45deg, #7B2CBF, #9D4EDA);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.playlist-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.creator-info {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.creator-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.creator-name {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: white;
-}
-
-.playlist-stats {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    color: #b3b3b3;
-    font-size: 0.875rem;
-}
-
-.visibility-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-weight: 600;
-}
-
-.visibility-badge.public {
-    background: rgba(123,44,191,0.2);
-    color: #7B2CBF;
-}
-
-.visibility-badge.private {
-    background: rgba(255,255,255,0.1);
-    color: #b3b3b3;
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.playlist-content {
-    padding: 2rem;
-    background: rgba(255,255,255,0.03);
-    border-radius: 20px;
-}
-
-.content-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
-
-.content-header h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-}
-
-.add-song-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: #7B2CBF;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 30px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.add-song-btn:hover {
-    background: #9D4EDA;
-    transform: translateY(-2px);
-}
-
-.songs-table {
-    width: 100%;
-}
-
-.table-header {
-    display: grid;
-    grid-template-columns: 50px 3fr 2fr 2fr 100px;
-    padding: 1rem;
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    font-weight: 600;
-    color: #b3b3b3;
-    margin-bottom: 0.5rem;
-}
-
-.song-row {
-    display: grid;
-    grid-template-columns: 50px 3fr 2fr 2fr 100px;
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
-    align-items: center;
-    transition: all 0.3s ease;
-}
-
-.song-row:hover {
-    background: rgba(255,255,255,0.05);
-}
-
-.song-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.song-thumb {
-    width: 40px;
-    height: 40px;
-    border-radius: 6px;
-    object-fit: cover;
-}
-
-.default-thumb {
-    width: 40px;
-    height: 40px;
-    border-radius: 6px;
-    background: linear-gradient(45deg, rgba(123,44,191,0.2), rgba(157,78,218,0.2));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.default-thumb i {
-    font-size: 1.25rem;
-    color: #7B2CBF;
-}
-
-.song-title {
-    font-weight: 500;
-}
-
-.col-artist, .col-album {
-    color: #b3b3b3;
-}
-
-.col-actions {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-end;
-}
-
-.col-actions .action-btn {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.1);
-    color: white;
-}
-
-.col-actions .play-btn:hover {
-    background: #7B2CBF;
-}
-
-.col-actions .remove-btn:hover {
-    background: #ff3b30;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: #b3b3b3;
-}
-
-.empty-state i {
-    font-size: 4rem;
-    color: #7B2CBF;
-    margin-bottom: 1rem;
-}
-
-.empty-state p {
-    font-size: 1.125rem;
-    margin-bottom: 2rem;
-}
-</style>
