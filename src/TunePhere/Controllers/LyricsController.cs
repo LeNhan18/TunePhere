@@ -173,35 +173,59 @@ namespace TunePhere.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit([Bind("LyricId,SongId,Content,Language")] Lyric lyric)
+        public async Task<IActionResult> Edit([Bind("LyricId,SongId,Content,SyncedContent,Language")] Lyric lyric)
         {
             try
             {
+                // Log dữ liệu đến để debug
+                Console.WriteLine($"Edit Lyric - Received data: LyricId={lyric.LyricId}, SongId={lyric.SongId}");
+                Console.WriteLine($"Edit Lyric - Content length: {lyric.Content?.Length ?? 0}");
+                Console.WriteLine($"Edit Lyric - SyncedContent: {lyric.SyncedContent ?? "null"}");
+                
                 if (ModelState.IsValid)
                 {
                     var existingLyric = await _context.Lyrics.FindAsync(lyric.LyricId);
                     if (existingLyric == null)
                     {
+                        Console.WriteLine("Edit Lyric - Lyric not found");
                         return NotFound();
                     }
 
-                    // Cập nhật nội dung và thời gian
+                    // Cập nhật nội dung, nội dung đồng bộ và thời gian
                     existingLyric.Content = lyric.Content;
+                    existingLyric.SyncedContent = lyric.SyncedContent; // Quan trọng: Lưu dữ liệu đồng bộ
                     existingLyric.UpdatedAt = DateTime.Now;
 
+                    // Log thông tin trước khi lưu
+                    Console.WriteLine($"Edit Lyric - Updating lyric: Content length={existingLyric.Content.Length}, SyncedContent={(existingLyric.SyncedContent != null ? existingLyric.SyncedContent.Length : 0)}");
+                    
                     _context.Update(existingLyric);
                     await _context.SaveChangesAsync();
+                    
+                    // Xác nhận đã lưu thành công
+                    Console.WriteLine("Edit Lyric - Successfully updated");
 
-                    return RedirectToAction("Details", "Songs", new { id = lyric.SongId });
+                    // Chuyển hướng về trang chi tiết bài hát với timestamp để tránh cache
+                    return RedirectToAction("Details", "Songs", new { id = lyric.SongId, t = DateTime.Now.Ticks });
+                }
+                else
+                {
+                    // Log lỗi model state
+                    foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        Console.WriteLine($"Edit Lyric - Model error: {error.ErrorMessage}");
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Lỗi khi cập nhật lyric: {ex.Message}");
+                Console.WriteLine($"Edit Lyric - Exception: {ex.Message}");
+                Console.WriteLine($"Edit Lyric - Stack trace: {ex.StackTrace}");
                 TempData["Error"] = "Có lỗi xảy ra khi cập nhật lời bài hát";
             }
 
-            return RedirectToAction("Details", "Songs", new { id = lyric.SongId });
+            // Thêm timestamp để tránh cache
+            return RedirectToAction("Details", "Songs", new { id = lyric.SongId, t = DateTime.Now.Ticks });
         }
 
         // GET: Lyrics/Delete/5
