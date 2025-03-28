@@ -508,9 +508,12 @@ function initLyricSyncing() {
     initSyncState();
 }
 
-// Hàm hiển thị lyrics theo thời gian hiện tại của bài hát
+// Cập nhật hàm hiển thị lyrics theo thời gian hiện tại của bài hát
 function updateSyncedLyrics() {
-    const currentTime = audioPlayer.currentTime;
+    // Thêm offset -0.5 giây để hiển thị sớm hơn và khắc phục delay
+    const LYRICS_OFFSET = -0.5; // Offset 0.5 giây để hiển thị sớm hơn
+    const currentTime = audioPlayer.currentTime - LYRICS_OFFSET;
+    
     const lyricsContainer = document.querySelector('.lyrics-content');
     
     if (!window.syncedLyricsData || !lyricsContainer || audioPlayer.paused) {
@@ -597,6 +600,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.syncedLyricsData.forEach(line => {
                     const lineElement = document.createElement('div');
                     lineElement.classList.add('lyric-line');
+                    
+                    // Thêm data-time để debugging
+                    lineElement.dataset.time = line.time;
+                    
+                    // Cắt ngắn text quá dài và thêm dấu ... nếu cần
+                    if (line.text.length > 100) {
+                        lineElement.title = line.text; // Hiển thị khi hover
+                    }
+                    
                     lineElement.textContent = line.text;
                     syncedLyricsDisplay.appendChild(lineElement);
                 });

@@ -330,11 +330,13 @@ body {
 
 /* Lyrics container */
 .lyrics-container {
-    width: 450px;
+    width: 90%;
+    max-width: 600px;
     height: 400px;
     overflow-y: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    padding: 0 10px;
 }
 
 .lyrics-container::-webkit-scrollbar {
@@ -414,16 +416,27 @@ body {
     transition: all 0.3s ease;
     color: #aaa;
     font-size: 16px;
-    line-height: 1.6;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.lyric-line:hover {
+    white-space: normal;
+    overflow: visible;
 }
 
 .lyric-line.active {
     color: #fff;
-    font-size: 110%;
+    font-size: 18px;
     font-weight: bold;
     background-color: rgba(29, 185, 84, 0.1);
     padding: 8px;
     border-radius: 5px;
+    white-space: normal;
+    overflow: visible;
 }
 
 .time-marker {
@@ -484,5 +497,34 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     transition: all 0.2s;
+}
+
+/* Container cho lyrics đồng bộ */
+.synced-lyrics-display {
+    width: 100%;
+    padding: 10px;
+}
+
+/* Fix hiển thị lyrics khi đang chạy */
+.lyrics-content {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Đảm bảo dòng chữ dài không bị lệch layout */
+.lyric-line {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Hiệu ứng chuyển động mượt mà */
+@keyframes highlightLyric {
+    from { background-color: transparent; }
+    to { background-color: rgba(29, 185, 84, 0.1); }
+}
+
+.lyric-line.active {
+    animation: highlightLyric 0.3s ease;
 }
 
