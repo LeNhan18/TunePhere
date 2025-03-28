@@ -114,8 +114,10 @@
             songRow.innerHTML = `
                 <div class="song-info">
                     <div class="form-group">
-                        <input type="file" name="SongFiles[${songCount}]" class="song-file" accept="audio/*" required onchange="handleSongFile(this)" />
-                        <input type="text" name="SongTitles[${songCount}]" class="form-control" placeholder="Tên bài hát" required />
+                        <label>Chọn file nhạc</label>
+                        <input type="file" name="SongFiles" class="song-file form-control" accept="audio/*" required onchange="handleSongFile(this)" />
+                        <label>Tên bài hát</label>
+                        <input type="text" name="SongTitles" class="form-control" placeholder="Tên bài hát" required />
                     </div>
                     <div class="song-duration">
                         <span>0:00</span>
