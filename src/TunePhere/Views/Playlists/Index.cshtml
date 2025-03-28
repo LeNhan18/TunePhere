@@ -3,6 +3,9 @@
     ViewData["Title"] = "Playlists";
 }
 
+<link rel="stylesheet" href="~/css/playlist.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
 <div class="playlists-page">
     <div class="page-header">
         <div class="header-content">
@@ -10,13 +13,20 @@
             <p>Khám phá và tạo những playlist tuyệt vời</p>
         </div>
         <div class="header-actions">
+            <form asp-action="Search" method="get" class="search-form">
+                <div class="search-input-wrapper">
+                    <input type="text" name="searchTerm" placeholder="Tìm kiếm playlist..." class="search-input" />
+                    <button type="submit" class="search-btn">
+                        <i class="fa-solid fa-search"></i>
+                    </button>
+                </div>
+            </form>
             <a asp-action="Create" class="create-btn">
                 <i class="fa-solid fa-plus"></i>
                 <span>Tạo Playlist mới</span>
             </a>
         </div>
     </div>
-
     <div class="content-section">
         <div class="section-header">
             <h2>
@@ -82,251 +92,3 @@
         </div>
     </div>
 </div>
-
-<style>
-.playlists-page {
-    min-height: 100vh;
-    background: linear-gradient(to bottom, #1e1e1e, #121212);
-    color: white;
-    padding: 2rem;
-}
-
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 3rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.header-content h1 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin: 0;
-    background: linear-gradient(45deg, #7B2CBF, #9D4EDA);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.header-content p {
-    color: #b3b3b3;
-    margin: 0.5rem 0 0;
-}
-
-.create-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: #7B2CBF;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 30px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.create-btn:hover {
-    background: #9D4EDA;
-    transform: translateY(-2px);
-}
-
-.section-header {
-    margin-bottom: 1.5rem;
-}
-
-.section-header h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: #fff;
-}
-
-.section-header h2 i {
-    color: #7B2CBF;
-}
-
-.playlist-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-}
-
-.playlist-card {
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.playlist-card:hover {
-    transform: translateY(-5px);
-    background: rgba(255,255,255,0.08);
-}
-
-.playlist-link {
-    text-decoration: none;
-    color: white;
-}
-
-.playlist-artwork {
-    position: relative;
-    aspect-ratio: 1;
-    background: #282828;
-    overflow: hidden;
-}
-
-.playlist-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.default-artwork {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(45deg, rgba(123,44,191,0.2), rgba(157,78,218,0.2));
-}
-
-.default-artwork i {
-    font-size: 3rem;
-    color: #7B2CBF;
-}
-
-.artwork-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: all 0.3s ease;
-}
-
-.playlist-card:hover .artwork-overlay {
-    opacity: 1;
-}
-
-.overlay-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-}
-
-.overlay-content i {
-    font-size: 3rem;
-    color: #7B2CBF;
-    transform: scale(0.8);
-    transition: all 0.3s ease;
-}
-
-.playlist-card:hover .overlay-content i {
-    transform: scale(1);
-}
-
-.song-count {
-    font-size: 0.875rem;
-    color: white;
-    font-weight: 600;
-}
-
-.playlist-info {
-    padding: 1rem;
-}
-
-.playlist-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    margin: 0 0 0.5rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.playlist-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.meta-left {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.created-date {
-    font-size: 0.75rem;
-    color: #b3b3b3;
-}
-
-.visibility-badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    font-size: 0.75rem;
-}
-
-.visibility-badge.private {
-    background: rgba(255,255,255,0.1);
-    color: #b3b3b3;
-}
-
-.visibility-badge.public {
-    background: rgba(123,44,191,0.2);
-    color: #7B2CBF;
-}
-
-.playlist-actions {
-    display: flex;
-    gap: 0.5rem;
-    opacity: 0;
-    transition: all 0.3s ease;
-}
-
-.playlist-card:hover .playlist-actions {
-    opacity: 1;
-}
-
-.action-btn {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.1);
-    color: white;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.action-btn:hover {
-    background: rgba(255,255,255,0.2);
-    transform: scale(1.1);
-}
-
-.action-btn.edit-btn:hover {
-    background: #7B2CBF;
-}
-
-.action-btn.delete-btn:hover {
-    background: #dc3545;
-}
-</style>

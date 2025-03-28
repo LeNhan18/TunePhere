@@ -353,6 +353,31 @@ namespace TunePhere.Controllers
             return Ok(new { playCount = song.PlayCount });
         }
 
+        // GET: Songs/Search
+        [HttpGet]
+        public async Task<IActionResult> Search(string query)
+        {
+            if (string.IsNullOrEmpty(query))
+            {
+                return Json(new List<object>());
+            }
+
+            var songs = await _context.Songs
+                .Include(s => s.Artists)
+                .Where(s => s.Title.ToLower().Contains(query.ToLower()) || 
+                           s.Artists.ArtistName.ToLower().Contains(query.ToLower()))
+                .Select(s => new
+                {
+                    songId = s.SongId,
+                    title = s.Title,
+                    artistName = s.Artists.ArtistName,
+                    imageUrl = s.ImageUrl
+                })
+                .ToListAsync();
+
+            return Json(songs);
+        }
+
         private bool SongExists(int id)
         {
             return _context.Songs.Any(e => e.SongId == id);

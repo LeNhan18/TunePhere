@@ -9,6 +9,7 @@ using TunePhere.Models;
 using System.Security.Claims; // Thêm để dùng ClaimTypes
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TunePhere.Controllers
 {
@@ -57,6 +58,10 @@ namespace TunePhere.Controllers
                 .Include(p => p.User)
                 .Include(p => p.PlaylistSongs)
                     .ThenInclude(ps => ps.Song)
+                        .ThenInclude(s => s.Artists)
+                .Include(p => p.PlaylistSongs)
+                    .ThenInclude(ps => ps.Song)
+                        .ThenInclude(s => s.Albums)
                 .FirstOrDefaultAsync(m => m.PlaylistId == id);
 
             if (playlist == null)
@@ -89,10 +94,15 @@ namespace TunePhere.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,IsPublic,UserId")] Playlist playlist, IFormFile PlaylistImage)
+        public async Task<IActionResult> Create([Bind("Title,IsPublic,UserId")] Playlist playlist, IFormFile? ImageFile)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return View(playlist);
+                }
+
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (string.IsNullOrEmpty(userId))
                 {
@@ -100,42 +110,30 @@ namespace TunePhere.Controllers
                     return View(playlist);
                 }
 
-                if (playlist.UserId != userId)
-                {
-                    ModelState.AddModelError("", "Dữ liệu không hợp lệ.");
-                    return View(playlist);
-                }
-
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-                playlist.User = user;
+                playlist.UserId = userId;
                 playlist.CreatedAt = DateTime.Now;
 
                 // Xử lý upload ảnh
-                if (PlaylistImage != null && PlaylistImage.Length > 0)
+                if (ImageFile != null && ImageFile.Length > 0)
                 {
                     var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "playlists");
                     if (!Directory.Exists(uploadsFolder))
                         Directory.CreateDirectory(uploadsFolder);
 
-                    var uniqueFileName = $"{Guid.NewGuid()}_{PlaylistImage.FileName}";
+                    var uniqueFileName = $"{Guid.NewGuid()}_{ImageFile.FileName}";
                     var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
-                        await PlaylistImage.CopyToAsync(fileStream);
+                        await ImageFile.CopyToAsync(fileStream);
                     }
 
                     playlist.ImageUrl = $"/uploads/playlists/{uniqueFileName}";
                 }
 
-                if (ModelState.IsValid)
-                {
-                    _context.Playlists.Add(playlist);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-
-                return View(playlist);
+                _context.Playlists.Add(playlist);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
@@ -144,12 +142,12 @@ namespace TunePhere.Controllers
                 {
                     ModelState.AddModelError(string.Empty, $"Chi tiết: {ex.InnerException.Message}");
                 }
+                return View(playlist);
             }
-
-            return View(playlist);
         }
 
         // GET: Playlists/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -157,17 +155,13 @@ namespace TunePhere.Controllers
                 return NotFound();
             }
 
-            var playlist = await _context.Playlists.FindAsync(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var playlist = await _context.Playlists
+                .FirstOrDefaultAsync(p => p.PlaylistId == id && p.UserId == userId);
+
             if (playlist == null)
             {
                 return NotFound();
-            }
-
-            // Kiểm tra quyền chỉnh sửa (nếu cần)
-            string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (playlist.UserId != currentUserId && !User.IsInRole("Admin"))
-            {
-                return Forbid();
             }
 
             return View(playlist);
@@ -175,60 +169,61 @@ namespace TunePhere.Controllers
 
         // POST: Playlists/Edit/5
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PlaylistId,UserId,Title,IsPublic,CreatedAt")] Playlist playlist, IFormFile PlaylistImage)
+        public async Task<IActionResult> Edit(int id, [Bind("PlaylistId,Title,IsPublic,ImageUrl")] Playlist playlist, IFormFile? ImageFile = null)
         {
             if (id != playlist.PlaylistId)
             {
                 return NotFound();
             }
 
-            // Kiểm tra quyền chỉnh sửa
-            string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (playlist.UserId != currentUserId && !User.IsInRole("Admin"))
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var existingPlaylist = await _context.Playlists
+                .FirstOrDefaultAsync(p => p.PlaylistId == id && p.UserId == userId);
+
+            if (existingPlaylist == null)
             {
-                return Forbid();
+                return NotFound();
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Xử lý upload ảnh mới
-                    if (PlaylistImage != null && PlaylistImage.Length > 0)
+                    // Cập nhật thông tin cơ bản
+                    existingPlaylist.Title = playlist.Title;
+                    existingPlaylist.IsPublic = playlist.IsPublic;
+
+                    // Xử lý upload ảnh mới nếu có
+                    if (ImageFile != null && ImageFile.Length > 0)
                     {
+                        var uniqueFileName = Guid.NewGuid().ToString() + "_" + ImageFile.FileName;
                         var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "playlists");
-                        if (!Directory.Exists(uploadsFolder))
-                            Directory.CreateDirectory(uploadsFolder);
+                        Directory.CreateDirectory(uploadsFolder);
+
+                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await ImageFile.CopyToAsync(stream);
+                        }
 
                         // Xóa ảnh cũ nếu có
-                        var existingPlaylist = await _context.Playlists.AsNoTracking().FirstOrDefaultAsync(p => p.PlaylistId == id);
-                        if (!string.IsNullOrEmpty(existingPlaylist?.ImageUrl))
+                        if (!string.IsNullOrEmpty(existingPlaylist.ImageUrl))
                         {
                             var oldImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", existingPlaylist.ImageUrl.TrimStart('/'));
                             if (System.IO.File.Exists(oldImagePath))
+                            {
                                 System.IO.File.Delete(oldImagePath);
+                            }
                         }
 
-                        var uniqueFileName = $"{Guid.NewGuid()}_{PlaylistImage.FileName}";
-                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await PlaylistImage.CopyToAsync(fileStream);
-                        }
-
-                        playlist.ImageUrl = $"/uploads/playlists/{uniqueFileName}";
-                    }
-                    else
-                    {
-                        // Giữ nguyên ảnh cũ
-                        var existingPlaylist = await _context.Playlists.AsNoTracking().FirstOrDefaultAsync(p => p.PlaylistId == id);
-                        playlist.ImageUrl = existingPlaylist?.ImageUrl;
+                        existingPlaylist.ImageUrl = "/uploads/playlists/" + uniqueFileName;
                     }
 
-                    _context.Update(playlist);
+                    _context.Update(existingPlaylist);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Details), new { id = playlist.PlaylistId });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -241,12 +236,13 @@ namespace TunePhere.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Details), new { id = playlist.PlaylistId });
             }
+
             return View(playlist);
         }
 
         // GET: Playlists/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -254,20 +250,13 @@ namespace TunePhere.Controllers
                 return NotFound();
             }
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var playlist = await _context.Playlists
-                .Include(p => p.User)
-                .FirstOrDefaultAsync(m => m.PlaylistId == id);
+                .FirstOrDefaultAsync(p => p.PlaylistId == id && p.UserId == userId);
 
             if (playlist == null)
             {
                 return NotFound();
-            }
-
-            // Kiểm tra quyền xóa (nếu cần)
-            string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (playlist.UserId != currentUserId && !User.IsInRole("Admin"))
-            {
-                return Forbid();
             }
 
             return View(playlist);
@@ -275,24 +264,80 @@ namespace TunePhere.Controllers
 
         // POST: Playlists/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var playlist = await _context.Playlists.FindAsync(id);
-            if (playlist != null)
-            {
-                // Kiểm tra quyền xóa (nếu cần)
-                string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (playlist.UserId != currentUserId && !User.IsInRole("Admin"))
-                {
-                    return Forbid();
-                }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var playlist = await _context.Playlists
+                .FirstOrDefaultAsync(p => p.PlaylistId == id && p.UserId == userId);
 
-                _context.Playlists.Remove(playlist);
+            if (playlist == null)
+            {
+                return NotFound();
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                // Xóa ảnh playlist nếu có
+                if (!string.IsNullOrEmpty(playlist.ImageUrl))
+                {
+                    var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", playlist.ImageUrl.TrimStart('/'));
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        System.IO.File.Delete(imagePath);
+                    }
+                }
+
+                // Xóa tất cả bài hát trong playlist
+                var playlistSongs = await _context.PlaylistSongs
+                    .Where(ps => ps.PlaylistId == id)
+                    .ToListAsync();
+
+                _context.PlaylistSongs.RemoveRange(playlistSongs);
+
+                // Xóa playlist
+                _context.Playlists.Remove(playlist);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Có lỗi xảy ra khi xóa playlist: " + ex.Message);
+                return View(playlist);
+            }
+        }
+
+        // GET: Playlists/Search
+        [HttpGet]
+        public async Task<IActionResult> Search(string searchTerm)
+        {
+            if (string.IsNullOrEmpty(searchTerm))
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            var query = _context.Playlists
+                .Include(p => p.User)
+                .Include(p => p.PlaylistSongs)
+                .Where(p => p.IsPublic || p.UserId == User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                searchTerm = searchTerm.ToLower();
+                query = query.Where(p => 
+                    p.Title.ToLower().Contains(searchTerm) || 
+                    p.User.UserName.ToLower().Contains(searchTerm)
+                );
+            }
+
+            var playlists = await query
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.SearchTerm = searchTerm;
+            return View("SearchResults", playlists);
         }
 
         private bool PlaylistExists(int id)

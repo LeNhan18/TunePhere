@@ -1,0 +1,174 @@
+@model IEnumerable<TunePhere.Models.Playlist>
+@{
+    ViewData["Title"] = "Kết quả tìm kiếm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/playlist.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<div class="playlists-page">
+    <div class="page-header">
+        <div class="header-content">
+            <h1>Kết quả tìm kiếm</h1>
+            <p>Tìm thấy @Model.Count() playlist cho "@ViewBag.SearchTerm"</p>
+        </div>
+        <div class="header-actions">
+            <form asp-action="Search" method="get" class="search-form">
+                <div class="search-input-wrapper">
+                    <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" 
+                           placeholder="Tìm kiếm playlist..." class="search-input" />
+                    <button type="submit" class="search-btn">
+                        <i class="fa-solid fa-search"></i>
+                    </button>
+                </div>
+            </form>
+            <a asp-action="Create" class="create-btn">
+                <i class="fa-solid fa-plus"></i>
+                <span>Tạo Playlist mới</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="content-section">
+        @if (!Model.Any())
+        {
+            <div class="no-results">
+                <i class="fa-solid fa-search"></i>
+                <h2>Không tìm thấy kết quả</h2>
+                <p>Thử tìm kiếm với từ khóa khác</p>
+            </div>
+        }
+        else
+        {
+            <div class="playlist-grid">
+                @foreach (var playlist in Model)
+                {
+                    <div class="playlist-card">
+                        <a asp-action="Details" asp-route-id="@playlist.PlaylistId" class="playlist-link">
+                            <div class="playlist-artwork">
+                                @if (!string.IsNullOrEmpty(playlist.ImageUrl))
+                                {
+                                    <img src="@playlist.ImageUrl" alt="@playlist.Title" class="playlist-image" />
+                                }
+                                else
+                                {
+                                    <div class="playlist-image default-artwork">
+                                        <i class="fa-solid fa-music"></i>
+                                    </div>
+                                }
+                                <div class="artwork-overlay">
+                                    <div class="overlay-content">
+                                        <i class="fa-solid fa-play"></i>
+                                        <span class="song-count">@playlist.PlaylistSongs.Count bài hát</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="playlist-info">
+                                <h3 class="playlist-title">@playlist.Title</h3>
+                                <div class="playlist-meta">
+                                    <div class="meta-left">
+                                        <span class="creator-name">@playlist.User.UserName</span>
+                                        <span class="created-date">@playlist.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                        @if (!playlist.IsPublic)
+                                        {
+                                            <span class="visibility-badge private">
+                                                <i class="fa-solid fa-lock"></i>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="visibility-badge public">
+                                                <i class="fa-solid fa-globe"></i>
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+.search-form {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+}
+
+.search-input-wrapper {
+    position: relative;
+    width: 300px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    padding-right: 3rem;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 30px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    background: rgba(255,255,255,0.15);
+    box-shadow: 0 0 0 2px rgba(123,44,191,0.5);
+}
+
+.search-input::placeholder {
+    color: rgba(255,255,255,0.5);
+}
+
+.search-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.25rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+    color: #7B2CBF;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.no-results {
+    text-align: center;
+    padding: 4rem 0;
+    color: rgba(255,255,255,0.5);
+}
+
+.no-results i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.no-results h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.no-results p {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.3);
+}
+</style> 
