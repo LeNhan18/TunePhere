@@ -47,11 +47,17 @@ namespace TunePhere.Controllers
 
             var song = await _context.Songs
                 .Include(s => s.Artists)
+                .Include(s => s.Lyrics)
                 .FirstOrDefaultAsync(m => m.SongId == id);
             if (song == null)
             {
                 return NotFound();
             }
+
+            // Thêm headers để tránh cache
+            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            Response.Headers["Pragma"] = "no-cache";
+            Response.Headers["Expires"] = "0";
 
             return View(song);
         }

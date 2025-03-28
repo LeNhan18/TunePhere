@@ -1,0 +1,628 @@
+﻿/* Thiết lập cơ bản */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #121212; /* Màu nền tối giống thanh nav */
+    color: #ffffff;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 200px;
+    background-color: #333;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding-top: 20px;
+    z-index: 100;
+}
+
+.sidebar-logo {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 0 20px;
+    margin-bottom: 30px;
+}
+
+.sidebar-menu {
+    list-style: none;
+}
+
+.sidebar-menu li {
+    padding: 10px 20px;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar-menu li:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-menu li i {
+    width: 20px;
+}
+
+.sidebar-section {
+    color: #777;
+    font-size: 14px;
+    padding: 10px 20px;
+    margin-top: 20px;
+}
+
+/* Main container */
+.main-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Top navigation */
+.top-navigation {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    color: #a7a7a7;
+    cursor: pointer;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 5px 10px;
+    width: 240px;
+}
+
+.search-bar input {
+    background: none;
+    border: none;
+    color: white;
+    margin-left: 10px;
+    outline: none;
+    width: 100%;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.user-menu-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.user-btn {
+    background: none;
+    border: none;
+    color: #a7a7a7;
+    cursor: pointer;
+}
+
+/* Nút quay lại - Cải thiện CSS để hiển thị rõ ràng hơn */
+.back-button-wrapper {
+    position: fixed;
+    top: 80px;
+    left: 30px;
+    z-index: 9999;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.back-button:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+    color: white;
+}
+
+/* Main song player container */
+.song-player {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 90px;
+    overflow: hidden;
+}
+
+/* Song content container - Dịch chuyển sang phải */
+.song-content {
+    display: flex;
+    gap: 60px;
+    padding: 40px;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    transform: translateX(80px);
+}
+
+/* Song image container */
+.left-column {
+    width: 380px;
+    margin-top: 40px;
+    margin-left: 140px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.song-image {
+    width: 380px;
+    height: 380px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    margin-bottom: 24px;
+    position: relative;
+}
+
+.song-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Phần header chứa tiêu đề và tim */
+.song-header {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* Container chứa tên bài hát và trái tim */
+.title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+/* Tên bài hát */
+.song-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 75%;
+    margin-bottom: 5px;
+}
+
+/* Hàng chứa tên ca sĩ */
+.artist-row {
+    text-align: left;
+    width: 100%;
+}
+
+.artist-name {
+    font-size: 18px;
+    color: #b3b3b3;
+}
+
+/* Trái tim và số lượt thích */
+.heart-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.heart-icon {
+    color: #ff4757;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.like-count {
+    font-size: 16px;
+    color: #b3b3b3;
+}
+
+/* Nút thêm lời bài hát - hiệu ứng mượt mà */
+.add-lyric-button {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px;
+    background-color: rgba(29, 185, 84, 0.9); /* Màu xanh Spotify với độ trong suốt */
+    color: white;
+    text-align: center;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    font-size: 16px;
+    transform: translateY(100%); /* Bắt đầu ẩn phía dưới */
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none; /* Tránh lỗi khi hover */
+}
+
+/* Hiện nút khi hover vào ảnh */
+.song-image:hover .add-lyric-button {
+    transform: translateY(0); /* Di chuyển lên */
+    opacity: 1;
+    pointer-events: auto; /* Cho phép tương tác khi hiện */
+}
+
+.add-lyric-button:hover {
+    background-color: #1ed760;
+}
+
+.add-lyric-button i {
+    margin-right: 8px;
+    transition: transform 0.3s ease;
+}
+
+.add-lyric-button:hover i {
+    transform: scale(1.1);
+}
+
+/* Thêm style cho trạng thái edit */
+.add-lyric-button.edit-mode {
+    background-color: #1DB954;
+}
+
+.add-lyric-button.edit-mode:hover {
+    background-color: #1ed760;
+}
+
+/* Song info section */
+.song-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 350px;
+}
+
+.artist-follow {
+    margin-left: 8px;
+    font-size: 13px;
+    color: #b0b0b0;
+    border: 1px solid #b0b0b0;
+    padding: 0px 8px;
+    border-radius: 10px;
+}
+
+.like-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+/* Lyrics container */
+.lyrics-container {
+    margin-top: 35px;
+    width: 750px;
+    max-width: 750px;
+    height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 20px;
+}
+
+.lyrics-container::-webkit-scrollbar {
+    display: none;
+}
+
+.lyrics-content {
+
+    position: relative;
+    padding-bottom: 200px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.lyrics-content::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 250px;
+    background: linear-gradient(
+        to bottom,
+        rgba(18, 18, 18, 0) 0%,
+        rgba(18, 18, 18, 0.15) 15%,
+        rgba(18, 18, 18, 0.3) 30%,
+        rgba(18, 18, 18, 0.45) 45%,
+        rgba(18, 18, 18, 0.6) 60%,
+        rgba(18, 18, 18, 0.75) 75%,
+        rgba(18, 18, 18, 0.9) 90%,
+        rgba(18, 18, 18, 1) 100%
+    );
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Lyrics */
+.lyric-line, .lyric-text {
+    font-size: 18px !important;
+    line-height: 2;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 14px;
+    white-space: pre-wrap;
+    font-family: inherit;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+/* Dòng đang active */
+.lyric-line.active {
+    color: #fff;
+    font-size: 19px;
+    font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.1) ;
+    padding: 12px;
+    border-radius: 8px;
+    white-space: normal;
+    overflow: hidden;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+/* Định dạng lời bài hát với thẻ pre */
+.lyrics-content pre.lyric-text {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    font-size: 22px;
+    line-height: 1.8;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+/* Điều chỉnh các dòng lyrics */
+.lyric-line {
+    padding: 8px 0;
+    transition: all 0.3s ease;
+    color: #aaa;
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    word-break: break-word;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .song-content {
+        max-width: 90%;
+    }
+}
+
+@media (max-width: 992px) {
+    .song-content {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .lyrics-container {
+        width: 100%;
+        max-width: 350px;
+        margin-top: 30px;
+    }
+}
+
+/* Cải thiện modal */
+.modal-content {
+    border-radius: 10px;
+    border: 1px solid #333;
+}
+
+.modal-header {
+    border-bottom: 1px solid #333;
+}
+
+.modal-footer {
+    border-top: 1px solid #333;
+}
+
+.btn-success {
+    background-color: #1db954;
+    border-color: #1db954;
+}
+
+.btn-success:hover {
+    background-color: #1ed760;
+    border-color: #1ed760;
+}
+
+/* Cải thiện styles cho lyrics đồng bộ */
+.lyric-line {
+    padding: 8px 0;
+    transition: all 0.3s ease;
+    color: #aaa;
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: normal;        /* Cho phép xuống dòng */
+    overflow: hidden;           /* Ẩn phần tràn ra */
+    text-overflow: ellipsis;
+    max-width: 100%;
+    box-sizing: border-box;
+    word-break: break-word;     /* Ngắt từ khi cần */
+}
+
+.lyric-line:hover {
+    white-space: normal;
+    overflow: visible;
+}
+
+.time-marker {
+    color: #1DB954;
+    margin-right: 10px;
+    font-family: monospace;
+    display: inline-block;
+    min-width: 50px;
+    background: rgba(29, 185, 84, 0.1);
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.lyric-line.synced {
+    color: #1DB954;
+    display: flex;
+    align-items: flex-start;
+}
+
+#syncPreview {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+/* Styles cho editor đồng bộ */
+.lyric-sync-editor {
+    margin-top: 15px;
+}
+
+/* Nút đồng bộ */
+.timing-controls button {
+    margin: 5px;
+    min-width: 120px;
+}
+
+.timing-controls {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#startSyncing, #resetSync {
+    flex: 1;
+}
+
+#markTimestamp {
+    flex: 2;
+}
+
+/* Thêm hiệu ứng khi hover nút */
+.timing-controls button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.2s;
+}
+
+/* Container cho lyrics đồng bộ */
+.synced-lyrics-display {
+    width: 100%;
+    padding: 10px;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Đảm bảo dòng chữ dài không bị lệch layout */
+.lyric-line {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Hiệu ứng chuyển động mượt mà */
+@keyframes highlightLyric {
+    from { background-color: transparent; }
+    to {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+.lyric-line.active {
+    animation: highlightLyric 0.3s ease;
+}
+
+/* Đảm bảo thanh điều khiển nhạc hiển thị trên backdrop */
+.now-playing-bar {
+    position: relative;
+    z-index: 1051 !important; /* Cao hơn z-index của modal-backdrop (1050) */
+}
+
+/* Đảm bảo các nút điều khiển luôn có thể nhấn được */
+.control-button {
+    position: relative;
+    z-index: 1052;
+}
+
+/* Điều chỉnh hiển thị modal và backdrop */
+.modal-backdrop {
+    opacity: 0.5;
+}
+
+.modal-content {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+}
+
