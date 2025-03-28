@@ -177,32 +177,34 @@ body {
 /* Song content container - Dịch chuyển sang phải */
 .song-content {
     display: flex;
-    gap: 40px;
+    gap: 60px;
     padding: 40px;
-    max-width: 1200px;
+    max-width: 1400px;
     width: 100%;
     margin: 0 auto;
     justify-content: center;
     align-items: flex-start;
     position: relative;
-    transform: translateX(100px);
+    transform: translateX(80px);
 }
 
 /* Song image container */
 .left-column {
-    width: 320px;
+    width: 380px;
+    margin-top: 40px;
+    margin-left: 140px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
 }
 
 .song-image {
-    width: 320px;
-    height: 320px;
-    border-radius: 8px;
+    width: 380px;
+    height: 380px;
+    border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    margin-bottom: 24px;
     position: relative;
 }
 
@@ -229,7 +231,7 @@ body {
 
 /* Tên bài hát */
 .song-title {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 700;
     color: #fff;
     margin: 0;
@@ -237,7 +239,8 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 75%; /* Đảm bảo không bị chạm vào trái tim */
+    max-width: 75%;
+    margin-bottom: 5px;
 }
 
 /* Hàng chứa tên ca sĩ */
@@ -247,7 +250,7 @@ body {
 }
 
 .artist-name {
-    font-size: 14px;
+    font-size: 18px;
     color: #b3b3b3;
 }
 
@@ -260,12 +263,12 @@ body {
 
 .heart-icon {
     color: #ff4757;
-    font-size: 16px;
+    font-size: 22px;
     cursor: pointer;
 }
 
 .like-count {
-    font-size: 12px;
+    font-size: 16px;
     color: #b3b3b3;
 }
 
@@ -285,7 +288,7 @@ body {
     align-items: center;
     justify-content: center;
     border: none;
-    font-size: 14px;
+    font-size: 16px;
     transform: translateY(100%); /* Bắt đầu ẩn phía dưới */
     opacity: 0;
     transition: all 0.3s ease;
@@ -348,14 +351,15 @@ body {
 
 /* Lyrics container */
 .lyrics-container {
-    width: 600px;
-    max-width: 600px;
-    height: 400px;
+    margin-top: 35px;
+    width: 750px;
+    max-width: 750px;
+    height: 500px;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding: 0 10px;
+    padding: 0 20px;
 }
 
 .lyrics-container::-webkit-scrollbar {
@@ -363,6 +367,7 @@ body {
 }
 
 .lyrics-content {
+
     position: relative;
     padding-bottom: 200px;
     width: 100%;
@@ -394,10 +399,10 @@ body {
 
 /* Lyrics */
 .lyric-line, .lyric-text {
-    font-size: 14px;
+    font-size: 18px !important;
     line-height: 2;
-    color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 14px;
     white-space: pre-wrap;
     font-family: inherit;
     background: transparent;
@@ -408,14 +413,14 @@ body {
 /* Dòng đang active */
 .lyric-line.active {
     color: #fff;
-    font-size: 18px;
+    font-size: 19px;
     font-weight: bold;
-    background-color: rgba(29, 185, 84, 0.1);
-    padding: 8px;
-    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.1) ;
+    padding: 12px;
+    border-radius: 8px;
     white-space: normal;
-    overflow: hidden;          /* Thay vì visible */
-    word-break: break-word;    /* Ngắt từ nếu cần */
+    overflow: hidden;
+    word-break: break-word;
     max-width: 100%;
 }
 
@@ -426,7 +431,7 @@ body {
     overflow-wrap: break-word;
     word-break: break-word;
     max-width: 100%;
-    font-size: 16px;
+    font-size: 22px;
     line-height: 1.8;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -451,13 +456,12 @@ body {
 /* Responsive */
 @media (max-width: 1200px) {
     .song-content {
-        transform: translateX(30px); /* Giảm độ dịch chuyển khi màn hình nhỏ hơn */
+        max-width: 90%;
     }
 }
 
 @media (max-width: 992px) {
     .song-content {
-        transform: translateX(0); /* Không dịch chuyển khi ở layout mobile */
         flex-direction: column;
         align-items: center;
     }
@@ -590,7 +594,9 @@ body {
 /* Hiệu ứng chuyển động mượt mà */
 @keyframes highlightLyric {
     from { background-color: transparent; }
-    to { background-color: rgba(29, 185, 84, 0.1); }
+    to {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
 }
 
 .lyric-line.active {
