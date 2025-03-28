@@ -79,6 +79,7 @@
         border-radius: 4px;
         transition: background-color 0.2s;
         cursor: pointer;
+        text-decoration: none;
     }
 
     .track-item:hover {
@@ -380,6 +381,18 @@
     .volume-bar:hover .volume-bar-filled {
         background: #1ed760;
     }
+
+    .song-item {
+        display: grid;
+        grid-template-columns: 16px 4fr 2fr 1fr;
+        text-decoration: none;
+        color: white;
+    }
+
+    .song-item:hover {
+        text-decoration: none;
+        color: white;
+    }
 </style>
 
 <div class="album-header" style="background: linear-gradient(transparent 0, rgba(0, 0, 0, .5) 100%), url('@Model.ImageUrl') center/cover">
@@ -417,7 +430,7 @@
 
     @foreach (var song in Model.Songs.OrderBy(s => s.UploadDate))
     {
-        <div class="track-item" data-song-id="@song.SongId" data-song-url="@song.FileUrl" data-song-title="@song.Title" data-song-artist="@Model.Artists?.ArtistName" data-song-image="@song.ImageUrl">
+        <a href="@Url.Action("Details", "Songs", new { id = song.SongId })" class="song-item track-item" data-song-id="@song.SongId" data-song-url="@song.FileUrl" data-song-title="@song.Title" data-song-artist="@Model.Artists?.ArtistName" data-song-image="@song.ImageUrl">
             <div class="track-number">
                 <span class="track-number-text">@(Model.Songs.ToList().IndexOf(song) + 1)</span>
                 <i class="fas fa-play track-play-icon" style="display: none;"></i>
@@ -435,7 +448,7 @@
                 <div class="track-actions">
                     @if (User.Identity.IsAuthenticated)
                     {
-                        <button class="btn-action add-to-playlist" data-song-id="@song.SongId" title="Thêm vào playlist">
+                        <button class="btn-action" title="Thêm vào playlist (tạm thời vô hiệu hóa)" style="opacity: 0.5; cursor: not-allowed;">
                             <i class="fas fa-plus"></i>
                         </button>
                     }
@@ -450,7 +463,7 @@
                     }
                 </div>
             </div>
-        </div>
+        </a>
     }
 
     @if (User.IsInRole("Artist") && Model.Artists?.userId == User.FindFirst(ClaimTypes.NameIdentifier)?.Value)
@@ -464,7 +477,8 @@
     }
 </div>
 
-<!-- Modal chọn playlist -->
+<!-- Modal chọn playlist - Tạm thời vô hiệu hóa -->
+<!--
 <div class="modal fade" id="playlistModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -480,6 +494,7 @@
         </div>
     </div>
 </div>
+-->
 
 <!-- Thanh phát nhạc cố định ở dưới cùng -->
 <div class="now-playing-bar" style="display: none;">
@@ -547,26 +562,36 @@
 
             // Xử lý sự kiện click vào bài hát
             $('.track-item').click(function(e) {
-                // Nếu click vào nút thêm vào playlist hoặc nút xóa, không phát nhạc
-                if ($(e.target).closest('.add-to-playlist').length || $(e.target).closest('form').length) {
+                // Nếu click vào nút thêm vào playlist hoặc nút xóa, không phát nhạc và không chuyển trang
+                if ($(e.target).closest('form').length) {
+                    e.preventDefault();
                     return;
                 }
-
-                const songId = $(this).data('song-id');
-                const songIndex = songs.findIndex(song => song.id === songId);
                 
-                if (songIndex !== -1) {
-                    playSong(songIndex);
+                // Nếu click để phát nhạc, ngăn chặn chuyển trang
+                if (e.target.tagName !== 'A' && 
+                    !$(e.target).closest('.btn-action').length &&
+                    !$(e.target).closest('form').length) {
+                    e.preventDefault();
+                    
+                    const songId = $(this).data('song-id');
+                    const songIndex = songs.findIndex(song => song.id === songId);
+                    
+                    if (songIndex !== -1) {
+                        playSong(songIndex);
+                    }
                 }
             });
 
-            // Xử lý sự kiện thêm vào playlist
+            // Xử lý sự kiện thêm vào playlist - Đã vô hiệu hóa
+            /* 
             $('.add-to-playlist').click(function(e) {
                 e.stopPropagation(); // Ngăn sự kiện click lan ra track-item
                 selectedSongId = $(this).data('song-id');
                 loadPlaylists();
                 $('#playlistModal').modal('show');
             });
+            */
 
             // Xử lý sự kiện ẩn modal playlist
             $('#playlistModal').on('hidden.bs.modal', function () {
@@ -752,6 +777,8 @@
                 });
         }
 
+        // Các hàm liên quan đến playlist đã bị vô hiệu hóa
+        /*
         function loadPlaylists() {
             $.get('/Albums/GetUserPlaylists', function(playlists) {
                 const playlistList = $('#playlistList');
@@ -788,5 +815,6 @@
                 });
             }
         }
+        */
     </script>
 } 
