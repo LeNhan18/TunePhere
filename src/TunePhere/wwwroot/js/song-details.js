@@ -360,9 +360,30 @@ function initLyricSyncing() {
         return;
     }
     
-    // Khởi tạo trạng thái
-    function initSyncState() {
+    // Reset quá trình đồng bộ - cần làm sạch hoàn toàn dữ liệu cũ
+    resetSyncBtn.addEventListener('click', function() {
+        // Reset mảng dữ liệu đồng bộ
         syncedLyrics = [];
+        currentLine = 0;
+        syncMode = false;
+        
+        // Reset UI
+        markTimestampBtn.disabled = true;
+        startSyncingBtn.disabled = false;
+        audioPlayer.pause();
+        
+        // Xóa sạch giao diện hiển thị
+        initSyncState(true); // Thêm tham số true để xác định đây là reset hoàn toàn
+    });
+    
+    // Khởi tạo trạng thái - thêm tham số forceReset
+    function initSyncState(forceReset = false) {
+        // Nếu là reset hoàn toàn hoặc khởi tạo lần đầu
+        if (forceReset) {
+            syncedLyrics = []; // Làm trống mảng dữ liệu
+            syncedContentInput.value = ''; // Xóa dữ liệu đồng bộ cũ trong input
+        }
+        
         currentLine = 0;
         syncMode = false;
         
@@ -379,8 +400,8 @@ function initLyricSyncing() {
             syncPreview.appendChild(lineElement);
         });
         
-        // Kiểm tra nếu đã có dữ liệu đồng bộ
-        if (syncedContentInput.value) {
+        // Chỉ hiển thị dữ liệu đồng bộ cũ nếu không phải là reset hoàn toàn
+        if (!forceReset && syncedContentInput.value) {
             try {
                 const existingSyncedData = JSON.parse(syncedContentInput.value);
                 console.log("Found existing synced data:", existingSyncedData);
@@ -401,7 +422,11 @@ function initLyricSyncing() {
     
     // Bắt đầu đồng bộ
     startSyncingBtn.addEventListener('click', function() {
-        initSyncState();
+        // Reset mảng dữ liệu đồng bộ khi bắt đầu mới
+        syncedLyrics = [];
+        
+        // Làm mới UI
+        initSyncState(true); // Đảm bảo xóa dữ liệu cũ khi bắt đầu đồng bộ
         syncMode = true;
         
         // Reset audio player về đầu
@@ -428,7 +453,7 @@ function initLyricSyncing() {
         
         const time = audioPlayer.currentTime;
         const lineElement = syncPreview.children[currentLine];
-        const lineText = lineElement.textContent;
+        const lineText = lineElement.textContent.trim(); // Loại bỏ khoảng trắng thừa
         
         // Lưu timestamp và text
         syncedLyrics.push({
@@ -438,7 +463,17 @@ function initLyricSyncing() {
         
         // Highlight dòng hiện tại và di chuyển đến dòng tiếp theo
         lineElement.classList.add('synced');
-        lineElement.innerHTML = `<span class="time-marker">[${formatTime(time)}]</span> ${lineText}`;
+        
+        // Xóa nội dung cũ trước khi thêm mới
+        lineElement.innerHTML = '';
+        
+        // Thêm thời gian mới và nội dung
+        const timeMarker = document.createElement('span');
+        timeMarker.className = 'time-marker';
+        timeMarker.textContent = `[${formatTime(time)}]`;
+        
+        lineElement.appendChild(timeMarker);
+        lineElement.appendChild(document.createTextNode(' ' + lineText));
         
         currentLine++;
         
@@ -446,21 +481,27 @@ function initLyricSyncing() {
         if (currentLine >= syncPreview.children.length) {
             markTimestampBtn.disabled = true;
             
-            // Lưu dữ liệu đồng bộ vào input hidden và log ra
+            // Lưu dữ liệu đồng bộ vào input hidden
             const syncedData = JSON.stringify(syncedLyrics);
             syncedContentInput.value = syncedData;
             console.log("Synced lyrics data saved:", syncedData);
             
-            alert('Đã đồng bộ hoàn tất!');
+            // Hiển thị thông báo hoàn tất
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success mt-2';
+            alertDiv.innerHTML = '<i class="fas fa-check-circle"></i> Lời bài hát đã được đồng bộ. Nhấn Cập nhật để lưu.';
+            
+            // Xóa thông báo cũ nếu có
+            const existingAlert = document.querySelector('#syncedLyrics .alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+            
+            // Thêm thông báo mới
+            document.querySelector('.lyric-sync-editor').appendChild(alertDiv);
+            
+            alert('Đã đồng bộ hoàn tất! Nhấn Cập nhật để lưu.');
         }
-    });
-    
-    // Reset quá trình đồng bộ
-    resetSyncBtn.addEventListener('click', function() {
-        initSyncState();
-        markTimestampBtn.disabled = true;
-        startSyncingBtn.disabled = false;
-        audioPlayer.pause();
     });
     
     // Khởi tạo ban đầu

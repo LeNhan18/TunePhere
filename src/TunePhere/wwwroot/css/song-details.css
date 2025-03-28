@@ -432,11 +432,16 @@ body {
     font-family: monospace;
     display: inline-block;
     min-width: 50px;
+    background: rgba(29, 185, 84, 0.1);
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-weight: bold;
 }
 
-/* Styles cho editor đồng bộ */
-.lyric-sync-editor {
-    margin-top: 15px;
+.lyric-line.synced {
+    color: #1DB954;
+    display: flex;
+    align-items: flex-start;
 }
 
 #syncPreview {
@@ -446,20 +451,38 @@ body {
     padding: 10px;
     border: 1px solid #333;
     border-radius: 5px;
+    font-size: 14px;
+    line-height: 1.8;
 }
 
-.lyric-line.synced {
-    color: #1DB954;
+/* Styles cho editor đồng bộ */
+.lyric-sync-editor {
+    margin-top: 15px;
+}
+
+/* Nút đồng bộ */
+.timing-controls button {
+    margin: 5px;
+    min-width: 120px;
 }
 
 .timing-controls {
     display: flex;
-    gap: 10px;
     flex-wrap: wrap;
 }
 
-.timing-controls button {
+#startSyncing, #resetSync {
     flex: 1;
-    min-width: 120px;
+}
+
+#markTimestamp {
+    flex: 2;
+}
+
+/* Thêm hiệu ứng khi hover nút */
+.timing-controls button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.2s;
 }
 
