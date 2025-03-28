@@ -1,3 +1,5 @@
+@using System.Text.Json
+@using TunePhere.Models
 @using System.Security.Claims
 @model TunePhere.Models.Song
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
@@ -29,6 +31,143 @@
         <a href="@Url.Action("Index", "Home")" class="back-button">
             <i class="fas fa-arrow-left"></i>
         </a>
+    </div>
+
+    <div class="song-details-page">
+        <!-- Lyrics bên trái -->
+        <div class="lyrics-container left-lyrics">
+            <div class="lyrics-header">
+                <h3>Lời bài hát</h3>
+                @if (User.IsInRole("Admin") || (User.Identity.IsAuthenticated && Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier)))
+                {
+                    <button class="add-lyrics-btn" onclick="showLyricModal()">
+                        <i class="fas @(Model.Lyrics != null && Model.Lyrics.Any() ? "fa-edit" : "fa-plus")"></i>
+                        <span>@(Model.Lyrics != null && Model.Lyrics.Any() ? "Chỉnh sửa lời bài hát" : "Thêm lời bài hát")</span>
+                    </button>
+                }
+            </div>
+            @if (Model.Lyrics != null && Model.Lyrics.Any())
+            {
+                <div class="lyrics-content">
+                    @{
+                        var syncedContent = Model.Lyrics.FirstOrDefault()?.SyncedContent;
+                        if (!string.IsNullOrEmpty(syncedContent))
+                        {
+                            try
+                            {
+                                var syncedData = JsonSerializer.Deserialize<List<SyncedLyricLine>>(syncedContent);
+                                foreach (var line in syncedData)
+                                {
+                                    <div class="lyric-line" data-time="@line.Time">
+                                        <span class="time-marker">[@TimeSpan.FromSeconds(line.Time).ToString(@"mm\:ss")]</span>
+                                        @line.Text
+                                    </div>
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="error-message">Lỗi hiển thị lyrics: @ex.Message</div>
+                            }
+                        }
+                        else
+                        {
+                            <pre class="lyric-text">@Model.Lyrics.First().Content</pre>
+                        }
+                    }
+                </div>
+            }
+            else 
+            {
+                <div class="no-lyrics-message">
+                    <p>Chưa có lời bài hát</p>
+                    @if (User.IsInRole("Admin") || (User.Identity.IsAuthenticated && Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier)))
+                    {
+                        <button class="add-lyrics-btn" onclick="showLyricModal()">
+                            <i class="fas fa-plus"></i>
+                            <span>Thêm lời bài hát</span>
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Đĩa nhạc ở giữa -->
+        <div class="vinyl-player">
+            <div class="vinyl-disc @(Model.FileUrl != null ? "can-play" : "")">
+                <div class="vinyl-label">
+                    <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/default-song.jpg" : Model.ImageUrl)" alt="@Model.Title" />
+                </div>
+            </div>
+            <div class="vinyl-reflection"></div>
+            
+            <div class="song-info">
+                <h1 class="song-title">@Model.Title</h1>
+                <div class="song-meta">
+                    @if (Model.Artists != null)
+                    {
+                        <a href="@Url.Action("Profile", "Artists", new { id = Model.ArtistId })" class="artist-name">
+                            @Model.Artists.ArtistName
+                        </a>
+                    }
+                    <div class="song-stats">
+                        <span class="stat-item">
+                            <i class="fa-solid fa-play"></i>
+                            @Model.PlayCount lượt nghe
+                        </span>
+                        <span class="stat-item">
+                            <i class="fa-solid fa-heart"></i>
+                            @Model.LikeCount lượt thích
+                        </span>
+                        <span class="stat-item">
+                            <i class="fa-regular fa-calendar"></i>
+                            @Model.UploadDate.ToString("dd/MM/yyyy")
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="player-controls">
+                <button class="play-btn" onclick="togglePlay()">
+                    <i class="fas fa-play"></i>
+                </button>
+            </div>
+
+            <audio id="audioPlayer" src="@Model.FileUrl"></audio>
+        </div>
+
+        <!-- Lyrics bên phải -->
+        <div class="lyrics-container right-lyrics">
+            @if (Model.Lyrics != null && Model.Lyrics.Any())
+            {
+                <div class="lyrics-content">
+                    @{
+                        var syncedContent = Model.Lyrics.FirstOrDefault()?.SyncedContent;
+                        if (!string.IsNullOrEmpty(syncedContent))
+                        {
+                            try
+                            {
+                                var syncedData = JsonSerializer.Deserialize<List<SyncedLyricLine>>(syncedContent);
+                                foreach (var line in syncedData)
+                                {
+                                    <div class="lyric-line" data-time="@line.Time">
+                                        <span class="time-marker">[@TimeSpan.FromSeconds(line.Time).ToString(@"mm\:ss")]</span>
+                                        @line.Text
+                                    </div>
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="error-message">Lỗi hiển thị lyrics: @ex.Message</div>
+                            }
+                        }
+                        else
+                        {
+                            <pre class="lyric-text">@Model.Lyrics.First().Content</pre>
+                        }
+                    }
+                </div>
+            }
+        </div>
     </div>
 
     <div class="song-player">
@@ -174,8 +313,8 @@
                                     <textarea class="form-control bg-dark text-white" name="Content" rows="10" 
                                               placeholder="Nhập lời bài hát ở đây..." required>@(Model.Lyrics != null && Model.Lyrics.Any() ? Model.Lyrics.First().Content : "")</textarea>
                                     <small class="form-text text-muted">Mỗi dòng sẽ được hiển thị theo đúng định dạng xuống dòng</small>
-</div>
-</div>
+                                </div>
+                            </div>
                             
                             <!-- Tab lời bài hát đồng bộ -->
                             <div id="syncedLyrics" class="tab-pane">
@@ -211,9 +350,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Hidden audio element -->
-    <audio id="audioPlayer" style="display: none;"></audio>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -280,6 +416,13 @@
                 });
             }
         });
+    </script>
+
+    <script>
+    function showLyricModal() {
+        const modal = new bootstrap.Modal(document.getElementById('addLyricModal'));
+        modal.show();
+    }
     </script>
 </body>
 </html>

@@ -229,29 +229,65 @@ body {
     margin-bottom: 5px;
 }
 
-/* Tên bài hát */
+/* Song title styling */
 .song-title {
-    font-size: 24px;
+    font-size: 3rem;
     font-weight: 700;
     color: #fff;
-    margin: 0;
-    text-align: left;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 75%;
-    margin-bottom: 5px;
+    text-align: center;
+    margin: 2rem 0 1rem;
+    text-shadow: 
+        0 0 10px rgba(123, 44, 191, 0.5),
+        0 0 20px rgba(123, 44, 191, 0.3),
+        0 0 30px rgba(123, 44, 191, 0.2);
+    background: linear-gradient(90deg, #fff, #9D4EDA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: titleGlow 2s ease-in-out infinite;
 }
 
-/* Hàng chứa tên ca sĩ */
-.artist-row {
-    text-align: left;
-    width: 100%;
+@keyframes titleGlow {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.2);
+    }
 }
 
+/* Artist name styling */
 .artist-name {
-    font-size: 18px;
-    color: #b3b3b3;
+    font-size: 1.5rem;
+    color: #9D4EDA;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    transition: color 0.3s ease;
+}
+
+.artist-name:hover {
+    color: #7B2CBF;
+}
+
+/* Song stats */
+.song-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.stat-item {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stat-item i {
+    color: #9D4EDA;
 }
 
 /* Trái tim và số lượt thích */
@@ -360,6 +396,7 @@ body {
     scrollbar-width: none;
     -ms-overflow-style: none;
     padding: 0 20px;
+    scroll-behavior: smooth;
 }
 
 .lyrics-container::-webkit-scrollbar {
@@ -367,7 +404,6 @@ body {
 }
 
 .lyrics-content {
-
     position: relative;
     padding-bottom: 200px;
     width: 100%;
@@ -439,18 +475,95 @@ body {
 
 /* Điều chỉnh các dòng lyrics */
 .lyric-line {
-    padding: 8px 0;
-    transition: all 0.3s ease;
-    color: #aaa;
+    padding: 8px 16px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    color: rgba(255, 255, 255, 0.5);
     font-size: 16px;
-    line-height: 1.5;
-    white-space: normal;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    word-break: break-word;
+    line-height: 1.6;
+    border-radius: 8px;
+    position: relative;
+    transform-origin: left center;
+}
+
+.lyric-line.active {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    background: linear-gradient(
+        90deg,
+        rgba(123, 44, 191, 0.2),
+        rgba(157, 78, 218, 0.1)
+    );
+    transform: scale(1.02);
+    padding-left: 24px;
+    border-left: 4px solid #7B2CBF;
+    animation: highlightIn 0.5s ease forwards;
+}
+
+.lyric-line.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: #7B2CBF;
+    transform: scaleY(0);
+    animation: lineGrow 0.3s ease forwards;
+}
+
+@keyframes highlightIn {
+    from {
+        background-position: -100% 0;
+        opacity: 0.7;
+    }
+    to {
+        background-position: 0 0;
+        opacity: 1;
+    }
+}
+
+@keyframes lineGrow {
+    from {
+        transform: scaleY(0);
+    }
+    to {
+        transform: scaleY(1);
+    }
+}
+
+.lyric-line.prev {
+    color: rgba(255, 255, 255, 0.7);
+    transform: translateY(5px);
+}
+
+.lyric-line.next {
+    color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-5px);
+}
+
+/* Smooth scroll animation for lyrics container */
+.lyrics-container {
+    scroll-behavior: smooth;
+}
+
+/* Time marker animation */
+.time-marker {
+    display: inline-block;
+    padding: 2px 8px;
+    margin-right: 12px;
+    background: rgba(123, 44, 191, 0.2);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 14px;
+    color: #7B2CBF;
+    transition: all 0.3s ease;
+}
+
+.lyric-line.active .time-marker {
+    background: rgba(123, 44, 191, 0.4);
+    color: #fff;
+    transform: scale(1.1);
 }
 
 /* Responsive */
@@ -624,5 +737,332 @@ body {
     border-radius: 8px;
     border: none;
     box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Song details page layout */
+.song-details-page {
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #1e1e1e, #121212);
+    color: white;
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+/* Lyrics containers */
+.lyrics-container {
+    flex: 1;
+    max-width: 400px;
+    height: calc(100vh - 4rem);
+    overflow-y: auto;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #7B2CBF rgba(0, 0, 0, 0.2);
+}
+
+.lyrics-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.lyrics-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.lyrics-container::-webkit-scrollbar-thumb {
+    background: #7B2CBF;
+    border-radius: 4px;
+}
+
+/* Container cho đĩa nhạc */
+.vinyl-player {
+    flex: 0 0 auto;
+    width: 400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    position: relative;
+}
+
+/* Đĩa nhạc */
+.vinyl-disc {
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: linear-gradient(30deg, 
+        #000000 0%, 
+        #333333 30%, 
+        #000000 40%, 
+        #333333 50%,
+        #000000 60%,
+        #333333 70%,
+        #000000 100%
+    );
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+        0 0 50px rgba(0,0,0,0.5),
+        inset 0 0 30px rgba(0,0,0,0.8);
+    transition: transform 0.5s ease;
+    overflow: hidden;
+}
+
+/* Vân đĩa */
+.vinyl-disc::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: repeating-radial-gradient(
+        circle at center,
+        transparent 0,
+        transparent 2px,
+        rgba(255,255,255,0.1) 3px,
+        transparent 4px
+    );
+}
+
+/* Lỗ giữa đĩa */
+.vinyl-disc::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center,
+        #9D4EDA 0%,
+        #7B2CBF 50%,
+        #6B1FAF 100%
+    );
+    box-shadow: 
+        0 0 15px rgba(123,44,191,0.6),
+        inset 0 0 5px rgba(255,255,255,0.5);
+}
+
+/* Ảnh album */
+.vinyl-label {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    box-shadow: 
+        0 0 20px rgba(0,0,0,0.4),
+        inset 0 0 10px rgba(0,0,0,0.4);
+    border: 4px solid #000;
+}
+
+.vinyl-label img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+.vinyl-label:hover img {
+    transform: scale(1.1);
+}
+
+/* Hiệu ứng xoay */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.vinyl-disc.playing {
+    animation: spin 20s linear infinite;
+}
+
+/* Phản chiếu */
+.vinyl-reflection {
+    position: absolute;
+    bottom: -30px;
+    width: 80%;
+    height: 20px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(123,44,191,0.2) 0%,
+        rgba(123,44,191,0.1) 40%,
+        rgba(123,44,191,0) 80%
+    );
+    border-radius: 50%;
+    filter: blur(5px);
+    transform: scaleY(0.3);
+    opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .vinyl-player {
+        width: 300px;
+    }
+    
+    .vinyl-disc {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .vinyl-label {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .vinyl-player {
+        width: 250px;
+    }
+    
+    .vinyl-disc {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .vinyl-label {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+/* Song Info */
+.song-info {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.song-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.song-stats {
+    display: flex;
+    gap: 2rem;
+    color: #b3b3b3;
+}
+
+.player-controls {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.play-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #7B2CBF;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.play-btn:hover {
+    background: #9D4EDA;
+    transform: scale(1.1);
+}
+
+.play-btn.playing .fa-play {
+    display: none;
+}
+
+.play-btn.playing .fa-pause {
+    display: inline-block;
+}
+
+.play-btn .fa-pause {
+    display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .song-title {
+        font-size: 2rem;
+    }
+
+    .song-stats {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+}
+
+/* Lyrics header */
+.lyrics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lyrics-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: white;
+}
+
+/* Add lyrics button */
+.add-lyrics-btn {
+    background: #7B2CBF;
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.add-lyrics-btn:hover {
+    background: #9D4EDA;
+    transform: translateY(-2px);
+}
+
+.add-lyrics-btn i {
+    font-size: 1rem;
+}
+
+/* No lyrics message */
+.no-lyrics-message {
+    text-align: center;
+    padding: 2rem;
+    color: #b3b3b3;
+}
+
+.no-lyrics-message p {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.no-lyrics-message .add-lyrics-btn {
+    margin: 0 auto;
 }
 
