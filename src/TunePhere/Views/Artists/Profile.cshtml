@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Trang nghệ sĩ";
 }
-
+@await Html.PartialAsync("_NavigationPartial")
 @section Styles {
     <link rel="stylesheet" href="~/css/artist-profile.css" />
 }
@@ -96,7 +96,7 @@
             <div class="songs-list">
                 @foreach (var song in Model.Songs.OrderByDescending(s => s.PlayCount).Take(5))
                 {
-                    <div class="song-item">
+                    <a href="@Url.Action("Details", "Songs", new { id = song.SongId })" class="song-item">
                         <div class="song-image">
                             <img src="@song.ImageUrl" alt="@song.Title" />
                             <button class="play-btn"><i class="fas fa-play"></i></button>
@@ -108,7 +108,7 @@
                         <div class="song-duration">
                             <span>@song.Duration.ToString(@"mm\:ss")</span>
                         </div>
-                    </div>
+                    </a>
                 }
             </div>
         </div>
