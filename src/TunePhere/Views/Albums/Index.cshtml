@@ -5,87 +5,128 @@
 }
 
 <link rel="stylesheet" href="~/css/albums.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-<div class="albums-container">
-    <section class="trending-songs">
-        <h2>Những bài hát thịnh hành</h2>
-        <div class="songs-grid">
-            <!-- Sẽ thêm danh sách bài hát sau -->
-        </div>
-    </section>
-
-    <section class="popular-artists">
-        <h2>Nghệ sĩ phổ biến</h2>
-        <div class="artists-grid">
-            @if (ViewBag.PopularArtists != null)
-            {
-                foreach (var artist in ViewBag.PopularArtists)
-                {
-                    <a href="@Url.Action("Profile", "Artists", new { id = artist.ArtistId })" class="artist-card">
-                        <div class="artist-image">
-                            <img src="@(string.IsNullOrEmpty(artist.ImageUrl) ? "/images/default-artist.jpg" : artist.ImageUrl)" alt="@artist.ArtistName" />
-                        </div>
-                        <div class="artist-info">
-                            <h3 class="artist-name">@artist.ArtistName</h3>
-                            <p class="artist-songs">@artist.Songs?.Count bài hát</p>
-                        </div>
-                    </a>
-                }
-            }
-        </div>
-    </section>
-
-    <section class="featured-albums">
-        <h2>Album nổi tiếng</h2>
-        <div class="albums-grid">
-            @foreach (var album in Model)
-            {
-                <a href="@Url.Action("Details", new { id = album.AlbumId })" class="album-card">
-                    <div class="album-image">
-                        <img src="@(string.IsNullOrEmpty(album.ImageUrl) ? "/images/default-album.jpg" : album.ImageUrl)" alt="@album.AlbumName" />
-                        <div class="album-overlay">
-                            <i class="fas fa-play"></i>
-                        </div>
-                    </div>
-                    <div class="album-info">
-                        <h3 class="album-name">@album.AlbumName</h3>
-                        <p class="artist-name">@album.Artists?.ArtistName</p>
-                    </div>
-                </a>
-            }
-        </div>
-    </section>
+<div class="spotify-albums-container">
+    <div class="spotify-header">
+        <h1 class="page-title">Albums</h1>
+    </div>
 
     @if (ViewBag.IsArtist && ViewBag.MyAlbums != null)
     {
-        <section class="my-albums">
+        <section class="my-albums-section">
             <div class="section-header">
                 <h2>Album của tôi</h2>
-                <a href="@Url.Action("Create")" class="create-album-btn">
+                <a href="@Url.Action("Create")" class="spotify-button">
                     <i class="fas fa-plus"></i>
                     Tạo album mới
                 </a>
             </div>
-            <div class="albums-grid">
+            <div class="spotify-grid">
                 @foreach (var album in ViewBag.MyAlbums)
                 {
-                    <a href="@Url.Action("Details", new { id = album.AlbumId })" class="album-card">
-                        <div class="album-image">
+                    <div class="spotify-card">
+                        <div class="spotify-card-img-container">
                             <img src="@(string.IsNullOrEmpty(album.ImageUrl) ? "/images/default-album.jpg" : album.ImageUrl)" alt="@album.AlbumName" />
-                            <div class="album-overlay">
-                                <i class="fas fa-play"></i>
+                            <div class="spotify-card-play">
+                                <a href="@Url.Action("Details", new { id = album.AlbumId })" class="spotify-play-button">
+                                    <i class="fas fa-play"></i>
+                                </a>
                             </div>
                         </div>
-                        <div class="album-info">
-                            <h3 class="album-name">@album.AlbumName</h3>
-                            <div class="album-stats">
-                                <span>@album.numberSongs bài hát</span>
-                                <span>@album.Time.ToString(@"mm\:ss")</span>
-                            </div>
+                        <div class="spotify-card-info">
+                            <a href="@Url.Action("Details", new { id = album.AlbumId })" class="spotify-card-title">@album.AlbumName</a>
+                            <p class="spotify-card-description">
+                                @album.numberSongs bài hát • @album.Time.ToString(@"mm\:ss")
+                            </p>
                         </div>
-                    </a>
+                    </div>
                 }
             </div>
         </section>
     }
+
+    <section class="featured-albums-section">
+        <div class="section-header">
+            <h2>Album nổi bật</h2>
+            <a href="#" class="spotify-link">Xem tất cả</a>
+        </div>
+        <div class="spotify-grid">
+            @foreach (var album in Model.Take(5))
+            {
+                <div class="spotify-card">
+                    <div class="spotify-card-img-container">
+                        <img src="@(string.IsNullOrEmpty(album.ImageUrl) ? "/images/default-album.jpg" : album.ImageUrl)" alt="@album.AlbumName" />
+                        <div class="spotify-card-play">
+                            <a href="@Url.Action("Details", new { id = album.AlbumId })" class="spotify-play-button">
+                                <i class="fas fa-play"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="spotify-card-info">
+                        <a href="@Url.Action("Details", new { id = album.AlbumId })" class="spotify-card-title">@album.AlbumName</a>
+                        <p class="spotify-card-description">
+                            <a href="@Url.Action("Profile", "Artists", new { id = album.Artists?.ArtistId })" class="spotify-card-subtitle">@album.Artists?.ArtistName</a>
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="all-albums-section">
+        <div class="section-header">
+            <h2>Tất cả Album</h2>
+        </div>
+        <div class="spotify-grid">
+            @foreach (var album in Model)
+            {
+                <div class="spotify-card">
+                    <div class="spotify-card-img-container">
+                        <img src="@(string.IsNullOrEmpty(album.ImageUrl) ? "/images/default-album.jpg" : album.ImageUrl)" alt="@album.AlbumName" />
+                        <div class="spotify-card-play">
+                            <a href="@Url.Action("Details", new { id = album.AlbumId })" class="spotify-play-button">
+                                <i class="fas fa-play"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="spotify-card-info">
+                        <a href="@Url.Action("Details", new { id = album.AlbumId })" class="spotify-card-title">@album.AlbumName</a>
+                        <p class="spotify-card-description">
+                            <a href="@Url.Action("Profile", "Artists", new { id = album.Artists?.ArtistId })" class="spotify-card-subtitle">@album.Artists?.ArtistName</a>
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="popular-artists-section">
+        <div class="section-header">
+            <h2>Nghệ sĩ phổ biến</h2>
+            <a href="@Url.Action("Index", "Artists")" class="spotify-link">Xem tất cả</a>
+        </div>
+        <div class="spotify-grid artists-grid">
+            @if (ViewBag.PopularArtists != null)
+            {
+                foreach (var artist in ViewBag.PopularArtists)
+                {
+                    <div class="spotify-card artist-card">
+                        <div class="spotify-card-img-container artist-img">
+                            <img src="@(string.IsNullOrEmpty(artist.ImageUrl) ? "/images/default-artist.jpg" : artist.ImageUrl)" alt="@artist.ArtistName" />
+                            <div class="spotify-card-play">
+                                <a href="@Url.Action("Profile", "Artists", new { id = artist.ArtistId })" class="spotify-play-button">
+                                    <i class="fas fa-play"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="spotify-card-info">
+                            <a href="@Url.Action("Profile", "Artists", new { id = artist.ArtistId })" class="spotify-card-title">@artist.ArtistName</a>
+                            <p class="spotify-card-description">Nghệ sĩ • @artist.Songs?.Count bài hát</p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </section>
 </div>
