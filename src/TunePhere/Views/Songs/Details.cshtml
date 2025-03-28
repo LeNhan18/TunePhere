@@ -7,7 +7,9 @@
     Layout = null;
     var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
-@await Html.PartialAsync("_NavigationPartial") 
+
+@await Html.PartialAsync("_NavigationPartial")
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -40,8 +42,8 @@
                     @if (User.IsInRole("Admin") || (User.Identity.IsAuthenticated && Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier)))
                     {
                         <div class="add-lyric-button" id="addLyricButton">
-                            <i class="fas fa-plus"></i>
-                            <span>Thêm lời bài hát</span>
+                            <i class="fas @(Model.Lyrics != null && Model.Lyrics.Any() ? "fa-edit" : "fa-plus")"></i>
+                            <span>@(Model.Lyrics != null && Model.Lyrics.Any() ? "Chỉnh sửa lời bài hát" : "Thêm lời bài hát")</span>
                         </div>
                     }
                 </div>
@@ -62,9 +64,9 @@
                 @if (Model.Lyrics != null && Model.Lyrics.Any())
                 {
                     <div class="lyrics-content">
-                        @foreach (var lyric in Model.Lyrics)
+                        @foreach (var lyric in Model.Lyrics.OrderByDescending(l => l.UpdatedAt ?? l.CreatedAt))
                         {
-                            <pre class="lyric-text">@Html.Raw(lyric.Content)</pre>
+                            <pre class="lyric-text" data-lyric-id="@lyric.LyricId">@Html.Raw(lyric.Content)</pre>
                         }
                     </div>
                 }
@@ -121,30 +123,38 @@
         </div>
     </div>
 
-    <!-- Modal thêm lời bài hát -->
+    <!-- Modal thêm/sửa lời bài hát -->
     <div class="modal fade" id="addLyricModal" tabindex="-1" aria-labelledby="addLyricModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-dark text-white">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addLyricModalLabel">Thêm lời cho bài hát: @Model.Title</h5>
+                    <h5 class="modal-title" id="addLyricModalLabel">
+                        @(Model.Lyrics != null && Model.Lyrics.Any() ? "Chỉnh sửa lời bài hát" : "Thêm lời bài hát")
+                    </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="/Lyrics/AddLyric" method="post">
+                <form action="@(Model.Lyrics != null && Model.Lyrics.Any() ? "/Lyrics/Edit" : "/Lyrics/AddLyric")" method="post">
                     <div class="modal-body">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="SongId" value="@Model.SongId" />
+                        @if (Model.Lyrics != null && Model.Lyrics.Any())
+                        {
+                            <input type="hidden" name="LyricId" value="@Model.Lyrics.First().LyricId" />
+                        }
                         <input type="hidden" name="Language" value="vi" />
                         
                         <div class="mb-3">
                             <label for="Content" class="form-label">Lời bài hát</label>
                             <textarea class="form-control bg-dark text-white" name="Content" rows="10" 
-                                      placeholder="Nhập lời bài hát ở đây..." required></textarea>
+                                      placeholder="Nhập lời bài hát ở đây..." required>@(Model.Lyrics != null && Model.Lyrics.Any() ? Model.Lyrics.First().Content : "")</textarea>
                             <small class="form-text text-muted">Mỗi dòng sẽ được hiển thị theo đúng định dạng xuống dòng</small>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-success">Lưu lại</button>
+                        <button type="submit" class="btn btn-success">
+                            @(Model.Lyrics != null && Model.Lyrics.Any() ? "Cập nhật" : "Lưu lại")
+                        </button>
                     </div>
                 </form>
             </div>

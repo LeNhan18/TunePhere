@@ -66,8 +66,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (userIsAdmin || userIsOwner) {
         // Thêm sự kiện click
         addLyricButton.addEventListener('click', function() {
-            // Hiển thị modal
-            new bootstrap.Modal(document.getElementById('addLyricModal')).show();
+            const modal = new bootstrap.Modal(document.getElementById('addLyricModal'));
+            modal.show();
         });
     } else {
         // Ẩn nút nếu không có quyền
@@ -247,114 +247,6 @@ function showVideo(url) {
     new bootstrap.Modal(document.getElementById('videoModal')).show();
 }
 
-// Xử lý nút thêm lời bài hát
-document.addEventListener('DOMContentLoaded', function() {
-    const addLyricButton = document.getElementById('addLyricButton');
-    if (addLyricButton) {
-        // Kiểm tra quyền truy cập
-        const userIsAdmin = window.songData.userIsAdmin === true;
-        const userIsOwner = window.songData.userIsOwner === true;
-        
-        // Chỉ hiển thị nút khi người dùng có quyền
-        if (userIsAdmin || userIsOwner) {
-            // Thêm sự kiện click
-            addLyricButton.addEventListener('click', function() {
-                // Hiển thị modal
-                new bootstrap.Modal(document.getElementById('addLyricModal')).show();
-            });
-        } else {
-            // Ẩn nút nếu không có quyền
-            addLyricButton.style.display = 'none';
-        }
-    }
-    
-    // Xử lý nút lưu lyrics
-    const saveLyricBtn = document.getElementById('saveLyricBtn');
-    if (saveLyricBtn) {
-        saveLyricBtn.addEventListener('click', function() {
-            const songId = document.getElementById('lyricSongId').value;
-            const content = document.getElementById('lyricContent').value;
-            
-            if (!content || content.trim() === '') {
-                alert('Vui lòng nhập lời bài hát');
-                return;
-            }
-            
-            // Hiển thị loading
-            saveLyricBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
-            saveLyricBtn.disabled = true;
-            
-            // Sử dụng FormData thay vì tạo form thủ công để giữ nguyên xuống dòng
-            const formData = new FormData();
-            formData.append('SongId', songId);
-            formData.append('Content', content);
-            formData.append('Language', 'vi');
-            
-            // Lấy token CSRF
-            const token = document.querySelector('meta[name="__RequestVerificationToken"]').content;
-            formData.append('__RequestVerificationToken', token);
-            
-            // Gửi request bằng fetch
-            fetch('/Lyrics/AddLyric', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'RequestVerificationToken': token
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.reload(); // Tải lại trang sau khi lưu
-                } else {
-                    alert('Có lỗi xảy ra khi lưu lời bài hát');
-                    saveLyricBtn.innerHTML = 'Lưu lại';
-                    saveLyricBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi:', error);
-                alert('Có lỗi xảy ra khi lưu lời bài hát');
-                saveLyricBtn.innerHTML = 'Lưu lại';
-                saveLyricBtn.disabled = false;
-            });
-        });
-    }
-});
-
-// Thêm code xử lý đóng modal
-document.addEventListener('DOMContentLoaded', function() {
-    // Lấy tham chiếu đến modal
-    const lyricModal = document.getElementById('addLyricModal');
-    
-    // Thêm sự kiện khi modal ẩn đi (hidden.bs.modal)
-    lyricModal.addEventListener('hidden.bs.modal', function() {
-        // Đảm bảo xóa backdrop
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) {
-            backdrop.remove();
-        }
-        
-        // Đảm bảo body không còn class 'modal-open'
-        document.body.classList.remove('modal-open');
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
-    });
-    
-    // Xử lý nút Hủy trong modal
-    const cancelButton = lyricModal.querySelector('.btn-secondary');
-    if (cancelButton) {
-        cancelButton.addEventListener('click', function() {
-            // Đóng modal đúng cách
-            const modalInstance = bootstrap.Modal.getInstance(lyricModal);
-            if (modalInstance) {
-                modalInstance.hide();
-            }
-        });
-    }
-    
-    // Code xử lý khác...
-});
-
 // Thêm sự kiện lắng nghe trạng thái audio
 document.addEventListener('DOMContentLoaded', function() {
     // ... existing code ...
@@ -380,4 +272,62 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // ... existing code ...
+});
+
+// Thêm hàm để force refresh trang
+function forceRefresh() {
+    window.location.reload(true); // true để force refresh từ server
+}
+
+// Cập nhật phần xử lý form submit trong Edit.cshtml
+document.addEventListener('DOMContentLoaded', function() {
+    const editForm = document.querySelector('form[action*="Edit"]');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Chuyển về trang Details và force refresh
+                    window.location.href = response.url;
+                    setTimeout(forceRefresh, 100);
+                } else {
+                    alert('Có lỗi xảy ra khi cập nhật lyrics');
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi:', error);
+                alert('Có lỗi xảy ra khi cập nhật lyrics');
+            });
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const addLyricButton = document.getElementById('addLyricButton');
+    if (addLyricButton) {
+        addLyricButton.addEventListener('click', function() {
+            const modal = new bootstrap.Modal(document.getElementById('addLyricModal'));
+            modal.show();
+        });
+    }
+
+    // Xử lý form submit
+    const lyricForm = document.querySelector('#addLyricModal form');
+    if (lyricForm) {
+        lyricForm.addEventListener('submit', function(e) {
+            const content = this.querySelector('textarea[name="Content"]').value;
+            if (!content || content.trim() === '') {
+                e.preventDefault();
+                alert('Vui lòng nhập lời bài hát');
+                return false;
+            }
+        });
+    }
 });
