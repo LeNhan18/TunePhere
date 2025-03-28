@@ -298,6 +298,25 @@
     margin-bottom: 2rem;
 }
 
+.play-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 10px;
+    transition: color 0.3s ease;
+}
+
+.play-btn:hover {
+    color: #7B2CBF;
+}
+
+.song-title {
+    display: flex;
+    align-items: center;
+}
+
 @media (max-width: 768px) {
     .playlist-hero {
         grid-template-columns: 1fr;

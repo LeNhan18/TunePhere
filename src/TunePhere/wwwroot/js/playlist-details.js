@@ -91,4 +91,58 @@ $(document).ready(function() {
             closeAddSongModal();
         }
     }
-}); 
+});
+
+// Xử lý phát nhạc
+let currentPlayingElement = null;
+
+function playSong(songElement) {
+    const songId = songElement.dataset.songId;
+    const songUrl = songElement.dataset.songUrl;
+    const songTitle = songElement.dataset.songTitle;
+    const songArtist = songElement.dataset.songArtist;
+    const songImage = songElement.dataset.songImage;
+
+    const audioPlayer = document.getElementById('audioPlayer');
+    const audioSource = audioPlayer.querySelector('source');
+
+    // Nếu đang phát bài hát này thì dừng lại
+    if (currentPlayingElement === songElement && !audioPlayer.paused) {
+        audioPlayer.pause();
+        songElement.querySelector('i').classList.remove('fa-pause');
+        songElement.querySelector('i').classList.add('fa-play');
+        currentPlayingElement = null;
+        return;
+    }
+
+    // Reset icon của bài hát đang phát trước đó (nếu có)
+    if (currentPlayingElement) {
+        currentPlayingElement.querySelector('i').classList.remove('fa-pause');
+        currentPlayingElement.querySelector('i').classList.add('fa-play');
+    }
+
+    // Cập nhật source và phát nhạc
+    audioSource.src = songUrl;
+    audioPlayer.load();
+    audioPlayer.play()
+        .then(() => {
+            // Cập nhật icon và lưu element đang phát
+            songElement.querySelector('i').classList.remove('fa-play');
+            songElement.querySelector('i').classList.add('fa-pause');
+            currentPlayingElement = songElement;
+
+            // Tăng lượt nghe
+            $.post('/Songs/IncrementPlayCount', { id: songId });
+        })
+        .catch(error => {
+            console.error('Error playing audio:', error);
+            alert('Có lỗi xảy ra khi phát nhạc');
+        });
+
+    // Xử lý khi bài hát kết thúc
+    audioPlayer.onended = function() {
+        songElement.querySelector('i').classList.remove('fa-pause');
+        songElement.querySelector('i').classList.add('fa-play');
+        currentPlayingElement = null;
+    };
+} 
