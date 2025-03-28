@@ -47,11 +47,17 @@ namespace TunePhere.Controllers
 
             var song = await _context.Songs
                 .Include(s => s.Artists)
+                .Include(s => s.Lyrics)
                 .FirstOrDefaultAsync(m => m.SongId == id);
             if (song == null)
             {
                 return NotFound();
             }
+
+            // Thêm headers để tránh cache
+            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            Response.Headers["Pragma"] = "no-cache";
+            Response.Headers["Expires"] = "0";
 
             return View(song);
         }
@@ -203,6 +209,7 @@ namespace TunePhere.Controllers
             // Kiểm tra quyền sở hữu
             var existingSong = await _context.Songs
                 .Include(s => s.Artists)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.SongId == id);
 
             if (existingSong == null)
@@ -220,7 +227,17 @@ namespace TunePhere.Controllers
             {
                 try
                 {
-                    _context.Update(song);
+                    // Cập nhật thông tin bài hát
+                    _context.Entry(song).State = EntityState.Modified;
+
+                    // Giữ nguyên các thông tin không được phép thay đổi
+                    song.ArtistId = existingSong.ArtistId;
+                    song.FileUrl = existingSong.FileUrl;
+                    song.ImageUrl = existingSong.ImageUrl;
+                    song.UploadDate = existingSong.UploadDate;
+                    song.PlayCount = existingSong.PlayCount;
+                    song.LikeCount = existingSong.LikeCount;
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)

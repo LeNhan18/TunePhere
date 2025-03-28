@@ -4,130 +4,173 @@
     ViewData["Title"] = "Bảng điều khiển nghệ sĩ";
 }
 
-<div class="artist-dashboard">
+<link rel="stylesheet" href="~/css/dashboard.css">
+
+<div class="artist-dashboard dark-theme">
     <div class="dashboard-header">
         <div class="artist-info">
-            <div class="artist-avatar">
-                @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                {
-                    <img src="@Model.ImageUrl" alt="@Model.ArtistName" />
-                }
-                else
-                {
-                    <i class="fas fa-user-circle"></i>
-                }
-            </div>
+            <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/default-avatar.jpg" : Model.ImageUrl)" 
+                 alt="@Model.ArtistName" 
+                 class="artist-avatar">
             <div class="artist-details">
                 <h1>@Model.ArtistName</h1>
-                <p class="bio">@Model.Bio</p>
+                <p>Nghệ sĩ</p>
             </div>
         </div>
-        <div class="quick-actions">
-            <a href="/Albums/Create" class="action-button">
+        <div class="dashboard-actions">
+            <button id="followArtistBtn" class="action-button follow-button" onclick="toggleFollow(@Model.ArtistId)">
+                <i class="fas fa-heart"></i>
+                <span>Theo dõi</span>
+            </button>
+            <button class="action-button primary-button glow-effect" onclick="location.href='@Url.Action("Create", "Songs")'">
                 <i class="fas fa-plus"></i>
-                Tạo album mới
-            </a>
-            <a href="/Songs/Upload" class="action-button">
-                <i class="fas fa-upload"></i>
                 Tải bài hát lên
-            </a>
-            <a href="/Artists/Edit" class="action-button">
+            </button>
+            <button class="action-button secondary-button neon-border" onclick="location.href='@Url.Action("Create", "Albums")'">
+                <i class="fas fa-compact-disc"></i>
+                Tạo album mới
+            </button>
+            <button class="action-button secondary-button neon-border" onclick="location.href='@Url.Action("Edit", "Artists", new { id = Model.ArtistId })'">
                 <i class="fas fa-edit"></i>
                 Chỉnh sửa thông tin
-            </a>
+            </button>
         </div>
     </div>
 
     <div class="dashboard-stats">
-        <div class="stat-card">
-            <i class="fas fa-music"></i>
+        <div class="stat-card glass-effect">
+            <i class="fas fa-music neon-icon"></i>
             <div class="stat-info">
                 <h3>Bài hát</h3>
-                <p>@Model.Songs.Count()</p>
+                <p class="neon-text">@Model.Songs.Count()</p>
             </div>
         </div>
-        <div class="stat-card">
-            <i class="fas fa-compact-disc"></i>
+        <div class="stat-card glass-effect">
+            <i class="fas fa-compact-disc neon-icon"></i>
             <div class="stat-info">
                 <h3>Album</h3>
-                <p>@Model.Albums.Count()</p>
+                <p class="neon-text">@Model.Albums.Count()</p>
             </div>
         </div>
-        <div class="stat-card">
-            <i class="fas fa-heart"></i>
+        <div class="stat-card glass-effect">
+            <i class="fas fa-heart neon-icon"></i>
             <div class="stat-info">
                 <h3>Lượt thích</h3>
-                <p>@Model.Songs.Sum(s => s.LikeCount)</p>
+                <p class="neon-text">@Model.Songs.Sum(s => s.LikeCount)</p>
             </div>
         </div>
-        <div class="stat-card">
-            <i class="fas fa-play"></i>
+        <div class="stat-card glass-effect">
+            <i class="fas fa-play neon-icon"></i>
             <div class="stat-info">
                 <h3>Lượt nghe</h3>
-                <p>@Model.Songs.Sum(s => s.PlayCount)</p>
+                <p class="neon-text">@Model.Songs.Sum(s => s.PlayCount)</p>
             </div>
         </div>
     </div>
 
-    <div class="dashboard-content">
-        <div class="content-section">
-            <h2>Album mới nhất</h2>
-            <div class="albums-grid">
-                @foreach (var album in Model.Albums.OrderByDescending(a => a.ReleaseDate).Take(4))
-                {
-                    <div class="album-card">
-                        <div class="album-cover">
-                            @if (!string.IsNullOrEmpty(album.ImageUrl))
-                            {
-                                <img src="@album.ImageUrl" alt="@album.AlbumName" />
-                            }
-                            else
-                            {
-                                <i class="fas fa-compact-disc"></i>
-                            }
-                        </div>
-                        <div class="album-info">
-                            <h3>@album.AlbumName</h3>
-                            <p>@string.Format("{0:dd/MM/yyyy}", album.ReleaseDate)</p>
+    <div class="content-section glass-effect">
+        <h2 class="section-title">Bài hát mới nhất</h2>
+        <div class="songs-list">
+            @foreach (var song in Model.Songs.OrderByDescending(s => s.UploadDate).Take(5))
+            {
+                <div class="song-item glass-effect">
+                    <div class="song-cover">
+                        <img src="@song.ImageUrl" alt="@song.Title" />
+                    </div>
+                    <div class="song-info">
+                        <h5 class="song-title neon-text">@song.Title</h5>
+                        <div class="song-meta">
+                            <span class="song-genre neon-badge">@song.Genre</span>
+                            <span class="song-duration">@song.Duration.ToString(@"mm\:ss")</span>
                         </div>
                     </div>
-                }
-            </div>
+                    <div class="song-stats">
+                        <span><i class="fas fa-play neon-icon"></i> @song.PlayCount</span>
+                        <span><i class="fas fa-heart neon-icon"></i> @song.LikeCount</span>
+                    </div>
+                </div>
+            }
         </div>
+    </div>
 
-        <div class="content-section">
-            <h2>Bài hát mới nhất</h2>
-            <div class="songs-list">
-                @foreach (var song in Model.Songs.OrderByDescending(s => s.UploadDate).Take(5))
-                {
-                    <div class="song-item">
-                        <div class="song-cover">
-                            @if (!string.IsNullOrEmpty(song.ImageUrl))
-                            {
-                                <img src="@song.ImageUrl" alt="@song.Title" />
-                            }
-                            else
-                            {
-                                <i class="fas fa-music"></i>
-                            }
-                        </div>
-                        <div class="song-info">
-                            <h5 class="song-title">@song.Title</h5>
-                            <p class="song-meta">
-                                <span class="song-genre">@song.Genre</span>
-                                <span class="song-duration">@song.Duration.Minutes:@song.Duration.Seconds.ToString("00")</span>
-                            </p>
-                        </div>
-                        <div class="song-stats">
-                            <span><i class="fas fa-play"></i> @song.PlayCount</span>
-                            <span><i class="fas fa-heart"></i> @song.LikeCount</span>
+    <div class="content-section glass-effect">
+        <h2 class="section-title">Album của bạn</h2>
+        <div class="songs-list">
+            @foreach (var album in Model.Albums.OrderByDescending(a => a.ReleaseDate).Take(5))
+            {
+                <div class="song-item glass-effect">
+                    <div class="song-cover">
+                        <img src="@album.ImageUrl" alt="@album.AlbumName" />
+                    </div>
+                    <div class="song-info">
+                        <h5 class="song-title neon-text">@album.AlbumName</h5>
+                        <div class="song-meta">
+                            <span class="song-genre neon-badge">@album.Songs.Count() bài hát</span>
                         </div>
                     </div>
-                }
-            </div>
+                    <div class="song-stats">
+                        <span><i class="fas fa-play neon-icon"></i> @album.Songs.Sum(s => s.PlayCount)</span>
+                        <span><i class="fas fa-heart neon-icon"></i> @album.Songs.Sum(s => s.LikeCount)</span>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
+
+<script>
+let isFollowing = false;
+
+function toggleFollow(artistId) {
+    const followBtn = document.getElementById('followArtistBtn');
+    const icon = followBtn.querySelector('i');
+    const text = followBtn.querySelector('span');
+    
+    if (!isFollowing) {
+        // Theo dõi nghệ sĩ
+        fetch(`/Artists/Follow/${artistId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                isFollowing = true;
+                followBtn.classList.add('following');
+                icon.classList.remove('fa-heart');
+                icon.classList.add('fa-heart-broken');
+                text.textContent = 'Đang theo dõi';
+                
+                // Hiệu ứng thành công
+                followBtn.style.background = 'linear-gradient(45deg, #4f46e5, #6366f1)';
+                followBtn.style.color = '#c7d2fe';
+            }
+        });
+    } else {
+        // Hủy theo dõi
+        fetch(`/Artists/Unfollow/${artistId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                isFollowing = false;
+                followBtn.classList.remove('following');
+                icon.classList.remove('fa-heart-broken');
+                icon.classList.add('fa-heart');
+                text.textContent = 'Theo dõi';
+                
+                // Trở về style ban đầu
+                followBtn.style.background = 'rgba(17, 24, 39, 0.7)';
+                followBtn.style.color = '#818cf8';
+            }
+        });
+    }
+}
+</script>
 
 <style>
     .artist-dashboard {
@@ -407,5 +450,39 @@
         background: linear-gradient(145deg, #2575fc, #6a11cb);
         color: white;
         box-shadow: 0 4px 15px rgba(37, 117, 252, 0.2);
+    }
+
+    .follow-button {
+        background: rgba(17, 24, 39, 0.7);
+        color: #818cf8;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .follow-button:hover {
+        background: rgba(67, 56, 202, 0.3);
+        border-color: rgba(99, 102, 241, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .follow-button.following {
+        background: linear-gradient(45deg, #4f46e5, #6366f1);
+        color: #c7d2fe;
+        border: none;
+    }
+
+    .follow-button.following:hover {
+        background: linear-gradient(45deg, #6366f1, #4f46e5);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+    }
+
+    .follow-button i {
+        font-size: 16px;
+        margin-right: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .follow-button:hover i {
+        transform: scale(1.2);
     }
 </style> 
