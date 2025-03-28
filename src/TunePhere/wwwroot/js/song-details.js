@@ -687,3 +687,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Xử lý sự kiện nhấn trái tim
+document.addEventListener('DOMContentLoaded', function() {
+    const heartIcon = document.querySelector('.heart-icon');
+    if (heartIcon) {
+        heartIcon.addEventListener('click', function() {
+            this.classList.toggle('liked');
+            
+            // Animation nhịp tim
+            this.style.animation = 'heartBeat 0.4s';
+            setTimeout(() => {
+                this.style.animation = '';
+            }, 400);
+            
+            // Cập nhật số lượt thích
+            const likeCount = document.querySelector('.like-count');
+            if (likeCount) {
+                const count = parseInt(likeCount.textContent);
+                likeCount.textContent = this.classList.contains('liked') ? count + 1 : Math.max(0, count - 1);
+            }
+        });
+    }
+});
+
+// Thêm animation cho trái tim
+document.head.insertAdjacentHTML('beforeend', `
+    <style>
+    @keyframes heartBeat {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+    </style>
+`);

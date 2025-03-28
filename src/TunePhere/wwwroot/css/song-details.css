@@ -169,56 +169,104 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
     width: 100%;
-    padding-bottom: 90px; /* Thêm padding để không bị đè bởi thanh player */
+    padding-bottom: 90px;
+    overflow: hidden;
 }
 
 /* Song content container - Dịch chuyển sang phải */
 .song-content {
     display: flex;
-    width: 1000px;
+    gap: 40px;
+    padding: 40px;
+    max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
     justify-content: center;
     align-items: flex-start;
-    gap: 60px;
-    transform: translateX(100px); /* Dịch phải 100px để căn giữa */
+    position: relative;
+    transform: translateX(100px);
 }
 
 /* Song image container */
 .left-column {
+    width: 320px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 
 .song-image {
-    width: 350px;
-    height: 350px;
+    width: 320px;
+    height: 320px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     margin-bottom: 20px;
     position: relative;
-    overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease;
 }
 
 .song-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
 }
 
-.music-icon {
-    position: absolute;
-    top: 10px;
-    left: 10px;
+/* Phần header chứa tiêu đề và tim */
+.song-header {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* Container chứa tên bài hát và trái tim */
+.title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+/* Tên bài hát */
+.song-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 75%; /* Đảm bảo không bị chạm vào trái tim */
+}
+
+/* Hàng chứa tên ca sĩ */
+.artist-row {
+    text-align: left;
+    width: 100%;
+}
+
+.artist-name {
     font-size: 14px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 4px 10px;
-    border-radius: 12px;
+    color: #b3b3b3;
+}
+
+/* Trái tim và số lượt thích */
+.heart-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.heart-icon {
+    color: #ff4757;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.like-count {
+    font-size: 12px;
+    color: #b3b3b3;
 }
 
 /* Nút thêm lời bài hát - hiệu ứng mượt mà */
@@ -281,26 +329,6 @@ body {
     width: 350px;
 }
 
-.song-title {
-    font-size: 24px;
-    font-weight: 600;
-    margin-top: 10px;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.artist-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-}
-
-.artist-name {
-    font-size: 16px;
-    color: #b0b0b0;
-}
-
 .artist-follow {
     margin-left: 8px;
     font-size: 13px;
@@ -318,22 +346,13 @@ body {
     margin-top: 5px;
 }
 
-.heart-icon {
-    color: #ff4757;
-    font-size: 20px;
-}
-
-.like-count {
-    color: #b0b0b0;
-    font-size: 16px;
-}
-
 /* Lyrics container */
 .lyrics-container {
-    width: 90%;
+    width: 600px;
     max-width: 600px;
     height: 400px;
     overflow-y: auto;
+    overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
     padding: 0 10px;
@@ -343,46 +362,110 @@ body {
     display: none;
 }
 
-.lyrics-content p {
-    margin-bottom: 15px;
+.lyrics-content {
+    position: relative;
+    padding-bottom: 200px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.lyrics-content::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 250px;
+    background: linear-gradient(
+        to bottom,
+        rgba(18, 18, 18, 0) 0%,
+        rgba(18, 18, 18, 0.15) 15%,
+        rgba(18, 18, 18, 0.3) 30%,
+        rgba(18, 18, 18, 0.45) 45%,
+        rgba(18, 18, 18, 0.6) 60%,
+        rgba(18, 18, 18, 0.75) 75%,
+        rgba(18, 18, 18, 0.9) 90%,
+        rgba(18, 18, 18, 1) 100%
+    );
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Lyrics */
+.lyric-line, .lyric-text {
+    font-size: 14px;
     line-height: 2;
-    color: #e0e0e0;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 10px;
+    white-space: pre-wrap;
+    font-family: inherit;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+/* Dòng đang active */
+.lyric-line.active {
+    color: #fff;
     font-size: 18px;
+    font-weight: bold;
+    background-color: rgba(29, 185, 84, 0.1);
+    padding: 8px;
+    border-radius: 5px;
+    white-space: normal;
+    overflow: hidden;          /* Thay vì visible */
+    word-break: break-word;    /* Ngắt từ nếu cần */
+    max-width: 100%;
 }
 
 /* Định dạng lời bài hát với thẻ pre */
 .lyrics-content pre.lyric-text {
-    white-space: pre-wrap;       /* Giữ nguyên khoảng trắng và xuống dòng */
-    word-wrap: break-word;       /* Cho phép từ dài được ngắt xuống dòng */
-    font-family: inherit;        /* Sử dụng font giống phần còn lại */
-    margin-bottom: 15px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    font-size: 16px;
     line-height: 1.8;
-    color: #e0e0e0;
-    font-size: 18px;
-    background-color: transparent;
-    border: none;
-    padding: 0;
-    overflow: visible;
-    display: block;
-    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+/* Điều chỉnh các dòng lyrics */
+.lyric-line {
+    padding: 8px 0;
+    transition: all 0.3s ease;
+    color: #aaa;
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    word-break: break-word;
 }
 
 /* Responsive */
 @media (max-width: 1200px) {
     .song-content {
-        transform: translateX(50px);
+        transform: translateX(30px); /* Giảm độ dịch chuyển khi màn hình nhỏ hơn */
     }
 }
 
 @media (max-width: 992px) {
     .song-content {
-        transform: translateX(0);
+        transform: translateX(0); /* Không dịch chuyển khi ở layout mobile */
         flex-direction: column;
         align-items: center;
     }
     
     .lyrics-container {
-        width: 350px;
+        width: 100%;
+        max-width: 350px;
+        margin-top: 30px;
     }
 }
 
@@ -417,24 +500,15 @@ body {
     color: #aaa;
     font-size: 16px;
     line-height: 1.5;
-    white-space: nowrap;
-    overflow: hidden;
+    white-space: normal;        /* Cho phép xuống dòng */
+    overflow: hidden;           /* Ẩn phần tràn ra */
     text-overflow: ellipsis;
     max-width: 100%;
+    box-sizing: border-box;
+    word-break: break-word;     /* Ngắt từ khi cần */
 }
 
 .lyric-line:hover {
-    white-space: normal;
-    overflow: visible;
-}
-
-.lyric-line.active {
-    color: #fff;
-    font-size: 18px;
-    font-weight: bold;
-    background-color: rgba(29, 185, 84, 0.1);
-    padding: 8px;
-    border-radius: 5px;
     white-space: normal;
     overflow: visible;
 }
@@ -503,13 +577,8 @@ body {
 .synced-lyrics-display {
     width: 100%;
     padding: 10px;
-}
-
-/* Fix hiển thị lyrics khi đang chạy */
-.lyrics-content {
-    width: 100%;
     max-width: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 /* Đảm bảo dòng chữ dài không bị lệch layout */
@@ -526,5 +595,28 @@ body {
 
 .lyric-line.active {
     animation: highlightLyric 0.3s ease;
+}
+
+/* Đảm bảo thanh điều khiển nhạc hiển thị trên backdrop */
+.now-playing-bar {
+    position: relative;
+    z-index: 1051 !important; /* Cao hơn z-index của modal-backdrop (1050) */
+}
+
+/* Đảm bảo các nút điều khiển luôn có thể nhấn được */
+.control-button {
+    position: relative;
+    z-index: 1052;
+}
+
+/* Điều chỉnh hiển thị modal và backdrop */
+.modal-backdrop {
+    opacity: 0.5;
+}
+
+.modal-content {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
 }
 
