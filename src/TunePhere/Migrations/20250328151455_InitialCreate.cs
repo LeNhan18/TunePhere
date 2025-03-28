@@ -124,8 +124,8 @@ namespace TunePhere.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ProviderKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
@@ -169,8 +169,8 @@ namespace TunePhere.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -191,20 +191,20 @@ namespace TunePhere.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FollowerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FollowedId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    FollowingId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FollowedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UserFollowers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserFollowers_AspNetUsers_FollowedId",
-                        column: x => x.FollowedId,
+                        name: "FK_UserFollowers_AspNetUsers_FollowerId",
+                        column: x => x.FollowerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_UserFollowers_AspNetUsers_FollowerId",
-                        column: x => x.FollowerId,
+                        name: "FK_UserFollowers_AspNetUsers_FollowingId",
+                        column: x => x.FollowingId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                 });
@@ -251,6 +251,37 @@ namespace TunePhere.Migrations
                         principalTable: "Artists",
                         principalColumn: "ArtistId",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ArtistFollowers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ArtistId = table.Column<int>(type: "int", nullable: false),
+                    FollowedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ArtistFollowers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ArtistFollowers_Artists_ArtistId",
+                        column: x => x.ArtistId,
+                        principalTable: "Artists",
+                        principalColumn: "ArtistId");
+                    table.ForeignKey(
+                        name: "FK_ArtistFollowers_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ArtistFollowers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -352,7 +383,8 @@ namespace TunePhere.Migrations
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Language = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    SyncedContent = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -459,6 +491,21 @@ namespace TunePhere.Migrations
                 name: "IX_Albums_ArtistId",
                 table: "Albums",
                 column: "ArtistId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ArtistFollowers_AppUserId",
+                table: "ArtistFollowers",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ArtistFollowers_ArtistId",
+                table: "ArtistFollowers",
+                column: "ArtistId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ArtistFollowers_UserId",
+                table: "ArtistFollowers",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Artists_userId",
@@ -580,19 +627,22 @@ namespace TunePhere.Migrations
                 column: "ArtistId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserFollowers_FollowedId",
-                table: "UserFollowers",
-                column: "FollowedId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserFollowers_FollowerId",
                 table: "UserFollowers",
                 column: "FollowerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserFollowers_FollowingId",
+                table: "UserFollowers",
+                column: "FollowingId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ArtistFollowers");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
