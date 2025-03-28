@@ -31,13 +31,12 @@
             <i class="fas fa-download"></i> Tải xuống
         </a>
         <div class="vertical-line"></div>
-        
+
         @if (SignInManager.IsSignedIn(User))
         {
             var user = await UserManager.GetUserAsync(User);
-
             var isArtist = await UserManager.IsInRoleAsync(user, "Artist");
-            
+
             <div class="user-menu-container">
                 <div class="user-menu-button">
                     <div class="user-avatar">
@@ -45,7 +44,7 @@
                         {
                             // Lấy thông tin nghệ sĩ từ database
                             var artist = DbContext.Artists.FirstOrDefault(a => a.userId == user.Id);
-                            
+
                             @if (artist != null && !string.IsNullOrEmpty(artist.ImageUrl))
                             {
                                 <img src="@artist.ImageUrl" alt="Artist Profile" class="rounded-avatar" />
@@ -63,7 +62,7 @@
                         {
                             @if (!string.IsNullOrEmpty(user.ImageUrl))
                             {
-                                <img src="@user.ImageUrl" alt="Profile" class="rounded-avatar" />   
+                                <img src="@user.ImageUrl" alt="Profile" class="rounded-avatar" />
                             }
                             else
                             {
@@ -104,59 +103,52 @@
                                 <i class="fas fa-user"></i>
                                 Trang nghệ sĩ
                             </a>
-           
-                            <a href="/Account/ChangePassword">
-                                <i class="fas fa-key"></i>
-                                Đổi mật khẩu
+
+                            <hr>
+                        }
+                        else
+                        {
+                            <a href="/Users/Details">
+                                <i class="fas fa-user"></i>
+                                Hồ sơ cá nhân
                             </a>
-                            <a href="/Playlists">
-                                <i class="fas fa-list"></i>
-                                Playlist của tôi
+                            <a href="/ArtistRegistration/Register">
+                                <i class="fas fa-music"></i>
+                                Đăng ký nghệ sĩ
                             </a>
-                            <a href="/Songs/Favorites">
-                                <i class="fas fa-heart"></i>
-                                Bài hát yêu thích
-                            </a>
-                            <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutForm" class="navbar-right">
-                                <button type="submit" class="btn btn-link nav-link">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                    Đăng xuất
-                                </button>
-                            </form>
-                        </nav>
-                    </div>
+
+                            <hr>
+                        }
+
+                        <a href="/Account/ChangePassword">
+                            <i class="fas fa-key"></i>
+                            Đổi mật khẩu
+                        </a>
+                        <a href="/Playlists">
+                            <i class="fas fa-list"></i>
+                            Playlist của tôi
+                        </a>
+                        <a href="/Songs/Favorites">
+                            <i class="fas fa-heart"></i>
+                            Bài hát yêu thích
+                        </a>
+
+                        <hr>
+
+                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                            <button type="submit" class="logout-button">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Đăng xuất
+                            </button>
+                        </form>
+                    </nav>
                 </div>
-            }
-            else
-            {
-                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutForm" class="navbar-right">
-                    <button type="submit" class="btn btn-link nav-link">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Đăng xuất
-                    </button>
-                </form>
-            }
+            </div>
         }
         else
         {
-            <a href="/Identity/Account/Login" class="nav-link">Đăng nhập</a>
-            <a href="/Identity/Account/Register" class="nav-link">Đăng ký</a>
+            <a href="/Identity/Account/Register" class="nav-button signup">Đăng ký</a>
+            <a href="/Identity/Account/Login" class="nav-button login">Đăng nhập</a>
         }
     </div>
 </nav>
-
-@section Scripts {
-    <script>
-        $(document).ready(function() {
-            $('.user-menu-button').click(function() {
-                $('.user-dropdown-menu').toggleClass('show');
-            });
-
-            $(document).click(function(event) {
-                if (!$(event.target).closest('.user-menu-container').length) {
-                    $('.user-dropdown-menu').removeClass('show');
-                }
-            });
-        });
-    </script>
-}
