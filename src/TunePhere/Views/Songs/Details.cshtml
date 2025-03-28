@@ -33,12 +33,11 @@
 
     <div class="song-player">
         <div class="song-content">
+            <!-- Cột trái -->
             <div class="left-column">
+                <!-- Ảnh bài hát -->
                 <div class="song-image">
                     <img src="@Model.ImageUrl" alt="@Model.Title" />
-                    <div class="music-icon"><i class="fas fa-music"></i> Ngải Thần</div>
-                    
-                    <!-- Nút thêm lyric, chỉ hiển thị cho artist và admin -->
                     @if (User.IsInRole("Admin") || (User.Identity.IsAuthenticated && Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier)))
                     {
                         <div class="add-lyric-button" id="addLyricButton">
@@ -48,24 +47,29 @@
                     }
                 </div>
                 
-                <div class="song-info">
-                    <h1 class="song-title">@Model.Title @(Model.Title.Contains("Remix") ? "" : "")</h1>
+                <!-- Thông tin bài hát -->
+                <div class="song-header">
+                    <div class="title-container">
+                        <h1 class="song-title">@Model.Title</h1>
+                        <div class="heart-container">
+                            <i class="fas fa-heart heart-icon"></i>
+                            <span class="like-count">@Model.LikeCount</span>
+                        </div>
+                    </div>
                     <div class="artist-row">
                         <span class="artist-name">@Model.Artists?.ArtistName</span>
-                    </div>
-                    <div class="like-row">
-                        <i class="fas fa-heart heart-icon"></i>
-                        <span class="like-count">@Model.LikeCount</span>
                     </div>
                 </div>
             </div>
             
+            <!-- Phần lyrics -->
             <div class="lyrics-container">
                 @if (Model.Lyrics != null && Model.Lyrics.Any())
                 {
                     <div class="lyrics-content">
                         @if (!string.IsNullOrEmpty(Model.Lyrics.First().SyncedContent))
                         {
+                            <div id="syncedLyricsDisplay" data-synced-content="@Model.Lyrics.First().SyncedContent"></div>
                             <!-- Hiển thị lyrics đồng bộ với container rộng hơn -->
                             <div id="syncedLyricsDisplay" class="synced-lyrics-display"
                                  data-synced-content="@Model.Lyrics.First().SyncedContent"></div>
@@ -141,7 +145,7 @@
                     <h5 class="modal-title" id="addLyricModalLabel">
                         @(Model.Lyrics != null && Model.Lyrics.Any() ? "Chỉnh sửa lời bài hát" : "Thêm lời bài hát")
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" id="modalCloseX"></button>
                 </div>
                 <form action="@(Model.Lyrics != null && Model.Lyrics.Any() ? "/Lyrics/Edit" : "/Lyrics/AddLyric")" method="post">
                     <div class="modal-body">
@@ -170,8 +174,8 @@
                                     <textarea class="form-control bg-dark text-white" name="Content" rows="10" 
                                               placeholder="Nhập lời bài hát ở đây..." required>@(Model.Lyrics != null && Model.Lyrics.Any() ? Model.Lyrics.First().Content : "")</textarea>
                                     <small class="form-text text-muted">Mỗi dòng sẽ được hiển thị theo đúng định dạng xuống dòng</small>
-                                </div>
-                            </div>
+</div>
+</div>
                             
                             <!-- Tab lời bài hát đồng bộ -->
                             <div id="syncedLyrics" class="tab-pane">
@@ -198,7 +202,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="button" class="btn btn-secondary" id="cancelButton">Hủy</button>
                         <button type="submit" class="btn btn-success">
                             @(Model.Lyrics != null && Model.Lyrics.Any() ? "Cập nhật" : "Lưu lại")
                         </button>
@@ -227,6 +231,7 @@
         };
     </script>
     <script src="~/js/song-details.js"></script>
+    <script src="~/js/navigation.js"></script>
 
     <!-- Thêm ngay sau thẻ <body> -->
     @if (TempData["Error"] != null)
@@ -237,6 +242,45 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
+
+    <script>
+        // Đảm bảo backdrop luôn được dọn dẹp
+        document.addEventListener('DOMContentLoaded', function() {
+            // Khắc phục lỗi backdrop
+            const cancelButton = document.getElementById('cancelButton');
+            if (cancelButton) {
+                cancelButton.addEventListener('click', function() {
+                    const modalElement = document.getElementById('addLyricModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    
+                    if (modalInstance) {
+                        modalInstance.hide();
+                        
+                        // Dọn dẹp backdrop sau khi modal ẩn
+                        setTimeout(function() {
+                            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                            document.body.classList.remove('modal-open');
+                            document.body.style.overflow = '';
+                            document.body.style.paddingRight = '';
+                        }, 300);
+                    }
+                });
+            }
+            
+            // Thêm sự kiện cho nút X
+            const closeX = document.getElementById('modalCloseX');
+            if (closeX) {
+                closeX.addEventListener('click', function() {
+                    setTimeout(function() {
+                        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.overflow = '';
+                        document.body.style.paddingRight = '';
+                    }, 300);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
 
