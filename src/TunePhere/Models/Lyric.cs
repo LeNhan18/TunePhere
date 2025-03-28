@@ -24,5 +24,7 @@ namespace TunePhere.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Ngày thêm lyrics
 
         public DateTime? UpdatedAt { get; set; }
+
+        public string? SyncedContent { get; set; } // Lưu dạng JSON với timestamp
     }
 }

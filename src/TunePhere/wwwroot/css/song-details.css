@@ -408,3 +408,58 @@ body {
     border-color: #1ed760;
 }
 
+/* Cải thiện styles cho lyrics đồng bộ */
+.lyric-line {
+    padding: 8px 0;
+    transition: all 0.3s ease;
+    color: #aaa;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.lyric-line.active {
+    color: #fff;
+    font-size: 110%;
+    font-weight: bold;
+    background-color: rgba(29, 185, 84, 0.1);
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.time-marker {
+    color: #1DB954;
+    margin-right: 10px;
+    font-family: monospace;
+    display: inline-block;
+    min-width: 50px;
+}
+
+/* Styles cho editor đồng bộ */
+.lyric-sync-editor {
+    margin-top: 15px;
+}
+
+#syncPreview {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid #333;
+    border-radius: 5px;
+}
+
+.lyric-line.synced {
+    color: #1DB954;
+}
+
+.timing-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.timing-controls button {
+    flex: 1;
+    min-width: 120px;
+}
+
