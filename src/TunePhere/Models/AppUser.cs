@@ -27,6 +27,9 @@ namespace TunePhere.Models
         public virtual ICollection<UserFollower> Followers { get; set; }
         public virtual ICollection<UserFollower> Following { get; set; }
 
+        // Artist Following
+        public virtual ICollection<ArtistFollower> ArtistFollowing { get; set; }
+
         public AppUser()
         {
             ListeningRooms = new HashSet<ListeningRoom>();
@@ -35,6 +38,7 @@ namespace TunePhere.Models
             Remixes = new HashSet<Remix>();
             Followers = new HashSet<UserFollower>();
             Following = new HashSet<UserFollower>();
+            ArtistFollowing = new HashSet<ArtistFollower>();
         }
 
         // Helper methods to get counts
