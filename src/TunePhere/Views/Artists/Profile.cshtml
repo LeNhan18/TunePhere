@@ -116,7 +116,7 @@
         <div class="profile-section">
             <div class="section-header">
                 <h2>Bài hát nổi bật</h2>
-                <a href="@Url.Action("Index", "Songs")" class="view-all">Xem tất cả</a>
+                <a href="@Url.Action("Index", "Songs", new { artistId = Model.ArtistId })" class="view-all">Xem tất cả</a>
             </div>
             <div class="songs-list">
                 @foreach (var song in Model.Songs.OrderByDescending(s => s.PlayCount).Take(5))
