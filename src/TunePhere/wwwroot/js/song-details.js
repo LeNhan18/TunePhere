@@ -138,12 +138,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Nếu bài hát tự động phát khi trang tải xong, cũng bật hiệu ứng đĩa
     audioPlayer.addEventListener('play', function() {
+        console.log("Sự kiện play được kích hoạt");
         isPlaying = true;
         updatePlayPauseButton();
         toggleVinylEffect(true);
     });
     
     audioPlayer.addEventListener('pause', function() {
+        console.log("Sự kiện pause được kích hoạt");
         isPlaying = false;
         updatePlayPauseButton();
         toggleVinylEffect(false);
@@ -174,24 +176,29 @@ let vinylEffectActive = false;
 
 // Cập nhật hàm phát/dừng nhạc để thêm hiệu ứng đĩa xoay
 function togglePlay() {
+    console.log("togglePlay được gọi, trạng thái hiện tại:", isPlaying);
+    
     if (isPlaying) {
         audioPlayer.pause();
         isPlaying = false;
         // Tắt hiệu ứng đĩa xoay
         toggleVinylEffect(false);
+
     } else {
         audioPlayer.play()
             .then(() => {
                 isPlaying = true;
                 // Bật hiệu ứng đĩa xoay
                 toggleVinylEffect(true);
+
             })
             .catch(error => {
                 console.error('Lỗi phát nhạc:', error);
             });
     }
-
-    updatePlayPauseButton();
+    
+    // Đảm bảo cập nhật UI
+    setTimeout(updatePlayPauseButton, 10);
 }
 
 // Thêm hàm mới để xử lý hiệu ứng đĩa xoay
@@ -220,7 +227,6 @@ function playAudio() {
         .then(() => {
             isPlaying = true;
             updatePlayPauseButton();
-            // Bật hiệu ứng đĩa xoay
             toggleVinylEffect(true);
         })
         .catch(error => {
@@ -230,15 +236,28 @@ function playAudio() {
 
 // Cập nhật nút play/pause - đảm bảo nút hiển thị đúng
 function updatePlayPauseButton() {
+    // Chọn nút play ở thanh điều khiển phía dưới
     const button = document.getElementById('playPauseButton');
-    if (!button) return;
+    
+    if (!button) {
+        console.error('Không tìm thấy nút playPauseButton');
+        return;
+    }
 
     const icon = button.querySelector('i');
-    if (!icon) return;
+    
+    if (!icon) {
+        console.error('Không tìm thấy icon trong nút playPauseButton');
+        return;
+    }
 
     // Log để debug
-    console.log("Cập nhật trạng thái nút, isPlaying =", isPlaying);
+    console.log("Cập nhật trạng thái nút play/pause:", isPlaying ? "Đang phát" : "Đã dừng");
 
+    // Xóa tất cả class cũ
+    icon.className = '';
+    
+    // Thêm class mới dựa trên trạng thái
     if (isPlaying) {
         icon.className = 'fas fa-pause'; // Hiển thị nút tạm dừng khi đang phát
     } else {
