@@ -173,7 +173,7 @@
             <div class="music-grid">
                 @foreach (var song in Model.OrderByDescending(s => s.PlayCount).Take(4))
                 {
-                    <div class="music-card" data-song-id="@song.SongId" data-title="@song.Title" data-artist="@song.Artists?.ArtistName" data-audio-url="@song.FileUrl" data-image-url="@song.ImageUrl" data-video-url="@song.VideoUrl">
+                    <div class="music-card" ondblclick="location.href='/Songs/Details/@song.SongId'" data-song-id="@song.SongId" data-title="@song.Title" data-artist="@song.Artists?.ArtistName" data-audio-url="@song.FileUrl" data-image-url="@song.ImageUrl" data-video-url="@song.VideoUrl">
                         <div class="card-img-container">
                             <img src="@song.ImageUrl" alt="@song.Title">
                             <div class="play-overlay">

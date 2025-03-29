@@ -16,12 +16,29 @@
             <i class="fas fa-home"></i>
         </a>
         <div class="search-container">
-            <div class="search-bar">
+            <form asp-controller="Search" asp-action="Index" method="get" class="search-bar">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" placeholder="Bạn muốn phát nội dung gì?" />
-            </div>
+                <input type="text" name="searchTerm" placeholder="Tìm kiếm bài hát, nghệ sĩ hoặc album..." autocomplete="off" />
+                <div class="search-suggestions-dropdown">
+                    <div class="suggestions-content">
+                        <div class="suggestions-section artists-section">
+                            <h3>Nghệ sĩ</h3>
+                            <div class="suggestions-list" id="artistSuggestions"></div>
+                        </div>
+                        <div class="suggestions-section songs-section">
+                            <h3>Bài hát</h3>
+                            <div class="suggestions-list" id="songSuggestions"></div>
+                        </div>
+                        <div class="suggestions-section albums-section">
+                            <h3>Album</h3>
+                            <div class="suggestions-list" id="albumSuggestions"></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
+
 
     <!-- Phần bên phải: Liên kết và nút -->
     <div class="navbar-right">
@@ -152,3 +169,105 @@
         }
     </div>
 </nav>
+<script>
+     document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('.search-bar input');
+        const suggestionsDropdown = document.querySelector('.search-suggestions-dropdown');
+        let debounceTimer;
+
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(debounceTimer);
+            const searchTerm = e.target.value.trim();
+
+            if (searchTerm.length < 2) {
+                suggestionsDropdown.style.display = 'none';
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                fetchSuggestions(searchTerm);
+            }, 300);
+        });
+
+        searchInput.addEventListener('focus', function() {
+            if (this.value.trim().length >= 2) {
+                suggestionsDropdown.style.display = 'block';
+            }
+        });
+
+        // Đóng dropdown khi click ra ngoài
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-container')) {
+                suggestionsDropdown.style.display = 'none';
+            }
+        });
+
+        function fetchSuggestions(searchTerm) {
+            fetch(`/api/search/suggestions?term=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.json())
+                .then(data => {
+                    updateSuggestions(data);
+                    suggestionsDropdown.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error fetching suggestions:', error);
+                });
+        }
+
+        function updateSuggestions(data) {
+            // Cập nhật phần nghệ sĩ
+            const artistsList = document.getElementById('artistSuggestions');
+            updateSectionContent(artistsList, data.artists, 'artist');
+
+            // Cập nhật phần bài hát
+            const songsList = document.getElementById('songSuggestions');
+            updateSectionContent(songsList, data.songs, 'song');
+
+            // Cập nhật phần album
+            const albumsList = document.getElementById('albumSuggestions');
+            updateSectionContent(albumsList, data.albums, 'album');
+        }
+
+        function updateSectionContent(container, items, type) {
+            if (!items || items.length === 0) {
+                container.innerHTML = '<div class="no-results">Không tìm thấy kết quả</div>';
+                return;
+            }
+
+            container.innerHTML = items.map(item => {
+                const imageUrl = item.imageUrl || '/images/default.png';
+                const name = type === 'song' ? item.title : item.name;
+                const subtitle = type === 'song' ? item.artistName :
+                               type === 'album' ? item.artistName :
+                               'Nghệ sĩ';
+
+                return `
+                    <div class="suggestion-item" onclick="handleSuggestionClick('${type}', '${item.id}')">
+                        <img src="${imageUrl}" alt="${name}" class="suggestion-image">
+                        <div class="suggestion-info">
+                            <div class="suggestion-name">${name}</div>
+                            <div class="suggestion-type">${subtitle}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    });
+
+    function handleSuggestionClick(type, id) {
+        switch (type) {
+            case 'artist':
+                window.location.href = `/Artists/Profile/${id}`;
+                break;
+            case 'song':
+                window.location.href = `/Search/Song/${id}`;
+                break;
+            case 'album':
+                window.location.href = `/Search/Album/${id}`;
+                break;
+        }
+    }
+
+
+
+</script>
