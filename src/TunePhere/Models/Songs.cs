@@ -60,8 +60,6 @@ namespace TunePhere.Models
         [JsonIgnore]
         public virtual ICollection<SongLike>? SongLikes { get; set; } // Danh sách người đã like bài hát
         
-        [NotMapped]
-        public bool IsLiked { get; set; } // Trạng thái like của người dùng hiện tại
         
         [JsonIgnore]
         public virtual ICollection<UserFavoriteSong> FavoritedBy { get; set; }

@@ -35,7 +35,7 @@ namespace TunePhere.Controllers
             _logger = logger;
         }
 
-        // GET: Songs
+       [AllowAnonymous]
         public async Task<IActionResult> Index(int? artistId)
         {
             try
