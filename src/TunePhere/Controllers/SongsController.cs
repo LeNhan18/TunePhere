@@ -35,7 +35,7 @@ namespace TunePhere.Controllers
             _logger = logger;
         }
 
-        // GET: Songs
+        [AllowAnonymous]
         public async Task<IActionResult> Index(int? artistId)
         {
             try
@@ -60,28 +60,36 @@ namespace TunePhere.Controllers
                     return View(songs);
                 }
 
-                // Nếu không có artistId, lấy tất cả bài hát của nghệ sĩ hiện tại
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
+                // Nếu không có artistId, kiểm tra xem người dùng có đăng nhập không
+                if (User.Identity.IsAuthenticated)
                 {
-                    return Challenge();
+                    var user = await _userManager.GetUserAsync(User);
+                    // Kiểm tra xem người dùng có phải là nghệ sĩ không
+                    var currentArtist = await _context.Artists
+                        .FirstOrDefaultAsync(a => a.userId == user.Id);
+
+                    if (currentArtist != null)
+                    {
+                        // Nếu người dùng là nghệ sĩ, hiển thị bài hát của họ
+                        var artistSongs = await _context.Songs
+                            .Include(s => s.Artists)
+                            .Where(s => s.ArtistId == currentArtist.ArtistId)
+                            .ToListAsync();
+
+                        ViewBag.Artist = currentArtist;
+                        return View(artistSongs);
+                    }
                 }
-
-                var currentArtist = await _context.Artists
-                    .FirstOrDefaultAsync(a => a.userId == user.Id);
-
-                if (currentArtist == null)
-                {
-                    return RedirectToAction("Create", "Artists");
-                }
-
-                var artistSongs = await _context.Songs
+                
+                // Nếu không phải nghệ sĩ hoặc không đăng nhập, hiển thị tất cả bài hát
+                var allSongs = await _context.Songs
                     .Include(s => s.Artists)
-                    .Where(s => s.ArtistId == currentArtist.ArtistId)
+                    .OrderByDescending(s => s.PlayCount)
+                    .Take(50)  // Giới hạn số lượng bài hát hiển thị
                     .ToListAsync();
-
-                ViewBag.Artist = currentArtist;
-                return View(artistSongs);
+                    
+                ViewBag.Title = "Bài hát nổi bật";
+                return View(allSongs);
             }
             catch (Exception ex)
             {
