@@ -3,7 +3,8 @@
 @{
     ViewData["Title"] = "Danh sách bài hát";
     Layout = "_Layout";
-    var artist = ViewBag.Artist as TunePhere.Models.Artists;
+    var firstSong = Model.FirstOrDefault();
+    var artist = firstSong?.Artists;
 }
 
 
@@ -23,16 +24,9 @@
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                @if (User.Identity.IsAuthenticated)
-                {
-                    var currentUser = await UserManager.GetUserAsync(User);
-                    if (artist?.userId == currentUser.Id)
-                    {
-                        <a asp-action="Create" class="btn btn-create">
-                            <i class="fas fa-plus-circle me-2"></i> Thêm bài hát mới
-                        </a>
-                    }
-                }
+                <a asp-action="Create" class="btn btn-create">
+                    <i class="fas fa-plus-circle me-2"></i> Thêm bài hát mới
+                </a>
             </div>
         </div>
 
@@ -67,7 +61,7 @@
                                         <h6 class="mb-0 song-title">@item.Title</h6>
                                     </div>
                                 </div>
-                            </td>
+                                </td>
                             <td><span class="genre-badge">@item.Genre</span></td>
                             <td class="text-muted">@item.Duration.ToString(@"mm\:ss")</td>
                             <td>
@@ -80,21 +74,14 @@
                             </td>
                             <td>
                                 <div class="btn-group action-buttons">
-                                    @if (User.Identity.IsAuthenticated)
-                                    {
-                                        var currentUser = await UserManager.GetUserAsync(User);
-                                        if (artist?.userId == currentUser.Id)
-                                        {
-                                            <a asp-action="Edit" asp-route-id="@item.SongId" class="btn btn-action">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a asp-action="Delete" asp-route-id="@item.SongId" class="btn btn-action btn-delete">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        }
-                                    }
+                                    <a asp-action="Edit" asp-route-id="@item.SongId" class="btn btn-action">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
                                     <a asp-action="Details" asp-route-id="@item.SongId" class="btn btn-action">
                                         <i class="fas fa-info-circle"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.SongId" class="btn btn-action btn-delete">
+                                        <i class="fas fa-trash"></i>
                                     </a>
                                 </div>
                             </td>
@@ -105,6 +92,7 @@
         </div>
     </div>
 </div>
+
 
 @section Styles {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">

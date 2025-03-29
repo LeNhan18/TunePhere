@@ -79,7 +79,7 @@
                 <i class="fas fa-compact-disc"></i>
                 <span>Album đã lưu</span>
             </a>
-            <a href="@Url.Action("Index", "Artists")" class="library-item">
+            <a href="@Url.Action("Following", "Artists")" class="library-item">
                 <i class="fas fa-microphone-alt"></i>
                 <span>Nghệ sĩ đang theo dõi</span>
             </a>
@@ -173,7 +173,7 @@
             <div class="music-grid">
                 @foreach (var song in Model.OrderByDescending(s => s.PlayCount).Take(4))
                 {
-                    <div class="music-card" data-song-id="@song.SongId" data-title="@song.Title" data-artist="@song.Artists?.ArtistName" data-audio-url="@song.FileUrl" data-image-url="@song.ImageUrl" data-video-url="@song.VideoUrl">
+                    <div class="music-card" ondblclick="location.href='/Songs/Details/@song.SongId'" data-song-id="@song.SongId" data-title="@song.Title" data-artist="@song.Artists?.ArtistName" data-audio-url="@song.FileUrl" data-image-url="@song.ImageUrl" data-video-url="@song.VideoUrl">
                         <div class="card-img-container">
                             <img src="@song.ImageUrl" alt="@song.Title">
                             <div class="play-overlay">
