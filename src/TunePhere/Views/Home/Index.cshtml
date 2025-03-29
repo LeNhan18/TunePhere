@@ -266,59 +266,12 @@
 </div>
 
 <!-- Now Playing Bar -->
-<div id="nowPlayingBar" class="now-playing-bar" style="display: none;">
-    <div class="now-playing-left">
-        <div class="now-playing-cover">
-            <img id="nowPlayingImage" src="" alt="Now Playing">
-        </div>
-        <div class="track-info">
-            <span id="nowPlayingTitle" class="song-name"></span>
-            <span id="nowPlayingArtist" class="artist-name"></span>
-        </div>
-    </div>
-    <div class="now-playing-center">
-        <div class="player-controls">
-            <button onclick="previousSong()" class="control-button">
-                <i class="fas fa-step-backward"></i>
-            </button>
-            <button onclick="togglePlay()" class="control-button play-pause-btn" id="playPauseButton">
-                <i class="fas fa-play"></i>
-            </button>
-            <button onclick="nextSong()" class="control-button">
-                <i class="fas fa-step-forward"></i>
-            </button>
-        </div>
-        <div class="playback-bar">
-            <span id="currentTime" class="time">0:00</span>
-            <div class="progress-bar">
-                <input type="range" id="seekBar" value="0" class="seek-bar">
-                <div class="progress-bar-bg"></div>
-            </div>
-            <span id="duration" class="time">0:00</span>
-        </div>
-    </div>
-    <div class="now-playing-right">
-        <button onclick="toggleMute()" class="control-button" id="volumeButton">
-            <i class="fas fa-volume-up"></i>
-        </button>
-        <div class="volume-bar-container">
-            <input type="range" id="volumeBar" value="100" class="volume-bar">
-            <div class="volume-bar-bg"></div>
-            <button onclick="showVideo(currentSong?.videoUrl)" class="control-button" id="videoButton" style="display: none;">
-                <i class="fas fa-video"></i>
-            </button>
-        </div>
-    </div>
-</div>
+<!-- Xóa phần này vì đã có player bar trong _NavigationPartial.cshtml -->
 
-<!-- Script --> 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    let audioPlayer = new Audio();
     let currentSongIndex = -1;
     let songs = [];
-    let isPlaying = false;
-    let currentSong = null;
 
     // Khởi tạo danh sách bài hát
     function initializeSongs() {
@@ -336,43 +289,6 @@
     // Khởi tạo các event listeners
     document.addEventListener('DOMContentLoaded', function() {
         initializeSongs();
-        
-        const seekBar = document.getElementById('seekBar');
-        const volumeBar = document.getElementById('volumeBar');
-        
-        // Xử lý tua nhạc
-        seekBar.addEventListener('input', () => {
-            const time = (seekBar.value / 100) * audioPlayer.duration;
-            audioPlayer.currentTime = time;
-        });
-        
-        // Xử lý âm lượng
-        volumeBar.addEventListener('input', () => {
-            const value = volumeBar.value;
-            audioPlayer.volume = value / 100;
-            volumeBar.style.setProperty('--volume-percentage', `${value}%`);
-            
-            if (audioPlayer.volume > 0) {
-                const icon = document.querySelector('#volumeButton i');
-                icon.classList.remove('fa-volume-mute');
-                icon.classList.add('fa-volume-up');
-            }
-        });
-        
-        // Cập nhật tiến trình
-        audioPlayer.addEventListener('timeupdate', () => {
-            const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-            seekBar.value = percent;
-            seekBar.style.background = `linear-gradient(to right, #1ed760 ${percent}%, #535353 ${percent}%)`;
-            
-            document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime);
-            document.getElementById('duration').textContent = formatTime(audioPlayer.duration);
-        });
-        
-        // Xử lý khi bài hát kết thúc
-        audioPlayer.addEventListener('ended', () => {
-            nextSong();
-        });
 
         // Thêm sự kiện click cho các music card và song item
         document.querySelectorAll('.music-card, .song-item').forEach((card, index) => {
@@ -406,131 +322,25 @@
         });
     });
 
-    // Chuyển đến bài tiếp theo
-    function nextSong() {
-        if (currentSongIndex < songs.length - 1) {
-            playByIndex(currentSongIndex + 1);
-        }
-    }
-
-    // Chuyển về bài trước
-    function previousSong() {
-        if (currentSongIndex > 0) {
-            playByIndex(currentSongIndex - 1);
-        }
-    }
-
     // Hàm phát nhạc theo index
     function playByIndex(index) {
         if (index < 0 || index >= songs.length) return;
         
-        currentSong = songs[index];
+        const song = songs[index];
         currentSongIndex = index;
         
-        // Cập nhật nguồn audio
-        audioPlayer.src = currentSong.audioUrl;
+        // Sử dụng hàm playAudio từ _NavigationPartial.cshtml
+        const songItem = {
+            dataset: {
+                songId: song.id,
+                songUrl: song.audioUrl,
+                songTitle: song.title,
+                songArtist: song.artist,
+                songImage: song.imageUrl
+            }
+        };
         
-        // Cập nhật thông tin hiển thị
-        document.getElementById('nowPlayingTitle').textContent = currentSong.title;
-        document.getElementById('nowPlayingArtist').textContent = currentSong.artist;
-        document.getElementById('nowPlayingImage').src = currentSong.imageUrl;
-        
-        // Hiển thị/ẩn nút video
-        const videoButton = document.getElementById('videoButton');
-        videoButton.style.display = currentSong.videoUrl ? 'block' : 'none';
-        
-        // Hiển thị thanh phát nhạc
-        document.getElementById('nowPlayingBar').style.display = 'flex';
-        
-        // Phát nhạc và tăng lượt nghe
-        playAndIncrementCount(currentSong);
-    }
-
-    // Hàm phát nhạc và tăng lượt nghe
-    function playAndIncrementCount(song) {
-        audioPlayer.play()
-            .then(() => {
-                isPlaying = true;
-                updatePlayPauseButton();
-                
-                // Gọi API để tăng lượt nghe
-                fetch(`/Songs/IncrementPlayCount/${song.id}`, {
-                    method: 'POST',
-                    headers: {
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Cập nhật số lượt nghe trên giao diện nếu có
-                    const playCountElements = document.querySelectorAll('.play-count');
-                    playCountElements.forEach(element => {
-                        if (element.closest('.music-card')?.dataset.songId === song.id) {
-                            element.textContent = `${data.playCount} lượt nghe`;
-                        }
-                    });
-                })
-                .catch(error => console.error('Lỗi khi tăng lượt nghe:', error));
-            })
-            .catch(error => {
-                console.error('Lỗi phát nhạc:', error);
-            });
-    }
-
-    // Cập nhật nút play/pause
-    function updatePlayPauseButton() {
-        const button = document.getElementById('playPauseButton');
-        const icon = button.querySelector('i');
-        
-        if (isPlaying) {
-            icon.classList.remove('fa-play');
-            icon.classList.add('fa-pause');
-        } else {
-            icon.classList.remove('fa-pause');
-            icon.classList.add('fa-play');
-        }
-    }
-
-    // Xử lý play/pause
-    function togglePlay() {
-        if (currentSongIndex === -1 && songs.length > 0) {
-            playByIndex(0);
-            return;
-        }
-        
-        if (isPlaying) {
-            audioPlayer.pause();
-            isPlaying = false;
-        } else {
-            playAndIncrementCount(currentSong);
-        }
-        
-        updatePlayPauseButton();
-    }
-
-    // Xử lý âm lượng
-    function toggleMute() {
-        const volumeButton = document.getElementById('volumeButton');
-        const icon = volumeButton.querySelector('i');
-        
-        if (audioPlayer.volume > 0) {
-            audioPlayer.volume = 0;
-            icon.classList.remove('fa-volume-up');
-            icon.classList.add('fa-volume-mute');
-        } else {
-            audioPlayer.volume = volumeBar.value / 100;
-            icon.classList.remove('fa-volume-mute');
-            icon.classList.add('fa-volume-up');
-        }
-    }
-
-    // Hàm format thời gian
-    function formatTime(seconds) {
-        if (isNaN(seconds)) return '0:00';
-        
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = Math.floor(seconds % 60);
-        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        playAudio(songItem);
     }
 
     function showVideo(url, card) {
@@ -567,19 +377,7 @@
             if (playlistTitle) playlistTitle.textContent = title;
             if (playlistDescription) playlistDescription.textContent = `By ${artist}`;
         }
-        // Nếu không có card, sử dụng currentSong
-        else if (currentSong) {
-            if (playlistTitle) playlistTitle.textContent = currentSong.title;
-            if (playlistDescription) playlistDescription.textContent = `By ${currentSong.artist}`;
-        }
     }
-
-    // Cập nhật onclick cho nút video trong thanh player
-    document.getElementById('videoButton').onclick = function() {
-        if (currentSong?.videoUrl) {
-            showVideo(currentSong.videoUrl);
-        }
-    };
 </script>
 
 @* <!-- Add this CSS to your homepage.css file --> *@
