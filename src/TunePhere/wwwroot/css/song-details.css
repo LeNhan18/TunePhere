@@ -1,4 +1,4 @@
-﻿﻿ /* Thiết lập cơ bản */
+﻿ /* Thiết lập cơ bản */
 * {
     margin: 0;
     padding: 0;
@@ -464,9 +464,9 @@ body {
 /* Lyrics */
 .lyric-line, .lyric-text {
     font-size: 18px !important;
-    line-height: 2;
+    line-height: 2.5;
     color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 14px;
+    margin-bottom: 25px;
     white-space: pre-wrap;
     font-family: inherit;
     background: transparent;
@@ -496,18 +496,19 @@ body {
     word-break: break-word;
     max-width: 100%;
     font-size: 22px;
-    line-height: 1.8;
+    line-height: 2.2;
     text-overflow: ellipsis;
     overflow: hidden;
+    margin-bottom: 30px;
 }
 
 /* Điều chỉnh các dòng lyrics */
 .lyric-line {
-    padding: 8px 0;
+    padding: 12px 0;
     transition: all 0.3s ease;
     color: #aaa;
     font-size: 16px;
-    line-height: 1.5;
+    line-height: 2;
     white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -515,6 +516,7 @@ body {
     max-width: 100%;
     box-sizing: border-box;
     word-break: break-word;
+    margin-bottom: 10px;
 }
 
 /* Responsive */
