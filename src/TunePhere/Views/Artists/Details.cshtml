@@ -1,43 +1,279 @@
 ﻿@model TunePhere.Models.Artists
 
 @{
-    ViewData["Title"] = "Details";
-    Layout = "UserController";
+    ViewData["Title"] = "Chi tiết nghệ sĩ";
+    Layout = "_Layout";
 }
 
-<h1>Details</h1>
+<div class="artist-profile">
+    <div class="profile-header">
+        <div class="profile-image">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" alt="@Model.ArtistName" />
+            }
+            else
+            {
+                <div class="default-image">
+                    <i class="fas fa-user"></i>
+                </div>
+            }
+        </div>
+        <div class="profile-info">
+            <h1>@Model.ArtistName</h1>
+            @if (!string.IsNullOrEmpty(Model.Bio))
+            {
+                <p class="bio">@Model.Bio</p>
+            }
+            <div class="stats">
+                <div class="stat">
+                    <span class="count">@Model.Songs.Count</span>
+                    <span class="label">Bài hát</span>
+                </div>
+                <div class="stat">
+                    <span class="count">@Model.Albums.Count</span>
+                    <span class="label">Album</span>
+                </div>
+                <div class="stat">
+                    <span class="count">@Model.Followers.Count</span>
+                    <span class="label">Người theo dõi</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div>
-    <h4>Artists</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ArtistName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ArtistName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageUrl)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageUrl)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Bio)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Bio)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.userId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.userId)
-        </dd>
-    </dl>
+    @if (Model.Songs.Any())
+    {
+        <div class="songs-section">
+            <h2>Bài hát</h2>
+            <div class="songs-grid">
+                @foreach (var song in Model.Songs.OrderByDescending(s => s.UploadDate))
+                {
+                    <div class="song-card">
+                        <div class="song-image">
+                            @if (!string.IsNullOrEmpty(song.ImageUrl))
+                            {
+                                <img src="@song.ImageUrl" alt="@song.Title" />
+                            }
+                            else
+                            {
+                                <div class="default-song-image">
+                                    <i class="fas fa-music"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="song-info">
+                            <h3>@song.Title</h3>
+                            <p>@song.Genre</p>
+                            <p>@song.Duration.ToString(@"mm\:ss")</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (Model.Albums.Any())
+    {
+        <div class="albums-section">
+            <h2>Album</h2>
+            <div class="albums-grid">
+                @foreach (var album in Model.Albums.OrderByDescending(a => a.ReleaseDate))
+                {
+                    <div class="album-card">
+                        <div class="album-image">
+                            @if (!string.IsNullOrEmpty(album.ImageUrl))
+                            {
+                                <img src="@album.ImageUrl" alt="@album.AlbumName" />
+                            }
+                            else
+                            {
+                                <div class="default-album-image">
+                                    <i class="fas fa-compact-disc"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="album-info">
+                            <h3>@album.AlbumName</h3>
+                            <p>@album.ReleaseDate</p>
+                            <p>@album.Songs.Count bài hát</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ArtistId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+<style>
+.artist-profile {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+}
+
+.profile-image {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 2rem;
+}
+
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-image {
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    color: rgba(255,255,255,0.3);
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-info h1 {
+    color: white;
+    margin-bottom: 1rem;
+    font-size: 2.5rem;
+}
+
+.bio {
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.stats {
+    display: flex;
+    gap: 2rem;
+}
+
+.stat {
+    text-align: center;
+}
+
+.count {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+.label {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.9rem;
+}
+
+.songs-section, .albums-section {
+    margin-top: 3rem;
+}
+
+.songs-section h2, .albums-section h2 {
+    color: white;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+.songs-grid, .albums-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.song-card, .album-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.song-card:hover, .album-card:hover {
+    transform: translateY(-5px);
+}
+
+.song-image, .album-image {
+    position: relative;
+    padding-top: 100%;
+}
+
+.song-image img, .album-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-song-image, .default-album-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: rgba(255,255,255,0.3);
+}
+
+.song-info, .album-info {
+    padding: 1rem;
+}
+
+.song-info h3, .album-info h3 {
+    color: white;
+    margin: 0;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.song-info p, .album-info p {
+    color: rgba(255,255,255,0.5);
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+@@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-image {
+        margin-right: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .stats {
+        justify-content: center;
+    }
+
+    .songs-grid, .albums-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+</style>

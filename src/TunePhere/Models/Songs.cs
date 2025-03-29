@@ -54,12 +54,19 @@ namespace TunePhere.Models
         
         [JsonIgnore]
         public virtual ICollection<PlaylistSong>? PlaylistSongs { get; set; } // Danh sách playlist chứa bài hát này
+
+        [JsonIgnore]
+        public virtual ICollection<SongLike>? SongLikes { get; set; } // Danh sách người đã like bài hát
+        
+        [NotMapped]
+        public bool IsLiked { get; set; } // Trạng thái like của người dùng hiện tại
         
         public Song()
         {
             Lyrics = new HashSet<Lyric>();
             Remixes = new HashSet<Remix>();
             PlaylistSongs = new HashSet<PlaylistSong>();
+            SongLikes = new HashSet<SongLike>();
             Title = "";
             Genre = "";
             FileUrl = "";
@@ -68,6 +75,5 @@ namespace TunePhere.Models
             PlayCount = 0;
             LikeCount = 0;
         }
-       
     }
 }
