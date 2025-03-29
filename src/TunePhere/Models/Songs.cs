@@ -56,9 +56,6 @@ namespace TunePhere.Models
         
         [JsonIgnore]
         public virtual ICollection<PlaylistSong>? PlaylistSongs { get; set; } // Danh sách playlist chứa bài hát này
-
-        [JsonIgnore]
-        public virtual ICollection<SongLike>? SongLikes { get; set; } // Danh sách người đã like bài hát
         
         
         [JsonIgnore]
