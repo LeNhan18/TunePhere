@@ -38,8 +38,10 @@ namespace TunePhere.Controllers
                 if (userId != null)
                 {
                     foreach (var song in artist.Songs)
-                    {
-                        song.IsLiked = await _context.SongLikes
+
+                    {   
+                        song.IsLiked = await _context.UserFavoriteSongs
+
                             .AnyAsync(sl => sl.SongId == song.SongId && sl.UserId == userId);
                     }
                 }
@@ -59,7 +61,8 @@ namespace TunePhere.Controllers
             {
                 foreach (var song in songs)
                 {
-                    song.IsLiked = await _context.SongLikes
+                    song.IsLiked = await _context.UserFavoriteSongs
+
                         .AnyAsync(sl => sl.SongId == song.SongId && sl.UserId == userId);
                 }
             }
@@ -94,9 +97,10 @@ namespace TunePhere.Controllers
                     .Where(s => s.Title.ToLower().Contains(searchTerm) ||
                                s.Genre.ToLower().Contains(searchTerm) ||
                                (s.Artists != null && s.Artists.ArtistName.ToLower().Contains(searchTerm)))
-                    .Select(s => new { 
-                        s.SongId, 
-                        s.Title, 
+                    .Select(s => new {
+                        s.SongId,
+                        s.Title,
+
                         ArtistName = s.Artists != null ? s.Artists.ArtistName : "Unknown",
                         s.ImageUrl,
                         s.Genre,
@@ -132,9 +136,11 @@ namespace TunePhere.Controllers
                     .AsNoTracking()
                     .Where(a => a.ArtistName.ToLower().Contains(searchTerm) ||
                                (a.Bio != null && a.Bio.ToLower().Contains(searchTerm)))
-                    .Select(a => new { 
-                        a.ArtistId, 
-                        a.ArtistName, 
+
+                    .Select(a => new {
+                        a.ArtistId,
+                        a.ArtistName,
+
                         a.ImageUrl,
                         a.Bio,
                         SongCount = a.Songs.Count,
@@ -173,7 +179,9 @@ namespace TunePhere.Controllers
             }
 
             var userId = User.Identity.Name;
-            var existingLike = await _context.SongLikes
+
+            var existingLike = await _context.UserFavoriteSongs
+
                 .FirstOrDefaultAsync(sl => sl.SongId == songId && sl.UserId == userId);
 
             var song = await _context.Songs.FindAsync(songId);
@@ -184,19 +192,24 @@ namespace TunePhere.Controllers
 
             if (existingLike != null)
             {
-                _context.SongLikes.Remove(existingLike);
+                _context.UserFavoriteSongs.Remove(existingLike);
+
                 song.LikeCount--;
                 await _context.SaveChangesAsync();
                 return Json(new { success = true, isLiked = false });
             }
             else
             {
-                var songLike = new SongLike
+
+                var songLike = new UserFavoriteSong
+
                 {
                     SongId = songId,
                     UserId = userId
                 };
-                _context.SongLikes.Add(songLike);
+
+                _context.UserFavoriteSongs.Add(songLike);
+
                 song.LikeCount++;
                 await _context.SaveChangesAsync();
                 return Json(new { success = true, isLiked = true });
@@ -208,7 +221,9 @@ namespace TunePhere.Controllers
         {
             if (string.IsNullOrEmpty(term) || term.Length < 2)
             {
-                return Json(new { 
+                return Json(new
+                {
+
                     artists = new List<object>(),
                     songs = new List<object>(),
                     albums = new List<object>()
