@@ -17,7 +17,6 @@ namespace TunePhere.Models
         public DbSet<Remix> Remixes { get; set; }
         public DbSet<UserPreference> UserPreferences { get; set; }
         public DbSet<PlaylistSong> PlaylistSongs { get; set; }
-        public DbSet<SongLike> SongLikes { get; set; }
 
         public DbSet<Artists> Artists { get; set; }
         public DbSet<Album> Albums { get; set; }
