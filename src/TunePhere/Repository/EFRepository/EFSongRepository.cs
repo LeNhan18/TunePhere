@@ -51,5 +51,62 @@ namespace TunePhere.Repository.EFRepository
                 .Take(10)
                 .ToListAsync();
         }
+
+        public async Task<bool> IsFavoritedByUserAsync(int songId, string userId)
+        {
+            return await _context.UserFavoriteSongs
+                .AnyAsync(f => f.SongId == songId && f.UserId == userId);
+        }
+
+        public async Task<bool> ToggleFavoriteAsync(int songId, string userId)
+        {
+            var song = await _context.Songs.FindAsync(songId);
+            if (song == null)
+                return false;
+
+            var favorite = await _context.UserFavoriteSongs
+                .FirstOrDefaultAsync(f => f.UserId == userId && f.SongId == songId);
+
+            bool isNowLiked = false;
+            
+            if (favorite == null)
+            {
+                // Chưa thích - thêm vào danh sách yêu thích
+                _context.UserFavoriteSongs.Add(new UserFavoriteSong
+                {
+                    UserId = userId,
+                    SongId = songId,
+                    AddedDate = DateTime.Now
+                });
+                
+                // Tăng LikeCount của bài hát
+                song.LikeCount++;
+                isNowLiked = true;
+            }
+            else
+            {
+                // Đã thích - xóa khỏi danh sách yêu thích
+                _context.UserFavoriteSongs.Remove(favorite);
+                
+                // Giảm LikeCount của bài hát
+                if (song.LikeCount > 0)
+                    song.LikeCount--;
+                isNowLiked = false;
+            }
+            
+            await _context.SaveChangesAsync();
+            
+            return isNowLiked;
+        }
+
+        public async Task<IEnumerable<Song>> GetUserFavoriteSongsAsync(string userId)
+        {
+            return await _context.UserFavoriteSongs
+                .Where(f => f.UserId == userId)
+                .Include(f => f.Song)
+                .ThenInclude(s => s.Artists)
+                .Select(f => f.Song)
+                .ToListAsync();
+        }
     }
 }
