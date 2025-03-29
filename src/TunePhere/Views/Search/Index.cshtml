@@ -1,0 +1,672 @@
+@model TunePhere.Models.SearchResults
+
+@{
+    ViewData["Title"] = "Kết quả tìm kiếm";
+    Layout = "_Layout";
+}
+
+<div class="search-results">
+    <div class="search-header">
+        <div class="search-info">
+            <h1>Kết quả tìm kiếm</h1>
+            <p class="search-term">Từ khóa: "@Model.SearchTerm"</p>
+            <p class="result-count">Tìm thấy @Model.Songs.Count bài hát</p>
+        </div>
+    </div>
+    <div class="songs-section">
+        @if (Model.Songs.Any())
+        {
+            <div class="songs-list">
+                @foreach (var song in Model.Songs)
+                {
+                    <div class="song-item" data-song-id="@song.SongId" data-song-url="@song.FileUrl" data-song-title="@song.Title" data-song-artist="@(song.Artists?.ArtistName ?? "Unknown")" data-song-image="@song.ImageUrl">
+                        <div class="song-number">
+                            <span class="number">@(Model.Songs.ToList().IndexOf(song) + 1)</span>
+                            <i class="fas fa-play play-icon"></i>
+                            <i class="fas fa-pause pause-icon"></i>
+                        </div>
+                        <div class="song-image">
+                            @if (!string.IsNullOrEmpty(song.ImageUrl))
+                            {
+                                <img src="@song.ImageUrl" alt="@song.Title" />
+                            }
+                            else
+                            {
+                                <div class="default-song-image">
+                                    <i class="fas fa-music"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="song-info">
+                            <h3>@song.Title</h3>
+                            <div class="song-meta">
+                                <a href="@Url.Action("Index", "Search", new { searchTerm = song.Artists?.ArtistName })" class="artist-name">
+                                    @(song.Artists?.ArtistName ?? "Unknown")
+                                </a>
+                                <span class="separator">•</span>
+                                <span class="genre">@song.Genre</span>
+                                <span class="separator">•</span>
+                                <span class="duration">@song.Duration.ToString(@"mm\:ss")</span>
+                            </div>
+                        </div>
+                        <div class="song-stats">
+                            <span class="play-count" title="Lượt nghe">
+                                <i class="fas fa-play"></i>
+                                @song.PlayCount
+                            </span>
+                            <span class="like-count" title="Lượt thích">
+                                <i class="fas fa-heart"></i>
+                                @song.LikeCount
+                            </span>
+                        </div>
+                        <div class="song-actions">
+                            <button class="btn-add-playlist" title="Thêm vào playlist" onclick="openPlaylistModal('@song.SongId')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="btn-like @(song.IsLiked ? "active" : "")" title="Yêu thích" onclick="toggleLike('@song.SongId')">
+                                <i class="@(song.IsLiked ? "fas" : "far") fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <p>Không tìm thấy bài hát nào phù hợp với từ khóa "@Model.SearchTerm"</p>
+                <a href="/" class="btn-back">Quay lại trang chủ</a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal thêm vào playlist -->
+<div class="modal fade" id="playlistModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm vào playlist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="playlist-list">
+                    <!-- Danh sách playlist sẽ được thêm bằng JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.search-results {
+    padding: 0;
+    max-width: 100%;
+    margin: 0;
+    background: #121212;
+    min-height: 100vh;
+    color: white;
+}
+
+.search-header {
+    background: linear-gradient(to bottom, #1DB954, #121212);
+    padding: 4rem 2rem 2rem;
+    margin-bottom: 2rem;
+}
+
+.search-info {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.search-info h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+}
+
+.search-term {
+    font-size: 1.2rem;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 0.5rem;
+}
+
+.result-count {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.6);
+}
+
+.songs-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.songs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.song-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.03);
+}
+
+.song-item:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+}
+
+.song-number {
+    width: 40px;
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+    font-size: 1rem;
+}
+
+.song-item:hover .number {
+    display: none;
+}
+
+.song-item:hover .play-icon {
+    display: block;
+}
+
+.play-icon, .pause-icon {
+    display: none;
+    cursor: pointer;
+    color: white;
+}
+
+.song-item.playing .number,
+.song-item.playing .play-icon {
+    display: none;
+}
+
+.song-item.playing .pause-icon {
+    display: block;
+    color: #1DB954;
+}
+
+.song-image {
+    width: 50px;
+    height: 50px;
+    margin: 0 1rem;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 4px 60px rgba(0,0,0,.5);
+}
+
+.song-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-song-image {
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.3);
+    font-size: 1.5rem;
+}
+
+.song-info {
+    flex: 1;
+    min-width: 0;
+    margin-right: 2rem;
+}
+
+.song-info h3 {
+    color: white;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.artist-name {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.artist-name:hover {
+    color: #1DB954;
+}
+
+.separator {
+    color: rgba(255,255,255,0.3);
+}
+
+.song-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-right: 2rem;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.9rem;
+}
+
+.song-stats span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.song-stats i {
+    font-size: 0.8rem;
+}
+
+.song-actions {
+    display: flex;
+    gap: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.song-item:hover .song-actions {
+    opacity: 1;
+}
+
+.song-actions button {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    font-size: 1.1rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.song-actions button:hover {
+    color: white;
+    transform: scale(1.1);
+}
+
+.song-actions .btn-like.active {
+    color: #1DB954;
+}
+
+.no-results {
+    text-align: center;
+    padding: 4rem 0;
+    color: rgba(255,255,255,0.7);
+}
+
+.no-results i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: rgba(255,255,255,0.3);
+}
+
+.no-results p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.btn-back {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    background: #1DB954;
+    color: white;
+    text-decoration: none;
+    border-radius: 2rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background: #1ed760;
+    transform: scale(1.05);
+}
+
+/* Modal styles */
+.modal-content {
+    background: #282828;
+    color: white;
+    border-radius: 8px;
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 1.5rem;
+}
+
+.modal-title {
+    color: white;
+    font-weight: 600;
+}
+
+.btn-close {
+    color: white;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.btn-close:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.playlist-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.playlist-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.playlist-item:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.playlist-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    margin-right: 1rem;
+}
+
+.playlist-item span {
+    color: white;
+    font-size: 0.9rem;
+}
+
+.search-suggestions {
+    max-width: 1200px;
+    margin: 0 auto 2rem;
+    padding: 0 2rem;
+}
+
+.suggestions-container {
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.suggestions-container h2 {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.suggestions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.suggestion-item:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+}
+
+.suggestion-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 1rem;
+}
+
+.suggestion-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.suggestion-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.suggestion-name {
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.suggestion-type {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.9rem;
+}
+
+@@media (max-width: 768px) {
+    .search-header {
+        padding: 3rem 1rem 1.5rem;
+    }
+
+    .search-info h1 {
+        font-size: 2rem;
+    }
+
+    .songs-section {
+        padding: 0 1rem;
+    }
+
+    .song-item {
+        padding: 0.5rem;
+    }
+
+    .song-image {
+        width: 40px;
+        height: 40px;
+    }
+
+    .song-info {
+        margin-right: 1rem;
+    }
+
+    .song-meta {
+        flex-wrap: wrap;
+    }
+
+    .song-stats {
+        display: none;
+    }
+
+    .song-actions {
+        opacity: 1;
+    }
+
+    .search-suggestions {
+        padding: 0 1rem;
+    }
+
+    .suggestions-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .suggestion-item {
+        padding: 0.5rem;
+    }
+
+    .suggestion-image {
+        width: 40px;
+        height: 40px;
+    }
+
+    .suggestion-name {
+        font-size: 0.9rem;
+    }
+
+    .suggestion-type {
+        font-size: 0.8rem;
+    }
+}
+</style>
+
+<script>
+let currentAudio = null;
+let currentSongItem = null;
+
+function playAudio(songItem) {
+    const songUrl = songItem.dataset.songUrl;
+    const songId = songItem.dataset.songId;
+    
+    // Nếu đang phát bài hát khác, dừng lại
+    if (currentAudio && currentSongItem) {
+        currentAudio.pause();
+        currentSongItem.classList.remove('playing');
+    }
+
+    // Nếu click vào bài hát đang phát, dừng lại
+    if (currentSongItem === songItem) {
+        currentAudio = null;
+        currentSongItem = null;
+        return;
+    }
+
+    // Phát bài hát mới
+    const audio = new Audio(songUrl);
+    audio.play();
+    
+    songItem.classList.add('playing');
+    currentAudio = audio;
+    currentSongItem = songItem;
+
+    // Cập nhật lượt nghe
+    updatePlayCount(songId);
+
+    // Xử lý khi phát xong
+    audio.onended = function() {
+        songItem.classList.remove('playing');
+        currentAudio = null;
+        currentSongItem = null;
+    };
+}
+
+function updatePlayCount(songId) {
+    fetch(`/api/songs/${songId}/play`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+}
+
+function openPlaylistModal(songId) {
+    // Lấy danh sách playlist của user
+    fetch('/api/playlists/user')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const playlistList = document.querySelector('.playlist-list');
+                playlistList.innerHTML = data.playlists.map(playlist => `
+                    <div class="playlist-item" onclick="addToPlaylist('${songId}', '${playlist.id}')">
+                        <img src="${playlist.imageUrl}" alt="${playlist.name}">
+                        <span>${playlist.name}</span>
+                    </div>
+                `).join('');
+                
+                const modal = new bootstrap.Modal(document.getElementById('playlistModal'));
+                modal.show();
+            }
+        });
+}
+
+function addToPlaylist(songId, playlistId) {
+    fetch('/api/playlists/add-song', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            songId: songId,
+            playlistId: playlistId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Đóng modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('playlistModal'));
+            modal.hide();
+            
+            // Hiển thị thông báo thành công
+            alert('Đã thêm bài hát vào playlist');
+        }
+    });
+}
+
+function toggleLike(songId) {
+    fetch(`/Search/Like`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ songId: songId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const likeButton = document.querySelector(`.song-item[data-song-id="${songId}"] .btn-like`);
+            const likeIcon = likeButton.querySelector('i');
+            const likeCount = document.querySelector(`.song-item[data-song-id="${songId}"] .like-count`);
+            
+            likeButton.classList.toggle('active');
+            likeIcon.classList.toggle('far');
+            likeIcon.classList.toggle('fas');
+            
+            // Cập nhật số lượt thích
+            const currentCount = parseInt(likeCount.textContent);
+            likeCount.textContent = data.isLiked ? currentCount + 1 : currentCount - 1;
+        } else {
+            alert(data.message || 'Có lỗi xảy ra khi thực hiện thao tác này');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi thực hiện thao tác này');
+    });
+}
+
+// Thêm sự kiện click cho số thứ tự và icon play
+document.querySelectorAll('.song-number').forEach(number => {
+    number.addEventListener('click', function() {
+        const songItem = this.closest('.song-item');
+        playAudio(songItem);
+    });
+});
+</script> 
