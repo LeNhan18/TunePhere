@@ -1,3 +1,65 @@
+/* Thêm đoạn CSS này vào đầu file để xử lý triệt để mọi dấu gạch chân */
+:root {
+    --accent-color: #bb86fc;
+}
+
+/* Quy tắc toàn cục xóa gạch chân cho TẤT CẢ liên kết */
+a, a:hover, a:focus, a:active, a:visited {
+    text-decoration: none !important;
+}
+
+/* Quy tắc đặc biệt cho phần bài hát nổi bật - đặt ở đầu file */
+.profile-section a,
+.profile-section a *,
+.songs-list a,
+.songs-list a *,
+.album-card,
+.album-card *,
+.song-item,
+.song-item * {
+    text-decoration: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+/* Đặc biệt cho màu khi hover */
+.profile-section a:hover,
+.songs-list a:hover,
+.album-card:hover,
+.song-item:hover,
+.profile-section a:hover *,
+.songs-list a:hover *,
+.album-card:hover *,
+.song-item:hover * {
+    text-decoration: none !important;
+    color: var(--accent-color) !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+/* Thêm vào cuối file để ghi đè lên tất cả */
+.profile-content a[href*="Đợi em tan học"],
+.profile-content a[href*="tan-hoc"],
+.profile-content a[href*="Songs/Details"] {
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
+.profile-content a[href*="Đợi em tan học"]:hover,
+.profile-content a[href*="tan-hoc"]:hover,
+.profile-content a[href*="Songs/Details"]:hover {
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
+/* Loại bỏ mọi kiểu gạch chân tiềm ẩn */
+.profile-content .song-item:before,
+.profile-content .song-item:after {
+    text-decoration: none !important;
+    border-bottom: none !important;
+    content: none !important;
+}
+
 .artist-profile {
     padding-top: 60px;
     background: #121212;
@@ -76,7 +138,8 @@
 }
 
 .stat-link:hover {
-    color: #fff;
+    color: var(--accent-color);
+    text-decoration: none;
 }
 
 .edit-profile-btn {
@@ -318,6 +381,11 @@
     margin: 0;
 }
 
+.album-info h3:hover {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
 .songs-list {
     background: #181818;
     border-radius: 8px;
@@ -334,6 +402,8 @@
 
 .song-item:hover {
     background: #282828;
+    color: var(--accent-color);
+    text-decoration: none;
 }
 
 .song-image {
@@ -372,6 +442,7 @@
 .song-info h3 {
     font-size: 16px;
     margin: 0 0 4px 0;
+    text-decoration: none;
 }
 
 .song-info p {
@@ -445,6 +516,11 @@
     font-weight: 600;
     margin: 12px 0 4px;
     color: white;
+}
+
+.artist-name:hover {
+    color: var(--accent-color);
+    text-decoration: none;
 }
 
 .artist-type {
@@ -540,4 +616,67 @@
     .artist-type {
         font-size: 12px;
     }
+}
+
+/* Quy tắc tổng quát cho tất cả liên kết trong trang nghệ sĩ */
+.artist-profile a,
+.profile-content a,
+.songs-list a,
+.song-item,
+.album-card,
+.stat-link,
+.profile-section a,
+.artists-grid a,
+.view-all {
+    text-decoration: none !important;
+    transition: color 0.3s ease;
+}
+
+/* Khi hover vào bất kỳ liên kết nào */
+.artist-profile a:hover,
+.profile-content a:hover,
+.songs-list a:hover,
+.song-item:hover,
+.album-card:hover,
+.stat-link:hover,
+.artists-grid a:hover,
+.view-all:hover {
+    text-decoration: none !important;
+    color: var(--accent-color);
+}
+
+/* Cập nhật hiệu ứng hover cho song-item */
+.song-item:hover {
+    background: #282828;
+    color: var(--accent-color);
+    text-decoration: none !important;
+}
+
+/* Đặc biệt cho liên kết bài hát */
+.song-item:hover .song-info h3 {
+    color: var(--accent-color);
+    text-decoration: none !important;
+}
+
+/* Đảm bảo không có gạch chân trên stat-link */
+.stat-link:hover {
+    color: var(--accent-color);
+    text-decoration: none !important;
+}
+
+/* Bổ sung thêm cho các liên kết khác */
+.profile-section a.album-card:hover,
+.profile-section a.song-item:hover,
+.profile-section a.view-all:hover {
+    text-decoration: none !important;
+}
+
+/* Bổ sung cho cụ thể link bài hát trong hình */
+.profile-section a[href*="Songs/Details"]:hover {
+    text-decoration: none !important;
+}
+
+/* Ghi đè !important để đảm bảo áp dụng */
+a:hover {
+    text-decoration: none !important;
 } 
