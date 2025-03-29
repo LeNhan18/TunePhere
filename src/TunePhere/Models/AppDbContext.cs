@@ -17,6 +17,7 @@ namespace TunePhere.Models
         public DbSet<Remix> Remixes { get; set; }
         public DbSet<UserPreference> UserPreferences { get; set; }
         public DbSet<PlaylistSong> PlaylistSongs { get; set; }
+        public DbSet<SongLike> SongLikes { get; set; }
 
         public DbSet<Artists> Artists { get; set; }
         public DbSet<Album> Albums { get; set; }
@@ -142,6 +143,19 @@ namespace TunePhere.Models
                 .HasOne(af => af.Artist)
                 .WithMany(a => a.Followers)
                 .HasForeignKey(af => af.ArtistId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Cấu hình mối quan hệ SongLike
+            modelBuilder.Entity<SongLike>()
+                .HasOne(sl => sl.User)
+                .WithMany()
+                .HasForeignKey(sl => sl.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<SongLike>()
+                .HasOne(sl => sl.Song)
+                .WithMany(s => s.SongLikes)
+                .HasForeignKey(sl => sl.SongId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }

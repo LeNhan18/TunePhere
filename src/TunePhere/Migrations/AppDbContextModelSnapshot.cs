@@ -610,6 +610,33 @@ namespace TunePhere.Migrations
                     b.ToTable("Songs");
                 });
 
+            modelBuilder.Entity("TunePhere.Models.SongLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("LikedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SongId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SongId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SongLikes");
+                });
+
             modelBuilder.Entity("TunePhere.Models.UserFollower", b =>
                 {
                     b.Property<int>("Id")
@@ -885,6 +912,25 @@ namespace TunePhere.Migrations
                     b.Navigation("Artists");
                 });
 
+            modelBuilder.Entity("TunePhere.Models.SongLike", b =>
+                {
+                    b.HasOne("TunePhere.Models.Song", "Song")
+                        .WithMany("SongLikes")
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TunePhere.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Song");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TunePhere.Models.UserFollower", b =>
                 {
                     b.HasOne("TunePhere.Models.AppUser", "Follower")
@@ -969,6 +1015,8 @@ namespace TunePhere.Migrations
                     b.Navigation("PlaylistSongs");
 
                     b.Navigation("Remixes");
+
+                    b.Navigation("SongLikes");
                 });
 #pragma warning restore 612, 618
         }
