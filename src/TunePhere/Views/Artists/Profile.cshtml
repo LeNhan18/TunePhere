@@ -6,6 +6,28 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/artist-profile.css" />
+    <style>
+        /* CSS nội tuyến để ghi đè lên mọi quy tắc khác */
+        a, a:hover, a:focus, a:active, a:visited {
+            text-decoration: none !important;
+            border-bottom: none !important;
+        }
+        
+        .song-item {
+            text-decoration: none !important;
+            color: white;
+        }
+        
+        .song-item:hover {
+            text-decoration: none !important;
+            color: #bb86fc;
+        }
+        
+        .profile-section a[href*="Songs/Details"]:hover,
+        .profile-section a[href*="tan-hoc"]:hover {
+            text-decoration: none !important;
+        }
+    </style>
 }
 
 <div class="artist-profile">
@@ -25,7 +47,7 @@
                 </div>
                 <div class="profile-details">
                     <div class="profile-top">
-                        <div>
+                        <div>   
                             <span class="artist-type">Nghệ sĩ</span>
                             <h1>@Model.ArtistName</h1>
                         </div>
