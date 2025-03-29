@@ -62,7 +62,7 @@
                             <span>@Model.PlayCount lượt nghe</span>
                         </div>
                         <div class="stat-item heart-container">
-                            <i class="fas fa-heart heart-icon"></i>
+                            <i class="fas fa-heart heart-icon @(ViewData["IsFavorited"] != null && (bool)ViewData["IsFavorited"] ? "liked" : "")"></i>
                             <span class="like-count">@Model.LikeCount</span>
                         </div>
                         <div class="stat-item">
@@ -290,6 +290,58 @@
                 });
             }
         });
+    </script>
+
+    <!-- Thêm một input hidden để lưu token -->
+    <input type="hidden" id="RequestVerificationToken" 
+           name="__RequestVerificationToken" value="@token" />
+
+    <!-- Thêm đoạn script này vào cuối trang -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const heartIcon = document.querySelector('.heart-icon');
+        const likeCount = document.querySelector('.like-count');
+        
+        if (heartIcon) {
+            heartIcon.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                @if (User.Identity.IsAuthenticated)
+                {
+                    @:// Gửi request để toggle favorite
+                    @:fetch('/Songs/ToggleFavorite/@Model.SongId', {
+                    @:    method: 'POST',
+                    @:    headers: {
+                    @:        'Content-Type': 'application/x-www-form-urlencoded',
+                    @:        'RequestVerificationToken': document.getElementById('RequestVerificationToken').value
+                    @:    }
+                    @:})
+                    @:.then(response => response.json())
+                    @:.then(data => {
+                    @:    // Cập nhật UI
+                    @:    if (data.liked) {
+                    @:        heartIcon.classList.add('liked');
+                    @:    } else {
+                    @:        heartIcon.classList.remove('liked');
+                    @:    }
+                    @:    likeCount.textContent = data.likeCount;
+                    @:    
+                    @:    // Animation nhịp tim
+                    @:    heartIcon.style.animation = 'heartBeat 0.4s';
+                    @:    setTimeout(() => {
+                    @:        heartIcon.style.animation = '';
+                    @:    }, 400);
+                    @:})
+                    @:.catch(error => console.error('Error:', error));
+                }
+                else
+                {
+                    @:// Chuyển hướng đến trang đăng nhập nếu chưa đăng nhập
+                    @:window.location.href = '/Identity/Account/Login?ReturnUrl=' + encodeURIComponent(window.location.pathname);
+                }
+            });
+        }
+    });
     </script>
 </body>
 </html>
