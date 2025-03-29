@@ -140,14 +140,14 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log("Lyrics data:", Model.Lyrics); // Kiểm tra dữ liệu lyrics
 
     // Nếu bài hát tự động phát khi trang tải xong, cũng bật hiệu ứng đĩa
-    audioPlayer.addEventListener('play', function() {
+    audioPlayer.addEventListener('play', function () {
         console.log("Sự kiện play được kích hoạt");
         isPlaying = true;
         updatePlayPauseButton();
         toggleVinylEffect(true);
     });
-    
-    audioPlayer.addEventListener('pause', function() {
+
+    audioPlayer.addEventListener('pause', function () {
         console.log("Sự kiện pause được kích hoạt");
         isPlaying = false;
         updatePlayPauseButton();
@@ -158,14 +158,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const songImage = document.querySelector('.song-image');
     if (songImage) {
         // Tạo hiệu ứng cản quang khi hover
-        songImage.addEventListener('mouseenter', function() {
+        songImage.addEventListener('mouseenter', function () {
             if (!isPlaying) {
                 this.style.transform = 'scale(1.05)';
                 this.style.boxShadow = '0 0 50px rgba(100, 65, 165, 0.4)';
             }
         });
-        
-        songImage.addEventListener('mouseleave', function() {
+
+        songImage.addEventListener('mouseleave', function () {
             if (!isPlaying) {
                 this.style.transform = 'scale(1)';
                 this.style.boxShadow = '0 0 50px rgba(0, 0, 0, 0.8)';
@@ -180,7 +180,7 @@ let vinylEffectActive = false;
 // Cập nhật hàm phát/dừng nhạc để thêm hiệu ứng đĩa xoay
 function togglePlay() {
     console.log("togglePlay được gọi, trạng thái hiện tại:", isPlaying);
-    
+
     if (isPlaying) {
         audioPlayer.pause();
         isPlaying = false;
@@ -193,7 +193,7 @@ function togglePlay() {
                 isPlaying = true;
                 // Bật hiệu ứng đĩa xoay
                 toggleVinylEffect(true);
-                
+
                 // Không tăng lượt nghe khi người dùng phát lại cùng một bài hát
                 // Lượt nghe đã được tăng khi tải trang
             })
@@ -201,7 +201,7 @@ function togglePlay() {
                 console.error('Lỗi phát nhạc:', error);
             });
     }
-    
+
     // Đảm bảo cập nhật UI
     setTimeout(updatePlayPauseButton, 10);
 }
@@ -209,9 +209,9 @@ function togglePlay() {
 // Thêm hàm mới để xử lý hiệu ứng đĩa xoay
 function toggleVinylEffect(active) {
     const songImage = document.querySelector('.song-image');
-    
+
     if (!songImage) return;
-    
+
     if (active) {
         songImage.classList.add('playing');
         // Nếu đang phát, đặt lại transform và thêm hiệu ứng glow
@@ -233,7 +233,7 @@ function playAudio() {
             isPlaying = true;
             updatePlayPauseButton();
             toggleVinylEffect(true);
-            
+
             // Không cần gọi lại vì đã gọi khi trang tải xong
             // incrementPlayCount(window.songData.songId);
         })
@@ -246,40 +246,40 @@ function playAudio() {
 function incrementPlayCount(songId) {
     // Lấy token CSRF từ meta tag
     const token = document.querySelector('meta[name="__RequestVerificationToken"]').content;
-    
+
     fetch(`/Songs/IncrementPlayCount/${songId}`, {
         method: 'POST',
         headers: {
             'RequestVerificationToken': token
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Đã tăng lượt nghe:', data.playCount);
-        
-        // Cập nhật số lượt nghe trên giao diện nếu có
-        const playCountElements = document.querySelectorAll('.stat-item span');
-        playCountElements.forEach(element => {
-            if (element.parentElement.querySelector('i.fa-play')) {
-                element.textContent = `${data.playCount} lượt nghe`;
-            }
-        });
-    })
-    .catch(error => console.error('Lỗi khi tăng lượt nghe:', error));
+        .then(response => response.json())
+        .then(data => {
+            console.log('Đã tăng lượt nghe:', data.playCount);
+
+            // Cập nhật số lượt nghe trên giao diện nếu có
+            const playCountElements = document.querySelectorAll('.stat-item span');
+            playCountElements.forEach(element => {
+                if (element.parentElement.querySelector('i.fa-play')) {
+                    element.textContent = `${data.playCount} lượt nghe`;
+                }
+            });
+        })
+        .catch(error => console.error('Lỗi khi tăng lượt nghe:', error));
 }
 
 // Cập nhật nút play/pause - đảm bảo nút hiển thị đúng
 function updatePlayPauseButton() {
     // Chọn nút play ở thanh điều khiển phía dưới
     const button = document.getElementById('playPauseButton');
-    
+
     if (!button) {
         console.error('Không tìm thấy nút playPauseButton');
         return;
     }
 
     const icon = button.querySelector('i');
-    
+
     if (!icon) {
         console.error('Không tìm thấy icon trong nút playPauseButton');
         return;
@@ -290,7 +290,7 @@ function updatePlayPauseButton() {
 
     // Xóa tất cả class cũ
     icon.className = '';
-    
+
     // Thêm class mới dựa trên trạng thái
     if (isPlaying) {
         icon.className = 'fas fa-pause'; // Hiển thị nút tạm dừng khi đang phát

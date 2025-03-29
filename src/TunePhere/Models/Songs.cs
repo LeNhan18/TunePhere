@@ -37,6 +37,8 @@ namespace TunePhere.Models
         
         public int PlayCount { get; set; } = 0; // Số lượt nghe
         public int LikeCount { get; set; } = 0;
+        [NotMapped]
+        public bool IsLiked { get; set; }
 
         public string? VideoUrl { get; set; }
 
