@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-
 namespace TunePhere.Models
 {
     public class SearchResults
@@ -9,4 +8,5 @@ namespace TunePhere.Models
         public List<Album> Albums { get; set; } = new List<Album>();
         public string? SearchTerm { get; set; }
     }
-} 
+
+}

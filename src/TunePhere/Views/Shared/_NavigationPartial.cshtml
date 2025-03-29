@@ -39,6 +39,7 @@
         </div>
     </div>
 
+
     <!-- Phần bên phải: Liên kết và nút -->
     <div class="navbar-right">
         <a href="/premium" class="nav-link">Premium</a>
@@ -168,562 +169,102 @@
         }
     </div>
 </nav>
-
-<!-- Player Bar -->
-<div class="player-bar">
-    <div class="player-left">
-        <img id="playerSongImage" src="" alt="Song Image" class="player-song-image">
-        <div class="player-song-info">
-            <div id="playerSongTitle" class="player-song-title"></div>
-            <div id="playerArtistName" class="player-artist-name"></div>
-        </div>
-    </div>
-    <div class="player-center">
-        <div class="player-controls">
-            <button id="prevButton" class="control-button">
-                <i class="fas fa-step-backward"></i>
-            </button>
-            <button id="playPauseButton" class="control-button play-button">
-                <i class="fas fa-play"></i>
-            </button>
-            <button id="nextButton" class="control-button">
-                <i class="fas fa-step-forward"></i>
-            </button>
-        </div>
-        <div class="player-progress">
-            <span id="currentTime" class="time">0:00</span>
-            <div class="progress-bar">
-                <div id="progressCurrent" class="progress-current"></div>
-            </div>
-            <span id="duration" class="time">0:00</span>
-        </div>
-    </div>
-    <div class="player-right">
-        <button id="volumeButton" class="control-button">
-            <i class="fas fa-volume-up"></i>
-        </button>
-        <div class="volume-slider">
-            <div class="volume-bar">
-                <div id="volumeCurrent" class="volume-current"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-.search-container {
-    position: relative;
-}
-
-.search-suggestions-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background: #282828;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    margin-top: 8px;
-    display: none;
-    z-index: 1000;
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.suggestions-content {
-    padding: 12px;
-}
-
-.suggestions-section {
-    margin-bottom: 16px;
-}
-
-.suggestions-section h3 {
-    color: #b3b3b3;
-    font-size: 14px;
-    margin-bottom: 8px;
-    padding-left: 8px;
-}
-
-.suggestions-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.suggestion-item {
-    display: flex;
-    align-items: center;
-    padding: 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.suggestion-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.suggestion-image {
-    width: 40px;
-    height: 40px;
-    border-radius: 4px;
-    margin-right: 12px;
-    object-fit: cover;
-}
-
-.suggestion-info {
-    flex: 1;
-}
-
-.suggestion-name {
-    color: white;
-    font-size: 14px;
-    margin-bottom: 2px;
-}
-
-.suggestion-type {
-    color: #b3b3b3;
-    font-size: 12px;
-}
-
-.no-results {
-    color: #b3b3b3;
-    text-align: center;
-    padding: 12px;
-    font-size: 14px;
-}
-
-.player-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 90px;
-    background: #282828;
-    border-top: 1px solid #404040;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    z-index: 1000;
-    display: none;
-}
-
-.player-left {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    min-width: 180px;
-    max-width: 30%;
-}
-
-.player-song-image {
-    width: 56px;
-    height: 56px;
-    border-radius: 4px;
-    margin-right: 12px;
-    object-fit: cover;
-}
-
-.player-song-info {
-    overflow: hidden;
-}
-
-.player-song-title {
-    color: white;
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.player-artist-name {
-    color: #b3b3b3;
-    font-size: 12px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.player-center {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 722px;
-}
-
-.player-controls {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 8px;
-}
-
-.control-button {
-    background: none;
-    border: none;
-    color: #b3b3b3;
-    cursor: pointer;
-    padding: 8px;
-    transition: all 0.2s;
-}
-
-.control-button:hover {
-    color: white;
-    transform: scale(1.1);
-}
-
-.play-button {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: white;
-    color: black;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.play-button:hover {
-    transform: scale(1.1);
-    color: black;
-}
-
-.player-progress {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.time {
-    color: #b3b3b3;
-    font-size: 12px;
-    min-width: 40px;
-    text-align: center;
-}
-
-.progress-bar {
-    flex: 1;
-    height: 4px;
-    background: #404040;
-    border-radius: 2px;
-    cursor: pointer;
-    position: relative;
-}
-
-.progress-current {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    background: #1DB954;
-    border-radius: 2px;
-    width: 0%;
-}
-
-.progress-bar:hover .progress-current {
-    background: #1ed760;
-}
-
-.player-right {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    min-width: 180px;
-    max-width: 30%;
-    gap: 8px;
-}
-
-.volume-slider {
-    width: 100px;
-}
-
-.volume-bar {
-    height: 4px;
-    background: #404040;
-    border-radius: 2px;
-    cursor: pointer;
-    position: relative;
-}
-
-.volume-current {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    background: #1DB954;
-    border-radius: 2px;
-    width: 100%;
-}
-
-.volume-bar:hover .volume-current {
-    background: #1ed760;
-}
-
-@@media (max-width: 768px) {
-    .player-bar {
-        padding: 0 8px;
-    }
-
-    .player-left {
-        min-width: 120px;
-    }
-
-    .player-song-image {
-        width: 40px;
-        height: 40px;
-    }
-
-    .player-right {
-        min-width: 120px;
-    }
-
-    .volume-slider {
-        display: none;
-    }
-}
-</style>
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.querySelector('.search-bar input');
-    const suggestionsDropdown = document.querySelector('.search-suggestions-dropdown');
-    let debounceTimer;
+     document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('.search-bar input');
+        const suggestionsDropdown = document.querySelector('.search-suggestions-dropdown');
+        let debounceTimer;
 
-    searchInput.addEventListener('input', function(e) {
-        clearTimeout(debounceTimer);
-        const searchTerm = e.target.value.trim();
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(debounceTimer);
+            const searchTerm = e.target.value.trim();
 
-        if (searchTerm.length < 2) {
-            suggestionsDropdown.style.display = 'none';
-            return;
-        }
+            if (searchTerm.length < 2) {
+                suggestionsDropdown.style.display = 'none';
+                return;
+            }
 
-        debounceTimer = setTimeout(() => {
-            fetchSuggestions(searchTerm);
-        }, 300);
-    });
+            debounceTimer = setTimeout(() => {
+                fetchSuggestions(searchTerm);
+            }, 300);
+        });
 
-    searchInput.addEventListener('focus', function() {
-        if (this.value.trim().length >= 2) {
-            suggestionsDropdown.style.display = 'block';
-        }
-    });
-
-    // Đóng dropdown khi click ra ngoài
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.search-container')) {
-            suggestionsDropdown.style.display = 'none';
-        }
-    });
-
-    function fetchSuggestions(searchTerm) {
-        fetch(`/api/search/suggestions?term=${encodeURIComponent(searchTerm)}`)
-            .then(response => response.json())
-            .then(data => {
-                updateSuggestions(data);
+        searchInput.addEventListener('focus', function() {
+            if (this.value.trim().length >= 2) {
                 suggestionsDropdown.style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Error fetching suggestions:', error);
-            });
-    }
+            }
+        });
 
-    function updateSuggestions(data) {
-        // Cập nhật phần nghệ sĩ
-        const artistsList = document.getElementById('artistSuggestions');
-        updateSectionContent(artistsList, data.artists, 'artist');
+        // Đóng dropdown khi click ra ngoài
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-container')) {
+                suggestionsDropdown.style.display = 'none';
+            }
+        });
 
-        // Cập nhật phần bài hát
-        const songsList = document.getElementById('songSuggestions');
-        updateSectionContent(songsList, data.songs, 'song');
-
-        // Cập nhật phần album
-        const albumsList = document.getElementById('albumSuggestions');
-        updateSectionContent(albumsList, data.albums, 'album');
-    }
-
-    function updateSectionContent(container, items, type) {
-        if (!items || items.length === 0) {
-            container.innerHTML = '<div class="no-results">Không tìm thấy kết quả</div>';
-            return;
+        function fetchSuggestions(searchTerm) {
+            fetch(`/api/search/suggestions?term=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.json())
+                .then(data => {
+                    updateSuggestions(data);
+                    suggestionsDropdown.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error fetching suggestions:', error);
+                });
         }
 
-        container.innerHTML = items.map(item => {
-            const imageUrl = item.imageUrl || '/images/default.png';
-            const name = type === 'song' ? item.title : item.name;
-            const subtitle = type === 'song' ? item.artistName : 
-                           type === 'album' ? item.artistName : 
-                           'Nghệ sĩ';
+        function updateSuggestions(data) {
+            // Cập nhật phần nghệ sĩ
+            const artistsList = document.getElementById('artistSuggestions');
+            updateSectionContent(artistsList, data.artists, 'artist');
 
-            return `
-                <div class="suggestion-item" onclick="handleSuggestionClick('${type}', '${item.id}')">
-                    <img src="${imageUrl}" alt="${name}" class="suggestion-image">
-                    <div class="suggestion-info">
-                        <div class="suggestion-name">${name}</div>
-                        <div class="suggestion-type">${subtitle}</div>
+            // Cập nhật phần bài hát
+            const songsList = document.getElementById('songSuggestions');
+            updateSectionContent(songsList, data.songs, 'song');
+
+            // Cập nhật phần album
+            const albumsList = document.getElementById('albumSuggestions');
+            updateSectionContent(albumsList, data.albums, 'album');
+        }
+
+        function updateSectionContent(container, items, type) {
+            if (!items || items.length === 0) {
+                container.innerHTML = '<div class="no-results">Không tìm thấy kết quả</div>';
+                return;
+            }
+
+            container.innerHTML = items.map(item => {
+                const imageUrl = item.imageUrl || '/images/default.png';
+                const name = type === 'song' ? item.title : item.name;
+                const subtitle = type === 'song' ? item.artistName :
+                               type === 'album' ? item.artistName :
+                               'Nghệ sĩ';
+
+                return `
+                    <div class="suggestion-item" onclick="handleSuggestionClick('${type}', '${item.id}')">
+                        <img src="${imageUrl}" alt="${name}" class="suggestion-image">
+                        <div class="suggestion-info">
+                            <div class="suggestion-name">${name}</div>
+                            <div class="suggestion-type">${subtitle}</div>
+                        </div>
                     </div>
-                </div>
-            `;
-        }).join('');
-    }
-});
-
-function handleSuggestionClick(type, id) {
-    switch (type) {
-        case 'artist':
-            window.location.href = `/Search/Artist/${id}`;
-            break;
-        case 'song':
-            window.location.href = `/Search/Song/${id}`;
-            break;
-        case 'album':
-            window.location.href = `/Search/Album/${id}`;
-            break;
-    }
-}
-
-// Khởi tạo biến audio toàn cục
-let globalAudio = null;
-let isPlaying = false;
-let currentProgress = 0;
-let currentVolume = 1;
-
-function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    seconds = Math.floor(seconds % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-}
-
-function updateProgress() {
-    if (!globalAudio) return;
-    
-    const progress = (globalAudio.currentTime / globalAudio.duration) * 100;
-    document.getElementById('progressCurrent').style.width = `${progress}%`;
-    document.getElementById('currentTime').textContent = formatTime(globalAudio.currentTime);
-    document.getElementById('duration').textContent = formatTime(globalAudio.duration);
-}
-
-function updatePlayPauseButton() {
-    const playPauseButton = document.getElementById('playPauseButton');
-    const icon = playPauseButton.querySelector('i');
-    
-    if (isPlaying) {
-        icon.classList.remove('fa-play');
-        icon.classList.add('fa-pause');
-    } else {
-        icon.classList.remove('fa-pause');
-        icon.classList.add('fa-play');
-    }
-}
-
-function togglePlayPause() {
-    if (!globalAudio) return;
-    
-    if (isPlaying) {
-        globalAudio.pause();
-    } else {
-        globalAudio.play();
-    }
-    
-    isPlaying = !isPlaying;
-    updatePlayPauseButton();
-}
-
-function updateVolume(volume) {
-    if (!globalAudio) return;
-    
-    currentVolume = volume;
-    globalAudio.volume = volume;
-    document.getElementById('volumeCurrent').style.width = `${volume * 100}%`;
-    
-    const volumeIcon = document.getElementById('volumeButton').querySelector('i');
-    volumeIcon.className = 'fas';
-    
-    if (volume >= 0.5) {
-        volumeIcon.classList.add('fa-volume-up');
-    } else if (volume > 0) {
-        volumeIcon.classList.add('fa-volume-down');
-    } else {
-        volumeIcon.classList.add('fa-volume-mute');
-    }
-}
-
-function initializePlayer(songUrl, songTitle, artistName, imageUrl) {
-    // Hiển thị player bar
-    document.querySelector('.player-bar').style.display = 'flex';
-    
-    // Cập nhật thông tin bài hát
-    document.getElementById('playerSongTitle').textContent = songTitle;
-    document.getElementById('playerArtistName').textContent = artistName;
-    document.getElementById('playerSongImage').src = imageUrl;
-    
-    // Nếu đang phát nhạc, dừng lại
-    if (globalAudio) {
-        globalAudio.pause();
-        globalAudio = null;
-    }
-    
-    // Tạo audio mới
-    globalAudio = new Audio(songUrl);
-    globalAudio.volume = currentVolume;
-    
-    // Thêm các event listeners
-    globalAudio.addEventListener('timeupdate', updateProgress);
-    globalAudio.addEventListener('ended', () => {
-        isPlaying = false;
-        updatePlayPauseButton();
+                `;
+            }).join('');
+        }
     });
-    
-    // Phát nhạc
-    globalAudio.play();
-    isPlaying = true;
-    updatePlayPauseButton();
-}
 
-// Thêm event listeners cho các controls
-document.getElementById('playPauseButton').addEventListener('click', togglePlayPause);
-
-document.getElementById('volumeButton').addEventListener('click', () => {
-    if (currentVolume > 0) {
-        updateVolume(0);
-    } else {
-        updateVolume(1);
+    function handleSuggestionClick(type, id) {
+        switch (type) {
+            case 'artist':
+                window.location.href = `/Artists/Profile/${id}`;
+                break;
+            case 'song':
+                window.location.href = `/Search/Song/${id}`;
+                break;
+            case 'album':
+                window.location.href = `/Search/Album/${id}`;
+                break;
+        }
     }
-});
-
-document.querySelector('.progress-bar').addEventListener('click', (e) => {
-    if (!globalAudio) return;
-    
-    const rect = e.target.getBoundingClientRect();
-    const ratio = (e.clientX - rect.left) / rect.width;
-    globalAudio.currentTime = ratio * globalAudio.duration;
-    updateProgress();
-});
-
-document.querySelector('.volume-bar').addEventListener('click', (e) => {
-    const rect = e.target.getBoundingClientRect();
-    const ratio = (e.clientX - rect.left) / rect.width;
-    updateVolume(Math.max(0, Math.min(1, ratio)));
-});
-
-// Cập nhật hàm playAudio để sử dụng player bar
-function playAudio(songItem) {
-    const songUrl = songItem.dataset.songUrl;
-    const songId = songItem.dataset.songId;
-    const songTitle = songItem.dataset.songTitle;
-    const artistName = songItem.dataset.songArtist;
-    const imageUrl = songItem.dataset.songImage;
-    
-    // Khởi tạo player
-    initializePlayer(songUrl, songTitle, artistName, imageUrl);
-    
-    // Cập nhật lượt nghe
-    updatePlayCount(songId);
-}
 </script>
