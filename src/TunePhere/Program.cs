@@ -50,6 +50,7 @@ builder.Services.AddScoped<ISongRepository, EFSongRepository>();
 builder.Services.AddScoped<IPlaylistRepository, EFPlaylistRepository>();
 builder.Services.AddScoped<IRemixRepository,EFRemixRepository>();
 builder.Services.AddScoped<IUserRepository, EFUserRepository>();
+builder.Services.AddScoped<IUserFavoriteSongs, EFUserFavoriteSongs>();
 
 var app = builder.Build();
 
@@ -102,6 +103,8 @@ using (var scope = app.Services.CreateScope())
         await userManager.AddToRoleAsync(adminUser, "Administrator");
     }
 }
+
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

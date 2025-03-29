@@ -14,7 +14,7 @@ let activeLyricLine = -1;
 document.addEventListener('DOMContentLoaded', function () {
     // Thiết lập nguồn audio
     audioPlayer.src = window.songData.fileUrl;
-    
+
     // Khởi tạo dữ liệu bài hát
     songs.push({
         id: 1,
@@ -23,24 +23,27 @@ document.addEventListener('DOMContentLoaded', function () {
         audioUrl: window.songData.fileUrl,
         imageUrl: window.songData.imageUrl
     });
-    
+
+    // Tăng lượt nghe khi trang chi tiết được tải
+    incrementPlayCount(window.songData.songId);
+
     // Tự động phát khi trang tải xong
     playAudio();
-    
+
     // Xử lý tua nhạc
     const seekBar = document.getElementById('seekBar');
     seekBar.addEventListener('input', () => {
         const time = (seekBar.value / 100) * audioPlayer.duration;
         audioPlayer.currentTime = time;
     });
-    
+
     // Xử lý âm lượng
     const volumeBar = document.getElementById('volumeBar');
     volumeBar.addEventListener('input', () => {
         audioPlayer.volume = volumeBar.value / 100;
         updateVolumeIcon();
     });
-    
+
     // Cập nhật tiến trình
     audioPlayer.addEventListener('timeupdate', () => {
         const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
@@ -50,28 +53,30 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime);
         document.getElementById('duration').textContent = formatTime(audioPlayer.duration);
     });
-    
+
     // Xử lý khi bài hát kết thúc
     audioPlayer.addEventListener('ended', () => {
         isPlaying = false;
         updatePlayPauseButton();
+        // Tắt hiệu ứng đĩa xoay
+        toggleVinylEffect(false);
     });
-    
+
     // Xử lý hiển thị nút thêm lời bài hát chỉ khi người dùng là admin hoặc người sở hữu
     const addLyricButton = document.getElementById('addLyricButton');
-    
+
     // Thêm đoạn log để debug
     console.log("User is admin:", window.songData.userIsAdmin);
     console.log("User is owner:", window.songData.userIsOwner);
-    
+
     // Kiểm tra quyền truy cập
     const userIsAdmin = window.songData.userIsAdmin === true;
     const userIsOwner = window.songData.userIsOwner === true;
-    
+
     // Chỉ hiển thị nút khi người dùng có quyền
     if (userIsAdmin || userIsOwner) {
         // Thêm sự kiện click
-        addLyricButton.addEventListener('click', function() {
+        addLyricButton.addEventListener('click', function () {
             const modal = new bootstrap.Modal(document.getElementById('addLyricModal'));
             modal.show();
         });
@@ -79,33 +84,33 @@ document.addEventListener('DOMContentLoaded', function () {
         // Ẩn nút nếu không có quyền
         addLyricButton.style.display = 'none';
     }
-    
+
     // Xử lý nút lưu lyrics
     const saveLyricBtn = document.getElementById('saveLyricBtn');
     if (saveLyricBtn) {
-        saveLyricBtn.addEventListener('click', function() {
+        saveLyricBtn.addEventListener('click', function () {
             const songId = document.getElementById('lyricSongId').value;
             const content = document.getElementById('lyricContent').value;
-            
+
             if (!content || content.trim() === '') {
                 alert('Vui lòng nhập lời bài hát');
                 return;
             }
-            
+
             // Hiển thị loading
             saveLyricBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
             saveLyricBtn.disabled = true;
-            
+
             // Sử dụng FormData thay vì tạo form thủ công để giữ nguyên xuống dòng
             const formData = new FormData();
             formData.append('SongId', songId);
             formData.append('Content', content);
             formData.append('Language', 'vi');
-            
+
             // Lấy token CSRF
             const token = document.querySelector('meta[name="__RequestVerificationToken"]').content;
             formData.append('__RequestVerificationToken', token);
-            
+
             // Gửi request bằng fetch
             fetch('/Lyrics/AddLyric', {
                 method: 'POST',
@@ -114,68 +119,179 @@ document.addEventListener('DOMContentLoaded', function () {
                     'RequestVerificationToken': token
                 }
             })
-            .then(response => {
-                if (response.ok) {
-                    window.location.reload(); // Tải lại trang sau khi lưu
-                } else {
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload(); // Tải lại trang sau khi lưu
+                    } else {
+                        alert('Có lỗi xảy ra khi lưu lời bài hát');
+                        saveLyricBtn.innerHTML = 'Lưu lại';
+                        saveLyricBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi:', error);
                     alert('Có lỗi xảy ra khi lưu lời bài hát');
                     saveLyricBtn.innerHTML = 'Lưu lại';
                     saveLyricBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi:', error);
-                alert('Có lỗi xảy ra khi lưu lời bài hát');
-                saveLyricBtn.innerHTML = 'Lưu lại';
-                saveLyricBtn.disabled = false;
-            });
+                });
         });
     }
 
     console.log("Lyrics data:", Model.Lyrics); // Kiểm tra dữ liệu lyrics
+
+    // Nếu bài hát tự động phát khi trang tải xong, cũng bật hiệu ứng đĩa
+    audioPlayer.addEventListener('play', function() {
+        console.log("Sự kiện play được kích hoạt");
+        isPlaying = true;
+        updatePlayPauseButton();
+        toggleVinylEffect(true);
+    });
+    
+    audioPlayer.addEventListener('pause', function() {
+        console.log("Sự kiện pause được kích hoạt");
+        isPlaying = false;
+        updatePlayPauseButton();
+        toggleVinylEffect(false);
+    });
+
+    // Thêm hiệu ứng hover đẹp hơn cho đĩa nhạc
+    const songImage = document.querySelector('.song-image');
+    if (songImage) {
+        // Tạo hiệu ứng cản quang khi hover
+        songImage.addEventListener('mouseenter', function() {
+            if (!isPlaying) {
+                this.style.transform = 'scale(1.05)';
+                this.style.boxShadow = '0 0 50px rgba(100, 65, 165, 0.4)';
+            }
+        });
+        
+        songImage.addEventListener('mouseleave', function() {
+            if (!isPlaying) {
+                this.style.transform = 'scale(1)';
+                this.style.boxShadow = '0 0 50px rgba(0, 0, 0, 0.8)';
+            }
+        });
+    }
 });
 
-// Phát nhạc
-function playAudio() {
-    audioPlayer.play()
-        .then(() => {
-            isPlaying = true;
-            updatePlayPauseButton();
-        })
-        .catch(error => {
-            console.error('Lỗi phát nhạc:', error);
-        });
-}
+// Khai báo biến để theo dõi hiệu ứng đĩa
+let vinylEffectActive = false;
 
-// Xử lý play/pause
+// Cập nhật hàm phát/dừng nhạc để thêm hiệu ứng đĩa xoay
 function togglePlay() {
+    console.log("togglePlay được gọi, trạng thái hiện tại:", isPlaying);
+    
     if (isPlaying) {
         audioPlayer.pause();
         isPlaying = false;
+        // Tắt hiệu ứng đĩa xoay
+        toggleVinylEffect(false);
+
     } else {
         audioPlayer.play()
             .then(() => {
                 isPlaying = true;
+                // Bật hiệu ứng đĩa xoay
+                toggleVinylEffect(true);
+                
+                // Không tăng lượt nghe khi người dùng phát lại cùng một bài hát
+                // Lượt nghe đã được tăng khi tải trang
             })
             .catch(error => {
                 console.error('Lỗi phát nhạc:', error);
             });
     }
     
-    updatePlayPauseButton();
+    // Đảm bảo cập nhật UI
+    setTimeout(updatePlayPauseButton, 10);
+}
+
+// Thêm hàm mới để xử lý hiệu ứng đĩa xoay
+function toggleVinylEffect(active) {
+    const songImage = document.querySelector('.song-image');
+    
+    if (!songImage) return;
+    
+    if (active) {
+        songImage.classList.add('playing');
+        // Nếu đang phát, đặt lại transform và thêm hiệu ứng glow
+        songImage.style.transform = 'scale(1)';
+        songImage.style.boxShadow = '0 0 50px rgba(100, 65, 165, 0.3)';
+        vinylEffectActive = true;
+    } else {
+        songImage.classList.remove('playing');
+        // Trả lại bóng đổ ban đầu khi dừng
+        songImage.style.boxShadow = '0 0 50px rgba(0, 0, 0, 0.8)';
+        vinylEffectActive = false;
+    }
+}
+
+// Cập nhật hàm phát nhạc để bật hiệu ứng đĩa
+function playAudio() {
+    audioPlayer.play()
+        .then(() => {
+            isPlaying = true;
+            updatePlayPauseButton();
+            toggleVinylEffect(true);
+            
+            // Không cần gọi lại vì đã gọi khi trang tải xong
+            // incrementPlayCount(window.songData.songId);
+        })
+        .catch(error => {
+            console.error('Lỗi phát nhạc:', error);
+        });
+}
+
+// Hàm tăng lượt nghe
+function incrementPlayCount(songId) {
+    // Lấy token CSRF từ meta tag
+    const token = document.querySelector('meta[name="__RequestVerificationToken"]').content;
+    
+    fetch(`/Songs/IncrementPlayCount/${songId}`, {
+        method: 'POST',
+        headers: {
+            'RequestVerificationToken': token
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Đã tăng lượt nghe:', data.playCount);
+        
+        // Cập nhật số lượt nghe trên giao diện nếu có
+        const playCountElements = document.querySelectorAll('.stat-item span');
+        playCountElements.forEach(element => {
+            if (element.parentElement.querySelector('i.fa-play')) {
+                element.textContent = `${data.playCount} lượt nghe`;
+            }
+        });
+    })
+    .catch(error => console.error('Lỗi khi tăng lượt nghe:', error));
 }
 
 // Cập nhật nút play/pause - đảm bảo nút hiển thị đúng
 function updatePlayPauseButton() {
+    // Chọn nút play ở thanh điều khiển phía dưới
     const button = document.getElementById('playPauseButton');
-    if (!button) return;
     
+    if (!button) {
+        console.error('Không tìm thấy nút playPauseButton');
+        return;
+    }
+
     const icon = button.querySelector('i');
-    if (!icon) return;
     
+    if (!icon) {
+        console.error('Không tìm thấy icon trong nút playPauseButton');
+        return;
+    }
+
     // Log để debug
-    console.log("Cập nhật trạng thái nút, isPlaying =", isPlaying);
+    console.log("Cập nhật trạng thái nút play/pause:", isPlaying ? "Đang phát" : "Đã dừng");
+
+    // Xóa tất cả class cũ
+    icon.className = '';
     
+    // Thêm class mới dựa trên trạng thái
     if (isPlaying) {
         icon.className = 'fas fa-pause'; // Hiển thị nút tạm dừng khi đang phát
     } else {
@@ -200,7 +316,7 @@ function toggleMute() {
     const volumeButton = document.getElementById('volumeButton');
     const icon = volumeButton.querySelector('i');
     const volumeBar = document.getElementById('volumeBar');
-    
+
     if (audioPlayer.volume > 0) {
         audioPlayer.volume = 0;
         volumeBar.value = 0;
@@ -216,7 +332,7 @@ function toggleMute() {
 function updateVolumeIcon() {
     const volumeButton = document.getElementById('volumeButton');
     const icon = volumeButton.querySelector('i');
-    
+
     if (audioPlayer.volume === 0) {
         icon.className = 'fas fa-volume-mute';
     } else {
@@ -253,72 +369,45 @@ function showVideo(url) {
     new bootstrap.Modal(document.getElementById('videoModal')).show();
 }
 
-// Thêm sự kiện lắng nghe trạng thái audio
-document.addEventListener('DOMContentLoaded', function() {
-    // ... existing code ...
-    
-    // Thêm các sự kiện lắng nghe âm thanh
-    audioPlayer.addEventListener('play', function() {
-        isPlaying = true;
-        updatePlayPauseButton();
-    });
-    
-    audioPlayer.addEventListener('pause', function() {
-        isPlaying = false;
-        updatePlayPauseButton();
-    });
-    
-    // Thêm lắng nghe sự kiện khi tương tác với thanh trình phát
-    const playPauseButton = document.getElementById('playPauseButton');
-    if (playPauseButton) {
-        playPauseButton.addEventListener('click', function() {
-            // Thêm thời gian chờ ngắn để đảm bảo DOM cập nhật sau khi xử lý
-            setTimeout(updatePlayPauseButton, 50);
-        });
-    }
-    
-    // ... existing code ...
-});
-
 // Thêm hàm để force refresh trang
 function forceRefresh() {
     window.location.reload(true); // true để force refresh từ server
 }
 
 // Cập nhật phần xử lý form submit trong Edit.cshtml
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const editForm = document.querySelector('form[action*="Edit"]');
     if (editForm) {
-        editForm.addEventListener('submit', function(e) {
+        editForm.addEventListener('submit', function (e) {
             e.preventDefault();
-            
+
             const formData = new FormData(this);
-            
+
             fetch(this.action, {
                 method: 'POST',
                 body: formData
             })
-            .then(response => {
-                if (response.ok) {
-                    // Chuyển về trang Details và force refresh
-                    window.location.href = response.url;
-                    setTimeout(forceRefresh, 100);
-                } else {
+                .then(response => {
+                    if (response.ok) {
+                        // Chuyển về trang Details và force refresh
+                        window.location.href = response.url;
+                        setTimeout(forceRefresh, 100);
+                    } else {
+                        alert('Có lỗi xảy ra khi cập nhật lyrics');
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi:', error);
                     alert('Có lỗi xảy ra khi cập nhật lyrics');
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi:', error);
-                alert('Có lỗi xảy ra khi cập nhật lyrics');
-            });
+                });
         });
     }
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const addLyricButton = document.getElementById('addLyricButton');
     if (addLyricButton) {
-        addLyricButton.addEventListener('click', function() {
+        addLyricButton.addEventListener('click', function () {
             const modal = new bootstrap.Modal(document.getElementById('addLyricModal'));
             modal.show();
         });
@@ -327,13 +416,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Xử lý form submit
     const lyricForm = document.querySelector('#addLyricModal form');
     if (lyricForm) {
-        lyricForm.addEventListener('submit', function(e) {
+        lyricForm.addEventListener('submit', function (e) {
             // Cải thiện xử lý form submit để đảm bảo dữ liệu đồng bộ được gửi đi
             const syncedContentInput = document.getElementById('syncedContentInput');
-            
+
             // Log dữ liệu đồng bộ để debug
             console.log("Submitting form with synced content:", syncedContentInput.value);
-            
+
             // Kiểm tra nếu nội dung trống
             const content = this.querySelector('textarea[name="Content"]').value;
             if (!content || content.trim() === '') {
@@ -354,28 +443,28 @@ function initLyricSyncing() {
     const syncPreview = document.getElementById('syncPreview');
     const syncedContentInput = document.getElementById('syncedContentInput');
     const lyricContent = document.querySelector('textarea[name="Content"]');
-    
+
     if (!startSyncingBtn || !markTimestampBtn || !resetSyncBtn || !syncPreview || !lyricContent) {
         console.log("Missing elements for sync feature");
         return;
     }
-    
+
     // Reset quá trình đồng bộ - cần làm sạch hoàn toàn dữ liệu cũ
-    resetSyncBtn.addEventListener('click', function() {
+    resetSyncBtn.addEventListener('click', function () {
         // Reset mảng dữ liệu đồng bộ
         syncedLyrics = [];
         currentLine = 0;
         syncMode = false;
-        
+
         // Reset UI
         markTimestampBtn.disabled = true;
         startSyncingBtn.disabled = false;
         audioPlayer.pause();
-        
+
         // Xóa sạch giao diện hiển thị
         initSyncState(true); // Thêm tham số true để xác định đây là reset hoàn toàn
     });
-    
+
     // Khởi tạo trạng thái - thêm tham số forceReset
     function initSyncState(forceReset = false) {
         // Nếu là reset hoàn toàn hoặc khởi tạo lần đầu
@@ -383,13 +472,13 @@ function initLyricSyncing() {
             syncedLyrics = []; // Làm trống mảng dữ liệu
             syncedContentInput.value = ''; // Xóa dữ liệu đồng bộ cũ trong input
         }
-        
+
         currentLine = 0;
         syncMode = false;
-        
+
         // Phân tách lời bài hát thành từng dòng
         const lines = lyricContent.value.split('\n').filter(line => line.trim() !== '');
-        
+
         // Tạo preview
         syncPreview.innerHTML = '';
         lines.forEach((line, index) => {
@@ -399,13 +488,13 @@ function initLyricSyncing() {
             lineElement.dataset.index = index;
             syncPreview.appendChild(lineElement);
         });
-        
+
         // Chỉ hiển thị dữ liệu đồng bộ cũ nếu không phải là reset hoàn toàn
         if (!forceReset && syncedContentInput.value) {
             try {
                 const existingSyncedData = JSON.parse(syncedContentInput.value);
                 console.log("Found existing synced data:", existingSyncedData);
-                
+
                 // Hiển thị dữ liệu đồng bộ đã có
                 existingSyncedData.forEach((item, index) => {
                     if (index < syncPreview.children.length) {
@@ -419,16 +508,16 @@ function initLyricSyncing() {
             }
         }
     }
-    
+
     // Bắt đầu đồng bộ
-    startSyncingBtn.addEventListener('click', function() {
+    startSyncingBtn.addEventListener('click', function () {
         // Reset mảng dữ liệu đồng bộ khi bắt đầu mới
         syncedLyrics = [];
-        
+
         // Làm mới UI
         initSyncState(true); // Đảm bảo xóa dữ liệu cũ khi bắt đầu đồng bộ
         syncMode = true;
-        
+
         // Reset audio player về đầu
         audioPlayer.currentTime = 0;
         audioPlayer.play()
@@ -444,66 +533,66 @@ function initLyricSyncing() {
                 startSyncingBtn.disabled = false;
             });
     });
-    
+
     // Đánh dấu thời gian cho mỗi dòng
-    markTimestampBtn.addEventListener('click', function() {
+    markTimestampBtn.addEventListener('click', function () {
         if (!syncMode || currentLine >= syncPreview.children.length) {
             return;
         }
-        
+
         const time = audioPlayer.currentTime;
         const lineElement = syncPreview.children[currentLine];
         const lineText = lineElement.textContent.trim(); // Loại bỏ khoảng trắng thừa
-        
+
         // Lưu timestamp và text
         syncedLyrics.push({
             time: time,
             text: lineText
         });
-        
+
         // Highlight dòng hiện tại và di chuyển đến dòng tiếp theo
         lineElement.classList.add('synced');
-        
+
         // Xóa nội dung cũ trước khi thêm mới
         lineElement.innerHTML = '';
-        
+
         // Thêm thời gian mới và nội dung
         const timeMarker = document.createElement('span');
         timeMarker.className = 'time-marker';
         timeMarker.textContent = `[${formatTime(time)}]`;
-        
+
         lineElement.appendChild(timeMarker);
         lineElement.appendChild(document.createTextNode(' ' + lineText));
-        
+
         currentLine++;
-        
+
         // Nếu đã đồng bộ hết các dòng
         if (currentLine >= syncPreview.children.length) {
             markTimestampBtn.disabled = true;
-            
+
             // Lưu dữ liệu đồng bộ vào input hidden
             const syncedData = JSON.stringify(syncedLyrics);
             syncedContentInput.value = syncedData;
             console.log("Synced lyrics data saved:", syncedData);
-            
+
             // Hiển thị thông báo hoàn tất
             const alertDiv = document.createElement('div');
             alertDiv.className = 'alert alert-success mt-2';
             alertDiv.innerHTML = '<i class="fas fa-check-circle"></i> Lời bài hát đã được đồng bộ. Nhấn Cập nhật để lưu.';
-            
+
             // Xóa thông báo cũ nếu có
             const existingAlert = document.querySelector('#syncedLyrics .alert');
             if (existingAlert) {
                 existingAlert.remove();
             }
-            
+
             // Thêm thông báo mới
             document.querySelector('.lyric-sync-editor').appendChild(alertDiv);
-            
+
             alert('Đã đồng bộ hoàn tất! Nhấn Cập nhật để lưu.');
         }
     });
-    
+
     // Khởi tạo ban đầu
     initSyncState();
 }
@@ -513,29 +602,29 @@ function updateSyncedLyrics() {
     // Thêm offset -0.5 giây để hiển thị sớm hơn và khắc phục delay
     const LYRICS_OFFSET = -0.5; // Offset 0.5 giây để hiển thị sớm hơn
     const currentTime = audioPlayer.currentTime - LYRICS_OFFSET;
-    
+
     const lyricsContainer = document.querySelector('.lyrics-content');
-    
+
     if (!window.syncedLyricsData || !lyricsContainer || audioPlayer.paused) {
         return;
     }
-    
+
     // Tìm dòng hiện tại dựa trên thời gian
     let currentActiveLineIndex = -1;
-    
+
     for (let i = 0; i < window.syncedLyricsData.length; i++) {
-        if (i === window.syncedLyricsData.length - 1 || 
-            (currentTime >= window.syncedLyricsData[i].time && 
-             currentTime < window.syncedLyricsData[i + 1].time)) {
+        if (i === window.syncedLyricsData.length - 1 ||
+            (currentTime >= window.syncedLyricsData[i].time &&
+                currentTime < window.syncedLyricsData[i + 1].time)) {
             currentActiveLineIndex = i;
             break;
         }
     }
-    
+
     // Nếu dòng active thay đổi
     if (currentActiveLineIndex !== activeLyricLine && currentActiveLineIndex >= 0) {
         activeLyricLine = currentActiveLineIndex;
-        
+
         // Cập nhật giao diện hiển thị
         const lines = lyricsContainer.querySelectorAll('.lyric-line');
         lines.forEach((line, index) => {
@@ -551,12 +640,12 @@ function updateSyncedLyrics() {
 }
 
 // Thêm vào cuối document.addEventListener('DOMContentLoaded'...)
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Code khác...
-    
+
     // Khởi tạo tính năng đồng bộ lyrics
     initLyricSyncing();
-    
+
     // Làm mới giao diện lyrics nếu có dữ liệu đồng bộ
     const lyricElement = document.querySelector('.lyric-text');
     if (lyricElement && lyricElement.dataset.syncedContent) {
@@ -564,19 +653,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Parse dữ liệu đồng bộ
             window.syncedLyricsData = JSON.parse(lyricElement.dataset.syncedContent);
             console.log("Loaded synced lyrics data:", window.syncedLyricsData);
-            
+
             // Định dạng lại hiển thị lyrics
             const lyricsContainer = document.querySelector('.lyrics-content');
             if (lyricsContainer && window.syncedLyricsData.length > 0) {
                 lyricsContainer.innerHTML = '';
-                
+
                 window.syncedLyricsData.forEach(line => {
                     const lineElement = document.createElement('div');
                     lineElement.classList.add('lyric-line');
                     lineElement.textContent = line.text;
                     lyricsContainer.appendChild(lineElement);
                 });
-                
+
                 // Thêm sự kiện cập nhật lyrics
                 audioPlayer.addEventListener('timeupdate', updateSyncedLyrics);
             }
@@ -592,27 +681,27 @@ document.addEventListener('DOMContentLoaded', function() {
             // Parse dữ liệu đồng bộ
             window.syncedLyricsData = JSON.parse(syncedLyricsDisplay.dataset.syncedContent);
             console.log("Loaded synced lyrics data for display:", window.syncedLyricsData);
-            
+
             // Định dạng hiển thị lyrics
             if (window.syncedLyricsData.length > 0) {
                 syncedLyricsDisplay.innerHTML = '';
-                
+
                 window.syncedLyricsData.forEach(line => {
                     const lineElement = document.createElement('div');
                     lineElement.classList.add('lyric-line');
-                    
+
                     // Thêm data-time để debugging
                     lineElement.dataset.time = line.time;
-                    
+
                     // Cắt ngắn text quá dài và thêm dấu ... nếu cần
                     if (line.text.length > 100) {
                         lineElement.title = line.text; // Hiển thị khi hover
                     }
-                    
+
                     lineElement.textContent = line.text;
                     syncedLyricsDisplay.appendChild(lineElement);
                 });
-                
+
                 // Thêm sự kiện cập nhật lyrics
                 audioPlayer.addEventListener('timeupdate', updateSyncedLyrics);
                 console.log("Added timeupdate event listener for synced lyrics");
@@ -625,15 +714,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Đảm bảo dữ liệu đồng bộ được submit đúng cách
     const addLyricForm = document.querySelector('#addLyricModal form');
     if (addLyricForm) {
-        addLyricForm.addEventListener('submit', function(event) {
+        addLyricForm.addEventListener('submit', function (event) {
             // Lấy các giá trị của form
             const formData = new FormData(this);
-            
+
             // Log tất cả dữ liệu của form để debug
             for (let pair of formData.entries()) {
                 console.log(pair[0] + ': ' + pair[1]);
             }
-            
+
             // Kiểm tra nếu đang ở tab đồng bộ và đã hoàn tất đồng bộ
             const syncedTab = document.querySelector('.nav-link[href="#syncedLyrics"]');
             if (syncedTab && syncedTab.classList.contains('active')) {
@@ -649,58 +738,58 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Cập nhật submit form để sử dụng fetch API thay vì submit thông thường
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const editForm = document.querySelector('#addLyricModal form');
     if (editForm) {
-        editForm.addEventListener('submit', function(e) {
+        editForm.addEventListener('submit', function (e) {
             e.preventDefault();
-            
+
             const formData = new FormData(this);
-            
+
             // Log dữ liệu form trước khi gửi để debug
             console.log("Form action:", this.action);
             for (let pair of formData.entries()) {
                 console.log(pair[0] + ': ' + (pair[0] === 'SyncedContent' ? 'Data length: ' + pair[1].length : pair[1]));
             }
-            
+
             fetch(this.action, {
                 method: 'POST',
                 body: formData
             })
-            .then(response => {
-                console.log("Response status:", response.status);
-                if (response.ok) {
-                    // Chuyển về trang Details và force refresh
-                    window.location.href = response.url;
-                    // Đảm bảo page refresh
-                    setTimeout(() => {
-                        window.location.reload(true);
-                    }, 100);
-                } else {
+                .then(response => {
+                    console.log("Response status:", response.status);
+                    if (response.ok) {
+                        // Chuyển về trang Details và force refresh
+                        window.location.href = response.url;
+                        // Đảm bảo page refresh
+                        setTimeout(() => {
+                            window.location.reload(true);
+                        }, 100);
+                    } else {
+                        alert('Có lỗi xảy ra khi cập nhật lyrics');
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi:', error);
                     alert('Có lỗi xảy ra khi cập nhật lyrics');
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi:', error);
-                alert('Có lỗi xảy ra khi cập nhật lyrics');
-            });
+                });
         });
     }
 });
 
 // Xử lý sự kiện nhấn trái tim
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const heartIcon = document.querySelector('.heart-icon');
     if (heartIcon) {
-        heartIcon.addEventListener('click', function() {
+        heartIcon.addEventListener('click', function () {
             this.classList.toggle('liked');
-            
+
             // Animation nhịp tim
             this.style.animation = 'heartBeat 0.4s';
             setTimeout(() => {
                 this.style.animation = '';
             }, 400);
-            
+
             // Cập nhật số lượt thích
             const likeCount = document.querySelector('.like-count');
             if (likeCount) {

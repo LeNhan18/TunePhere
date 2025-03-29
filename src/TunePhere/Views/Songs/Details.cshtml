@@ -20,8 +20,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/song-details.css" />
+    <link rel="stylesheet" href="@Url.Content("~/css/navigation.css")" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/player.css" />
-    <link rel="stylesheet" href="~/css/navigation.css">
 </head>
 <body>
     <!-- Nút quay lại - Được tạo mới và đặt ở vị trí tốt hơn -->
@@ -35,9 +35,10 @@
         <div class="song-content">
             <!-- Cột trái -->
             <div class="left-column">
-                <!-- Ảnh bài hát -->
+                <!-- Đĩa vinyl giống hệt ảnh mẫu -->
                 <div class="song-image">
                     <img src="@Model.ImageUrl" alt="@Model.Title" />
+                    <div class="vinyl-light-effect"></div>
                     @if (User.IsInRole("Admin") || (User.Identity.IsAuthenticated && Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier)))
                     {
                         <div class="add-lyric-button" id="addLyricButton">
@@ -46,22 +47,32 @@
                         </div>
                     }
                 </div>
-                
-                <!-- Thông tin bài hát -->
+
+                <!-- Thông tin bài hát - đã loại bỏ khung -->
                 <div class="song-header">
-                    <div class="title-container">
-                        <h1 class="song-title">@Model.Title</h1>
-                        <div class="heart-container">
-                            <i class="fas fa-heart heart-icon"></i>
-                            <span class="like-count">@Model.LikeCount</span>
-                        </div>
-                    </div>
+                    <h1 class="song-title">@Model.Title</h1>
                     <div class="artist-row">
                         <span class="artist-name">@Model.Artists?.ArtistName</span>
                     </div>
+                    
+                    <!-- Thông tin bài hát -->
+                    <div class="song-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-play"></i>
+                            <span>@Model.PlayCount lượt nghe</span>
+                        </div>
+                        <div class="stat-item heart-container">
+                            <i class="fas fa-heart heart-icon @(ViewData["IsFavorited"] != null && (bool)ViewData["IsFavorited"] ? "liked" : "")"></i>
+                            <span class="like-count">@Model.LikeCount</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>@(Model.UploadDate.ToString("dd/MM/yyyy") ?? "29/03/2025")</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
+
             <!-- Phần lyrics -->
             <div class="lyrics-container">
                 @if (Model.Lyrics != null && Model.Lyrics.Any())
@@ -93,7 +104,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Thanh phát nhạc kiểu mới (giống Index.cshtml) -->
     <div id="nowPlayingBar" class="now-playing-bar">
         <div class="now-playing-left">
@@ -156,7 +167,7 @@
                             <input type="hidden" name="LyricId" value="@Model.Lyrics.First().LyricId" />
                         }
                         <input type="hidden" name="Language" value="vi" />
-                        
+
                         <ul class="nav nav-tabs" role="tablist">
                             <li class="nav-item">
                                 <a class="nav-link active" data-bs-toggle="tab" href="#normalLyrics">Lời bài hát</a>
@@ -171,12 +182,12 @@
                             <div id="normalLyrics" class="tab-pane active">
                                 <div class="mb-3">
                                     <label for="Content" class="form-label">Lời bài hát</label>
-                                    <textarea class="form-control bg-dark text-white" name="Content" rows="10" 
+                                    <textarea class="form-control bg-dark text-white" name="Content" rows="10"
                                               placeholder="Nhập lời bài hát ở đây..." required>@(Model.Lyrics != null && Model.Lyrics.Any() ? Model.Lyrics.First().Content : "")</textarea>
                                     <small class="form-text text-muted">Mỗi dòng sẽ được hiển thị theo đúng định dạng xuống dòng</small>
-</div>
-</div>
-                            
+                                </div>
+                            </div>
+
                             <!-- Tab lời bài hát đồng bộ -->
                             <div id="syncedLyrics" class="tab-pane">
                                 <div class="lyric-sync-editor">
@@ -186,11 +197,11 @@
                                         <button type="button" id="resetSync" class="btn btn-warning">Bắt đầu lại</button>
                                     </div>
                                     <div id="syncPreview" class="bg-dark p-3 rounded"></div>
-                                    
+
                                     <!-- Thêm thuộc tính name để đảm bảo dữ liệu được gửi -->
-                                    <input type="hidden" id="syncedContentInput" name="SyncedContent" 
+                                    <input type="hidden" id="syncedContentInput" name="SyncedContent"
                                            value="@(Model.Lyrics != null && Model.Lyrics.Any() && !string.IsNullOrEmpty(Model.Lyrics.First().SyncedContent) ? Model.Lyrics.First().SyncedContent : "")" />
-                                    
+
                                     @if (Model.Lyrics != null && Model.Lyrics.Any() && !string.IsNullOrEmpty(Model.Lyrics.First().SyncedContent))
                                     {
                                         <div class="alert alert-success mt-2">
@@ -231,12 +242,11 @@
         };
     </script>
     <script src="~/js/song-details.js"></script>
-    <script src="~/js/navigation.js"></script>
-
+    <script src="@Url.Content("~/js/navigation.js")" asp-append-version="true"></script>
     <!-- Thêm ngay sau thẻ <body> -->
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert" 
+        <div class="alert alert-danger alert-dismissible fade show" role="alert"
              style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 300px;">
             @TempData["Error"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -252,10 +262,10 @@
                 cancelButton.addEventListener('click', function() {
                     const modalElement = document.getElementById('addLyricModal');
                     const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                    
+
                     if (modalInstance) {
                         modalInstance.hide();
-                        
+
                         // Dọn dẹp backdrop sau khi modal ẩn
                         setTimeout(function() {
                             document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
@@ -266,7 +276,7 @@
                     }
                 });
             }
-            
+
             // Thêm sự kiện cho nút X
             const closeX = document.getElementById('modalCloseX');
             if (closeX) {
@@ -281,6 +291,57 @@
             }
         });
     </script>
+
+    <!-- Thêm một input hidden để lưu token -->
+    <input type="hidden" id="RequestVerificationToken" 
+           name="__RequestVerificationToken" value="@token" />
+
+    <!-- Thêm đoạn script này vào cuối trang -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const heartIcon = document.querySelector('.heart-icon');
+        
+        if (heartIcon) {
+            heartIcon.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                @if (User.Identity.IsAuthenticated)
+                {
+                    @:// Gửi request để toggle favorite
+                    @:fetch('/Songs/ToggleFavorite/@Model.SongId', {
+                    @:    method: 'POST',
+                    @:    headers: {
+                    @:        'Content-Type': 'application/x-www-form-urlencoded',
+                    @:        'RequestVerificationToken': document.getElementById('RequestVerificationToken').value
+                    @:    }
+                    @:})
+                    @:.then(response => response.json())
+                    @:.then(data => {
+                    @:    // Cập nhật UI
+                    @:    if (data.liked) {
+                    @:        heartIcon.classList.add('liked');
+                    @:    } else {
+                    @:        heartIcon.classList.remove('liked');
+                    @:    }
+                    @:    likeCount.textContent = data.likeCount;
+                    @:    
+                    @:    // Animation nhịp tim
+                    @:    heartIcon.style.animation = 'heartBeat 0.4s';
+                    @:    setTimeout(() => {
+                    @:        heartIcon.style.animation = '';
+                    @:    }, 400);
+                    @:})
+                    @:.catch(error => console.error('Error:', error));
+                }
+                else
+                {
+                    @:// Chuyển hướng đến trang đăng nhập nếu chưa đăng nhập
+                    @:window.location.href = '/Identity/Account/Login?ReturnUrl=' + encodeURIComponent(window.location.pathname);
+                }
+            });
+        }
+    });
+    </script>
 </body>
 </html>
 
@@ -289,7 +350,7 @@
     {
         if (string.IsNullOrEmpty(content))
             return string.Empty;
-            
+
         // Chuyển đổi xuống dòng thành thẻ <br>
         return content
             .Replace("\r\n", "<br>")
