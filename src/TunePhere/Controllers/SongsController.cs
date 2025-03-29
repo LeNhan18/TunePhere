@@ -14,29 +14,79 @@ using System.Text.Json.Serialization;
 
 namespace TunePhere.Controllers
 {
-    [Authorize] // Require authentication
     public class SongsController : Controller
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _environment;
         private readonly UserManager<AppUser> _userManager;
+        private readonly ILogger<SongsController> _logger;
 
         public SongsController(
-            AppDbContext context, 
+            AppDbContext context,
             IWebHostEnvironment environment,
-            UserManager<AppUser> userManager)
+            UserManager<AppUser> userManager,
+            ILogger<SongsController> logger)
         {
             _context = context;
             _environment = environment;
             _userManager = userManager;
+            _logger = logger;
         }
-
         // GET: Songs
-        public async Task<IActionResult> Index()
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(int? artistId)
         {
-            return View(await _context.Songs.Include(s => s.Artists).ToListAsync());
-        }
+            try
+            {
+                // Nếu có artistId, lấy bài hát của nghệ sĩ đó
+                if (artistId.HasValue)
+                {
+                    var artist = await _context.Artists
+                        .FirstOrDefaultAsync(a => a.ArtistId == artistId.Value);
 
+                    if (artist == null)
+                    {
+                        return NotFound();
+                    }
+
+                    var songs = await _context.Songs
+                        .Include(s => s.Artists)
+                        .Where(s => s.ArtistId == artistId.Value)
+                        .ToListAsync();
+
+                    ViewBag.Artist = artist;
+                    return View(songs);
+                }
+
+                // Nếu không có artistId, lấy tất cả bài hát của nghệ sĩ hiện tại
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Challenge();
+                }
+
+                var currentArtist = await _context.Artists
+                    .FirstOrDefaultAsync(a => a.userId == user.Id);
+
+                if (currentArtist == null)
+                {
+                    return RedirectToAction("Create", "Artists");
+                }
+
+                var artistSongs = await _context.Songs
+                    .Include(s => s.Artists)
+                    .Where(s => s.ArtistId == currentArtist.ArtistId)
+                    .ToListAsync();
+
+                ViewBag.Artist = currentArtist;
+                return View(artistSongs);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching songs");
+                return View(new List<Song>());
+            }
+        }
         // GET: Songs/Details/5
         public async Task<IActionResult> Details(int? id)
         {

@@ -65,6 +65,9 @@
                         <a href="@Url.Action("Followers", "Artists", new { id = Model.ArtistId })" class="stat-link">
                             <span><i class="fas fa-users"></i> <span id="followers-count">@Model.GetFollowersCount()</span> người theo dõi</span>
                         </a>
+                        <a href="@Url.Action("Following", "Artists", new { userId = Model.userId })" class="stat-link">
+                            <span><i class="fas fa-user-friends"></i> Đang theo dõi</span>
+                        </a>
                         <span><i class="fas fa-music"></i> @Model.Songs.Count() bài hát</span>
                         <span><i class="fas fa-compact-disc"></i> @Model.Albums.Count() album</span>
                         <span><i class="fas fa-heart"></i> @Model.Songs.Sum(s => s.LikeCount) lượt thích</span>
@@ -141,9 +144,9 @@
                 <a href="@Url.Action("Index", "Artists")" class="view-all">Xem tất cả</a>
             </div>
             <div class="artists-grid">
-                @foreach (var artist in ViewBag.SimilarArtists ?? Enumerable.Empty<Artists>())
+                @foreach (var artist in ViewBag.SimilarArtists)
                 {
-                    <div class="artist-card">
+                    <a href="@Url.Action("Profile", "Artists", new { id = artist.ArtistId })" class="artist-card">
                         <div class="card-img-container artist-img">
                             <img src="@(string.IsNullOrEmpty(artist.ImageUrl) ? "/images/artist-placeholder.jpg" : artist.ImageUrl)" alt="@artist.ArtistName">
                             <div class="play-overlay">
@@ -153,8 +156,12 @@
                             </div>
                         </div>
                         <h3 class="artist-name">@artist.ArtistName</h3>
-                        <p class="artist-type">Nghệ sĩ</p>
-                    </div>
+                        <p class="artist-type">
+                            <i class="fas fa-music"></i> @artist.Songs.Count bài hát
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-play"></i> @(ViewBag.ArtistPlayCounts != null && ViewBag.ArtistPlayCounts.ContainsKey(artist.ArtistId) ? ViewBag.ArtistPlayCounts[artist.ArtistId].ToString("N0") : "0") lượt nghe
+                        </p>
+                    </a>
                 }
             </div>
         </div>

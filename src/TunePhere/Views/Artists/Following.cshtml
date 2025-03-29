@@ -1,0 +1,127 @@
+@model IEnumerable<TunePhere.Models.UserFollower>
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = $"Người {ViewBag.DisplayName} đang theo dõi";
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var isCurrentUser = currentUserId == ViewBag.UserId;
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-user-friends"></i> Người @ViewBag.DisplayName đang theo dõi
+                <span class="text-muted fs-5">(@Model.Count() người)</span>
+            </h2>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        @foreach (var follow in Model)
+        {
+            var artist = ViewBag.ArtistMap != null && ViewBag.ArtistMap.ContainsKey(follow.FollowingId) 
+                ? ViewBag.ArtistMap[follow.FollowingId] 
+                : null;
+
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card h-100 bg-dark text-white border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <img src="@(follow.Following.ImageUrl ?? "/images/default-avatar.png")" 
+                                 class="rounded-circle me-3" 
+                                 alt="Avatar" 
+                                 style="width: 64px; height: 64px; object-fit: cover;">
+                            <div>
+                                <h5 class="card-title mb-1">@follow.Following.FullName</h5>
+                                <p class="card-text text-muted small mb-2">
+                                    <i class="fas fa-calendar-alt"></i> Theo dõi từ: @follow.FollowedAt.ToString("dd/MM/yyyy")
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-3 d-flex justify-content-between align-items-center">
+                            @{
+                                var isArtistProfile = ViewBag.ArtistMap != null && ViewBag.ArtistMap.ContainsKey(follow.FollowingId);
+                                var profileUrl = isArtistProfile ? 
+                                    Url.Action("Profile", "Artists", new { id = ViewBag.ArtistMap[follow.FollowingId].ArtistId }) : 
+                                    Url.Action("Profile", "Users", new { id = follow.FollowingId });
+                            }
+                            <a href="@profileUrl" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-user"></i> Xem trang cá nhân
+                            </a>
+                            @if (isCurrentUser)
+                            {
+                                <button class="btn btn-outline-danger btn-sm unfollow-btn" 
+                                        data-user-id="@follow.FollowingId"
+                                        data-is-artist="@(isArtistProfile ? "true" : "false")"
+                                        data-artist-id="@(isArtistProfile ? ViewBag.ArtistMap[follow.FollowingId].ArtistId.ToString() : "")">
+                                    <i class="fas fa-user-times"></i>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-user-friends fa-4x text-muted"></i>
+            </div>
+            @if (isCurrentUser)
+            {
+                <h3 class="text-muted">Bạn chưa theo dõi ai</h3>
+                <p class="text-muted">Hãy khám phá và theo dõi những nghệ sĩ yêu thích của bạn</p>
+                <a href="@Url.Action("Index", "Artists")" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Khám phá nghệ sĩ
+                </a>
+            }
+            else
+            {
+                <h3 class="text-muted">@ViewBag.DisplayName chưa theo dõi ai</h3>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.unfollow-btn').click(function() {
+                if (confirm('Bạn có chắc muốn hủy theo dõi người này?')) {
+                    const button = $(this);
+                    const isArtist = button.data('is-artist') === 'true';
+                    const userId = button.data('user-id');
+                    const artistId = button.data('artist-id');
+                    
+                    const url = isArtist ? '/Artists/ToggleFollow' : '/Artists/ToggleFollowUser';
+                    const data = isArtist ? { artistId: artistId } : { userId: userId };
+                    
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: data,
+                        success: function(response) {
+                            if (response.success) {
+                                button.closest('.col-xl-3').fadeOut(function() {
+                                    $(this).remove();
+                                    if ($('.col-xl-3').length === 0) {
+                                        location.reload();
+                                    }
+                                });
+                            } else {
+                                alert(response.message || 'Có lỗi xảy ra khi hủy theo dõi');
+                            }
+                        },
+                        error: function() {
+                            alert('Có lỗi xảy ra, vui lòng thử lại sau');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+} 
