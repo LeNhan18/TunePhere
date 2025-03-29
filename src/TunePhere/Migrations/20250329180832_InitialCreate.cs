@@ -463,6 +463,31 @@ namespace TunePhere.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserFavoriteSongs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    SongId = table.Column<int>(type: "int", nullable: false),
+                    AddedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserFavoriteSongs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserFavoriteSongs_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_UserFavoriteSongs_Songs_SongId",
+                        column: x => x.SongId,
+                        principalTable: "Songs",
+                        principalColumn: "SongId");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ListeningRoomParticipants",
                 columns: table => new
                 {
@@ -627,6 +652,16 @@ namespace TunePhere.Migrations
                 column: "ArtistId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserFavoriteSongs_SongId",
+                table: "UserFavoriteSongs",
+                column: "SongId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserFavoriteSongs_UserId",
+                table: "UserFavoriteSongs",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserFollowers_FollowerId",
                 table: "UserFollowers",
                 column: "FollowerId");
@@ -669,6 +704,9 @@ namespace TunePhere.Migrations
 
             migrationBuilder.DropTable(
                 name: "Remixes");
+
+            migrationBuilder.DropTable(
+                name: "UserFavoriteSongs");
 
             migrationBuilder.DropTable(
                 name: "UserFollowers");

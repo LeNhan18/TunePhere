@@ -609,6 +609,7 @@ namespace TunePhere.Migrations
 
                     b.ToTable("Songs");
                 });
+
             modelBuilder.Entity("TunePhere.Models.UserFavoriteSong", b =>
                 {
                     b.Property<int>("Id")
@@ -617,8 +618,7 @@ namespace TunePhere.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("LikedAt")
-
+                    b.Property<DateTime>("AddedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("SongId")
@@ -633,7 +633,6 @@ namespace TunePhere.Migrations
                     b.HasIndex("SongId");
 
                     b.HasIndex("UserId");
-
 
                     b.ToTable("UserFavoriteSongs");
                 });
@@ -913,18 +912,15 @@ namespace TunePhere.Migrations
                     b.Navigation("Artists");
                 });
 
-
             modelBuilder.Entity("TunePhere.Models.UserFavoriteSong", b =>
                 {
                     b.HasOne("TunePhere.Models.Song", "Song")
                         .WithMany("FavoritedBy")
-
                         .HasForeignKey("SongId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("TunePhere.Models.AppUser", "User")
-
                         .WithMany("FavoriteSongs")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1023,8 +1019,6 @@ namespace TunePhere.Migrations
                     b.Navigation("PlaylistSongs");
 
                     b.Navigation("Remixes");
-
-                    b.Navigation("SongLikes");
                 });
 #pragma warning restore 612, 618
         }
