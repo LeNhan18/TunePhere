@@ -3,7 +3,8 @@
 @{
     ViewData["Title"] = "Danh sách bài hát";
     Layout = "_Layout";
-    var artist = ViewBag.Artist as TunePhere.Models.Artists;
+    var firstSong = Model.FirstOrDefault();
+    var artist = firstSong?.Artists;
 }
 
 
@@ -60,7 +61,7 @@
                                         <h6 class="mb-0 song-title">@item.Title</h6>
                                     </div>
                                 </div>
-                            </td>
+                                </td>
                             <td><span class="genre-badge">@item.Genre</span></td>
                             <td class="text-muted">@item.Duration.ToString(@"mm\:ss")</td>
                             <td>
@@ -91,6 +92,7 @@
         </div>
     </div>
 </div>
+
 
 @section Styles {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
