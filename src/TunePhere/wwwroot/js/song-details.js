@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', function () {
         imageUrl: window.songData.imageUrl
     });
 
+    // Tăng lượt nghe khi trang chi tiết được tải
+    incrementPlayCount(window.songData.songId);
+
     // Tự động phát khi trang tải xong
     playAudio();
 
@@ -190,7 +193,9 @@ function togglePlay() {
                 isPlaying = true;
                 // Bật hiệu ứng đĩa xoay
                 toggleVinylEffect(true);
-
+                
+                // Không tăng lượt nghe khi người dùng phát lại cùng một bài hát
+                // Lượt nghe đã được tăng khi tải trang
             })
             .catch(error => {
                 console.error('Lỗi phát nhạc:', error);
@@ -228,10 +233,39 @@ function playAudio() {
             isPlaying = true;
             updatePlayPauseButton();
             toggleVinylEffect(true);
+            
+            // Không cần gọi lại vì đã gọi khi trang tải xong
+            // incrementPlayCount(window.songData.songId);
         })
         .catch(error => {
             console.error('Lỗi phát nhạc:', error);
         });
+}
+
+// Hàm tăng lượt nghe
+function incrementPlayCount(songId) {
+    // Lấy token CSRF từ meta tag
+    const token = document.querySelector('meta[name="__RequestVerificationToken"]').content;
+    
+    fetch(`/Songs/IncrementPlayCount/${songId}`, {
+        method: 'POST',
+        headers: {
+            'RequestVerificationToken': token
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Đã tăng lượt nghe:', data.playCount);
+        
+        // Cập nhật số lượt nghe trên giao diện nếu có
+        const playCountElements = document.querySelectorAll('.stat-item span');
+        playCountElements.forEach(element => {
+            if (element.parentElement.querySelector('i.fa-play')) {
+                element.textContent = `${data.playCount} lượt nghe`;
+            }
+        });
+    })
+    .catch(error => console.error('Lỗi khi tăng lượt nghe:', error));
 }
 
 // Cập nhật nút play/pause - đảm bảo nút hiển thị đúng
