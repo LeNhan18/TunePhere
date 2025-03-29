@@ -12,8 +12,8 @@ using TunePhere.Models;
 namespace TunePhere.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250329165238_Tune4")]
-    partial class Tune4
+    [Migration("20250329180832_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
