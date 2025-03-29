@@ -1,5 +1,3 @@
-@using System.Text.Json
-@using TunePhere.Models
 @using System.Security.Claims
 @model TunePhere.Models.Song
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
@@ -33,159 +31,14 @@
         </a>
     </div>
 
-    <div class="song-details-page">
-        <!-- Lyrics bên trái -->
-        <div class="lyrics-container left-lyrics">
-            <div class="lyrics-header">
-                <h3>Lời bài hát</h3>
-                @if (User.IsInRole("Admin") || (User.Identity.IsAuthenticated && Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier)))
-                {
-                    <button class="add-lyrics-btn" onclick="showLyricModal()">
-                        <i class="fas @(Model.Lyrics != null && Model.Lyrics.Any() ? "fa-edit" : "fa-plus")"></i>
-                        <span>@(Model.Lyrics != null && Model.Lyrics.Any() ? "Chỉnh sửa lời bài hát" : "Thêm lời bài hát")</span>
-                    </button>
-                }
-            </div>
-            @if (Model.Lyrics != null && Model.Lyrics.Any())
-            {
-                <div class="lyrics-content">
-                    @{
-                        var syncedContent = Model.Lyrics.FirstOrDefault()?.SyncedContent;
-                        if (!string.IsNullOrEmpty(syncedContent))
-                        {
-                            try
-                            {
-                                var syncedData = JsonSerializer.Deserialize<List<SyncedLyricLine>>(syncedContent);
-                                <div id="syncedLyricsDisplay">
-                                    @foreach (var line in syncedData)
-                                    {
-                                        <div class="lyric-line" data-time="@line.Time">
-                                            <span class="time-marker">[@TimeSpan.FromSeconds(line.Time).ToString(@"mm\:ss")]</span>
-                                            <span class="lyric-text">@line.Text</span>
-                                        </div>
-                                    }
-                                </div>
-                            }
-                            catch (Exception ex)
-                            {
-                                <div class="error-message">Lỗi hiển thị lyrics: @ex.Message</div>
-                            }
-                        }
-                        else
-                        {
-                            <pre class="lyric-text">@Model.Lyrics.First().Content</pre>
-                        }
-                    }
-                </div>
-            }
-            else 
-            {
-                <div class="no-lyrics-message">
-                    <p>Chưa có lời bài hát</p>
-                    @if (User.IsInRole("Admin") || (User.Identity.IsAuthenticated && Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier)))
-                    {
-                        <button class="add-lyrics-btn" onclick="showLyricModal()">
-                            <i class="fas fa-plus"></i>
-                            <span>Thêm lời bài hát</span>
-                        </button>
-                    }
-                </div>
-            }
-        </div>
-
-        <!-- Đĩa nhạc ở giữa -->
-        <div class="vinyl-player">
-            <div class="vinyl-disc @(Model.FileUrl != null ? "can-play" : "")">
-                <div class="vinyl-label">
-                    <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/default-song.jpg" : Model.ImageUrl)" alt="@Model.Title" />
-                </div>
-            </div>
-            <div class="vinyl-reflection"></div>
-            
-            <div class="song-info">
-                <h1 class="song-title">@Model.Title</h1>
-                <div class="song-meta">
-                    @if (Model.Artists != null)
-                    {
-                        <a href="@Url.Action("Profile", "Artists", new { id = Model.ArtistId })" class="artist-name">
-                            @Model.Artists.ArtistName
-                        </a>
-                    }
-                    <div class="song-stats">
-                        <span class="stat-item">
-                            <i class="fa-solid fa-play"></i>
-                            @Model.PlayCount lượt nghe
-                        </span>
-                        <span class="stat-item">
-                            <i class="fa-solid fa-heart"></i>
-                            @Model.LikeCount lượt thích
-                        </span>
-                        <span class="stat-item">
-                            <i class="fa-regular fa-calendar"></i>
-                            @Model.UploadDate.ToString("dd/MM/yyyy")
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="player-controls">
-                <button class="play-btn" onclick="togglePlay()">
-                    <i class="fas fa-play"></i>
-                </button>
-            </div>
-
-            <!-- Thêm dòng lyrics đang phát -->
-            <div class="current-lyric">
-                <div class="lyric-text"></div>
-            </div>
-
-            <audio id="audioPlayer" src="@Model.FileUrl"></audio>
-        </div>
-
-        <!-- Lyrics bên phải -->
-        <div class="lyrics-container right-lyrics">
-            @if (Model.Lyrics != null && Model.Lyrics.Any())
-            {
-                <div class="lyrics-content">
-                    @{
-                        var syncedContent = Model.Lyrics.FirstOrDefault()?.SyncedContent;
-                        if (!string.IsNullOrEmpty(syncedContent))
-                        {
-                            try
-                            {
-                                var syncedData = JsonSerializer.Deserialize<List<SyncedLyricLine>>(syncedContent);
-                                <div id="syncedLyricsDisplay">
-                                    @foreach (var line in syncedData)
-                                    {
-                                        <div class="lyric-line" data-time="@line.Time">
-                                            <span class="time-marker">[@TimeSpan.FromSeconds(line.Time).ToString(@"mm\:ss")]</span>
-                                            <span class="lyric-text">@line.Text</span>
-                                        </div>
-                                    }
-                                </div>
-                            }
-                            catch (Exception ex)
-                            {
-                                <div class="error-message">Lỗi hiển thị lyrics: @ex.Message</div>
-                            }
-                        }
-                        else
-                        {
-                            <pre class="lyric-text">@Model.Lyrics.First().Content</pre>
-                        }
-                    }
-                </div>
-            }
-        </div>
-    </div>
-
     <div class="song-player">
         <div class="song-content">
             <!-- Cột trái -->
             <div class="left-column">
-                <!-- Ảnh bài hát -->
+                <!-- Đĩa vinyl giống hệt ảnh mẫu -->
                 <div class="song-image">
                     <img src="@Model.ImageUrl" alt="@Model.Title" />
+                    <div class="vinyl-light-effect"></div>
                     @if (User.IsInRole("Admin") || (User.Identity.IsAuthenticated && Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier)))
                     {
                         <div class="add-lyric-button" id="addLyricButton">
@@ -194,60 +47,64 @@
                         </div>
                     }
                 </div>
-                
-                <!-- Thông tin bài hát -->
+
+                <!-- Thông tin bài hát - đã loại bỏ khung -->
                 <div class="song-header">
-                    <div class="title-container">
-                        <h1 class="song-title">@Model.Title</h1>
-                        <div class="heart-container">
-                            <i class="fas fa-heart heart-icon"></i>
-                            <span class="like-count">@Model.LikeCount</span>
-                        </div>
-                    </div>
+                    <h1 class="song-title">@Model.Title</h1>
                     <div class="artist-row">
                         <span class="artist-name">@Model.Artists?.ArtistName</span>
                     </div>
+                    
+                    <!-- Thông tin bài hát -->
+                    <div class="song-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-play"></i>
+                            <span>@Model.PlayCount lượt nghe</span>
+                        </div>
+                        <div class="stat-item heart-container">
+                            <i class="fas fa-heart heart-icon"></i>
+                            <span class="like-count">@Model.LikeCount</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>@(Model.UploadDate.ToString("dd/MM/yyyy") ?? "29/03/2025")</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Phần Lyrics -->
-            <div class="lyrics-section">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3>Lời bài hát</h3>
-                    @if (User.IsInRole("Admin") || Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier))
-                    {
-                        <button class="btn btn-primary" onclick="showLyricModal()">
-                            <i class="fas @(Model.Lyrics != null && Model.Lyrics.Any() ? "fa-edit" : "fa-plus")"></i>
-                            @(Model.Lyrics != null && Model.Lyrics.Any() ? "Chỉnh sửa lời bài hát" : "Thêm lời bài hát")
-                        </button>
-                    }
-                </div>
 
+            <!-- Phần lyrics -->
+            <div class="lyrics-container">
                 @if (Model.Lyrics != null && Model.Lyrics.Any())
                 {
-                    var lyrics = Model.Lyrics.FirstOrDefault();
-                    if (lyrics != null)
-                    {
-                        <div class="lyrics-container">
-                            @if (!string.IsNullOrEmpty(lyrics.Content))
+                    <div class="lyrics-content">
+                        @if (!string.IsNullOrEmpty(Model.Lyrics.First().SyncedContent))
+                        {
+                            <div id="syncedLyricsDisplay" data-synced-content="@Model.Lyrics.First().SyncedContent"></div>
+                            <!-- Hiển thị lyrics đồng bộ với container rộng hơn -->
+                            <div id="syncedLyricsDisplay" class="synced-lyrics-display"
+                                 data-synced-content="@Model.Lyrics.First().SyncedContent"></div>
+                        }
+                        else
+                        {
+                            <!-- Hiển thị lyrics thường -->
+                            @foreach (var lyric in Model.Lyrics.OrderByDescending(l => l.UpdatedAt ?? l.CreatedAt))
                             {
-                                <div class="lyrics-content">
-                                    <pre class="lyric-text">@lyrics.Content</pre>
-                                </div>
+                                <pre class="lyric-text" data-lyric-id="@lyric.LyricId">@Html.Raw(lyric.Content)</pre>
                             }
-                        </div>
-                    }
+                        }
+                    </div>
                 }
                 else
                 {
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Chưa có lời bài hát
+                    <div class="lyrics-content">
+                        <p>Chưa có lời bài hát</p>
                     </div>
                 }
             </div>
         </div>
     </div>
-    
+
     <!-- Thanh phát nhạc kiểu mới (giống Index.cshtml) -->
     <div id="nowPlayingBar" class="now-playing-bar">
         <div class="now-playing-left">
@@ -291,20 +148,26 @@
         </div>
     </div>
 
-    <!-- Modal thêm lời bài hát -->
-    <div class="modal fade" id="addLyricModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
+    <!-- Modal thêm/sửa lời bài hát -->
+    <div class="modal fade" id="addLyricModal" tabindex="-1" aria-labelledby="addLyricModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white">
                 <div class="modal-header">
-                    <h5 class="modal-title">Thêm lời bài hát</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title" id="addLyricModalLabel">
+                        @(Model.Lyrics != null && Model.Lyrics.Any() ? "Chỉnh sửa lời bài hát" : "Thêm lời bài hát")
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" id="modalCloseX"></button>
                 </div>
-                <div class="modal-body">
-                    <form id="lyricForm" method="post">
+                <form action="@(Model.Lyrics != null && Model.Lyrics.Any() ? "/Lyrics/Edit" : "/Lyrics/AddLyric")" method="post">
+                    <div class="modal-body">
                         @Html.AntiForgeryToken()
-                        <input type="hidden" id="lyricSongId" name="SongId" value="@Model.SongId" />
-                        
-                        <!-- Tab Navigation -->
+                        <input type="hidden" name="SongId" value="@Model.SongId" />
+                        @if (Model.Lyrics != null && Model.Lyrics.Any())
+                        {
+                            <input type="hidden" name="LyricId" value="@Model.Lyrics.First().LyricId" />
+                        }
+                        <input type="hidden" name="Language" value="vi" />
+
                         <ul class="nav nav-tabs" role="tablist">
                             <li class="nav-item">
                                 <a class="nav-link active" data-bs-toggle="tab" href="#normalLyrics">Lời bài hát</a>
@@ -314,56 +177,68 @@
                             </li>
                         </ul>
 
-                        <!-- Tab Content -->
-                        <div class="tab-content mt-3">
-                            <!-- Normal Lyrics Tab -->
-                            <div class="tab-pane fade show active" id="normalLyrics">
+                        <div class="tab-content">
+                            <!-- Tab lời bài hát thường -->
+                            <div id="normalLyrics" class="tab-pane active">
                                 <div class="mb-3">
-                                    <textarea id="lyricContent" name="Content" class="form-control" rows="10" 
-                                        placeholder="Nhập lời bài hát ở đây..."></textarea>
+                                    <label for="Content" class="form-label">Lời bài hát</label>
+                                    <textarea class="form-control bg-dark text-white" name="Content" rows="10"
+                                              placeholder="Nhập lời bài hát ở đây..." required>@(Model.Lyrics != null && Model.Lyrics.Any() ? Model.Lyrics.First().Content : "")</textarea>
+                                    <small class="form-text text-muted">Mỗi dòng sẽ được hiển thị theo đúng định dạng xuống dòng</small>
                                 </div>
                             </div>
 
-                            <!-- Synced Lyrics Tab -->
-                            <div class="tab-pane fade" id="syncedLyrics">
+                            <!-- Tab lời bài hát đồng bộ -->
+                            <div id="syncedLyrics" class="tab-pane">
                                 <div class="lyric-sync-editor">
                                     <div class="timing-controls mb-3">
-                                        <button type="button" id="startSyncing" class="btn btn-primary">
-                                            <i class="fas fa-play"></i> Bắt đầu đồng bộ
-                                        </button>
-                                        <button type="button" id="markTimestamp" class="btn btn-info" disabled>
-                                            <i class="fas fa-clock"></i> Đánh dấu thời gian
-                                        </button>
-                                        <button type="button" id="resetSync" class="btn btn-warning">
-                                            <i class="fas fa-redo"></i> Bắt đầu lại
-                                        </button>
+                                        <button type="button" id="startSyncing" class="btn btn-primary">Bắt đầu đồng bộ</button>
+                                        <button type="button" id="markTimestamp" class="btn btn-info" disabled>Đánh dấu thời gian</button>
+                                        <button type="button" id="resetSync" class="btn btn-warning">Bắt đầu lại</button>
                                     </div>
-                                    <div id="syncPreview" class="mb-3"></div>
-                                    <input type="hidden" id="syncedContentInput" name="SyncedContent" />
+                                    <div id="syncPreview" class="bg-dark p-3 rounded"></div>
+
+                                    <!-- Thêm thuộc tính name để đảm bảo dữ liệu được gửi -->
+                                    <input type="hidden" id="syncedContentInput" name="SyncedContent"
+                                           value="@(Model.Lyrics != null && Model.Lyrics.Any() && !string.IsNullOrEmpty(Model.Lyrics.First().SyncedContent) ? Model.Lyrics.First().SyncedContent : "")" />
+
+                                    @if (Model.Lyrics != null && Model.Lyrics.Any() && !string.IsNullOrEmpty(Model.Lyrics.First().SyncedContent))
+                                    {
+                                        <div class="alert alert-success mt-2">
+                                            <i class="fas fa-check-circle"></i> Lời bài hát đã được đồng bộ. Bạn có thể đồng bộ lại nếu muốn.
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                            <button type="button" class="btn btn-primary" onclick="submitLyricForm()">Cập nhật</button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="cancelButton">Hủy</button>
+                        <button type="submit" class="btn btn-success">
+                            @(Model.Lyrics != null && Model.Lyrics.Any() ? "Cập nhật" : "Lưu lại")
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
+    <!-- Hidden audio element -->
+    <audio id="audioPlayer" style="display: none;"></audio>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Truyền dữ liệu từ Model sang JavaScript
         window.songData = {
-            title: '@Model.Title',
-            artist: '@Model.Artists',
             fileUrl: '@Model.FileUrl',
             imageUrl: '@Model.ImageUrl',
-            userIsAdmin: @Json.Serialize(User.IsInRole("Artist")),
-            userIsOwner: @Json.Serialize(Model.Artists.userId == User.FindFirstValue(ClaimTypes.NameIdentifier))
+            title: '@Model.Title',
+            artist: '@Model.Artists?.ArtistName',
+            songId: '@Model.SongId',
+            artistId: '@Model.ArtistId',
+            userId: '@User.FindFirstValue(ClaimTypes.NameIdentifier)',
+            artistUserId: '@Model.Artists?.userId',
+            userIsAdmin: '@User.IsInRole("Admin")' === 'True',
+            userIsOwner: '@(Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier))' === 'True'
         };
     </script>
     <script src="~/js/song-details.js"></script>
@@ -371,7 +246,7 @@
     <!-- Thêm ngay sau thẻ <body> -->
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert" 
+        <div class="alert alert-danger alert-dismissible fade show" role="alert"
              style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 300px;">
             @TempData["Error"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -387,10 +262,10 @@
                 cancelButton.addEventListener('click', function() {
                     const modalElement = document.getElementById('addLyricModal');
                     const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                    
+
                     if (modalInstance) {
                         modalInstance.hide();
-                        
+
                         // Dọn dẹp backdrop sau khi modal ẩn
                         setTimeout(function() {
                             document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
@@ -401,7 +276,7 @@
                     }
                 });
             }
-            
+
             // Thêm sự kiện cho nút X
             const closeX = document.getElementById('modalCloseX');
             if (closeX) {
@@ -416,49 +291,6 @@
             }
         });
     </script>
-
-    <script>
-    function showLyricModal() {
-        const modal = new bootstrap.Modal(document.getElementById('addLyricModal'));
-        modal.show();
-    }
-    </script>
-
-    <!-- Script để khởi tạo đồng bộ lyrics -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Khởi tạo chức năng đồng bộ lyrics
-        initLyricSyncing();
-        
-        // Xử lý form submit
-        window.submitLyricForm = function() {
-            const form = document.getElementById('lyricForm');
-            const formData = new FormData(form);
-            
-            fetch('/Lyrics/AddLyric', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    alert('Có lỗi xảy ra khi lưu lời bài hát');
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi:', error);
-                alert('Có lỗi xảy ra khi lưu lời bài hát');
-            });
-        };
-        
-        // Hiển thị modal
-        window.showLyricModal = function() {
-            const modal = new bootstrap.Modal(document.getElementById('addLyricModal'));
-            modal.show();
-        };
-    });
-    </script>
 </body>
 </html>
 
@@ -467,7 +299,7 @@
     {
         if (string.IsNullOrEmpty(content))
             return string.Empty;
-            
+
         // Chuyển đổi xuống dòng thành thẻ <br>
         return content
             .Replace("\r\n", "<br>")
