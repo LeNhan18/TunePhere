@@ -30,6 +30,9 @@ namespace TunePhere.Models
         // Artist Following
         public virtual ICollection<ArtistFollower> ArtistFollowing { get; set; }
 
+        // Favorite Songs
+        public virtual ICollection<UserFavoriteSong> FavoriteSongs { get; set; }
+
         public AppUser()
         {
             ListeningRooms = new HashSet<ListeningRoom>();
@@ -39,6 +42,7 @@ namespace TunePhere.Models
             Followers = new HashSet<UserFollower>();
             Following = new HashSet<UserFollower>();
             ArtistFollowing = new HashSet<ArtistFollower>();
+            FavoriteSongs = new HashSet<UserFavoriteSong>();
         }
 
         // Helper methods to get counts
@@ -60,6 +64,11 @@ namespace TunePhere.Models
         public int GetPublicPlaylistCount()
         {
             return Playlists?.Count(p => p.IsPublic) ?? 0;
+        }
+
+        public int GetFavoriteSongsCount()
+        {
+            return FavoriteSongs?.Count ?? 0;
         }
     }
 }
