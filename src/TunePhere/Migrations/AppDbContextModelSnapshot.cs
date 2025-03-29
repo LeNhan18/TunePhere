@@ -609,8 +609,7 @@ namespace TunePhere.Migrations
 
                     b.ToTable("Songs");
                 });
-
-            modelBuilder.Entity("TunePhere.Models.SongLike", b =>
+            modelBuilder.Entity("TunePhere.Models.UserFavoriteSong", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -619,6 +618,7 @@ namespace TunePhere.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("LikedAt")
+
                         .HasColumnType("datetime2");
 
                     b.Property<int>("SongId")
@@ -634,7 +634,8 @@ namespace TunePhere.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("SongLikes");
+
+                    b.ToTable("UserFavoriteSongs");
                 });
 
             modelBuilder.Entity("TunePhere.Models.UserFollower", b =>
@@ -912,16 +913,19 @@ namespace TunePhere.Migrations
                     b.Navigation("Artists");
                 });
 
-            modelBuilder.Entity("TunePhere.Models.SongLike", b =>
+
+            modelBuilder.Entity("TunePhere.Models.UserFavoriteSong", b =>
                 {
                     b.HasOne("TunePhere.Models.Song", "Song")
-                        .WithMany("SongLikes")
+                        .WithMany("FavoritedBy")
+
                         .HasForeignKey("SongId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("TunePhere.Models.AppUser", "User")
-                        .WithMany()
+
+                        .WithMany("FavoriteSongs")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -970,6 +974,8 @@ namespace TunePhere.Migrations
                 {
                     b.Navigation("ArtistFollowing");
 
+                    b.Navigation("FavoriteSongs");
+
                     b.Navigation("Followers");
 
                     b.Navigation("Following");
@@ -1010,6 +1016,8 @@ namespace TunePhere.Migrations
 
             modelBuilder.Entity("TunePhere.Models.Song", b =>
                 {
+                    b.Navigation("FavoritedBy");
+
                     b.Navigation("Lyrics");
 
                     b.Navigation("PlaylistSongs");

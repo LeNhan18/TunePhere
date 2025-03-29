@@ -1,0 +1,119 @@
+﻿@model IEnumerable<TunePhere.Models.UserFavoriteSong>
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+
+@{
+    ViewData["Title"] = "Bài hát yêu thích";
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+<link rel="stylesheet" href="~/css/favoritesong.css" />
+
+<div class="container-fluid favorites-container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="favorites-title">Bài hát yêu thích</h1>
+            <p class="favorites-subtitle">Những bài hát mà bạn đã thích</p>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-favorites">
+            <i class="fas fa-heart-broken"></i>
+            <h3>Bạn chưa thích bài hát nào</h3>
+            <p>Hãy nhấn vào biểu tượng tim khi nghe nhạc để thêm vào danh sách yêu thích</p>
+            <a href="@Url.Action("Index", "Home")" class="btn btn-primary mt-3">Khám phá nhạc</a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="favorites-table">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr class="text-muted">
+                                <th scope="col" width="50">#</th>
+                                <th scope="col">TIÊU ĐỀ</th>
+                                <th scope="col">THỂ LOẠI</th>
+                                <th scope="col" width="120">THỜI LƯỢNG</th>
+                                <th scope="col" width="120">LƯỢT NGHE</th>
+                                <th scope="col" width="120">LƯỢT THÍCH</th>
+                                <th scope="col" width="80">HỦY</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var (item, index) in Model.Select((favorite, index) => (favorite, index + 1)))
+                            {
+                                <tr class="align-middle song-item"
+                                    data-song-id="@item.Song.SongId"
+                                    data-audio-url="@item.Song.FileUrl"
+                                    data-image-url="@item.Song.ImageUrl"
+                                    data-title="@item.Song.Title"
+                                    data-artist="@item.Song.Artists?.ArtistName">
+                                    <th scope="row" class="text-muted">@index</th>
+                                    <td>
+                                        <a href="@Url.Action("Details", "Songs", new { id = item.Song.SongId })" class="song-link">
+                                        <div class="d-flex align-items-center">
+                                            <div class="song-image-container me-3">
+ 
+                                                    <img src="@item.Song.ImageUrl" alt="@item.Song.Title" class="song-image">
+                                          
+                                                <div class="play-overlay" onclick="playFavoriteSong(this)">
+                                                    <i class="fas fa-play"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                
+                                                    <h6 class="song-title mb-0">@item.Song.Title</h6>
+                                                    <div class="song-artist">@item.Song.Artists?.ArtistName</div>
+                                                
+                                            </div>
+                                        </div>
+                                        </a>
+                                    </td>
+                                    <td>    
+                                        <a href="@Url.Action("Details", "Songs", new { id = item.Song.SongId })" class="song-link">
+                                            <span class="genre-badge">@item.Song.Genre</span>
+                                        </a>
+                                    </td>
+                                    <td class="text-muted">
+                                        <a href="@Url.Action("Details", "Songs", new { id = item.Song.SongId })" class="song-link">
+                                            @item.Song.Duration.ToString(@"mm\:ss")
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("Details", "Songs", new { id = item.Song.SongId })" class="song-link">
+                                            <i class="fas fa-play text-accent me-1"></i>
+                                            <span class="text-muted">@item.Song.PlayCount</span>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("Details", "Songs", new { id = item.Song.SongId })" class="song-link">
+                                            <i class="fas fa-heart text-accent me-1"></i>
+                                            <span class="text-muted">@item.Song.LikeCount</span>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("Details", "Songs", new { id = item.Song.SongId })" class="song-link">
+                                            <div class="text-center">
+                                                <i class="fas fa-heart heart-icon liked" 
+                                                   data-song-id="@item.Song.SongId" 
+                                                   data-favorite-id="@item.Id"></i>
+                                            </div>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Thêm một input hidden để lưu token -->
+<input type="hidden" id="RequestVerificationToken" 
+       name="__RequestVerificationToken" value="@token" />
+
+<script src="~/js/favoritesongs.js"></script>

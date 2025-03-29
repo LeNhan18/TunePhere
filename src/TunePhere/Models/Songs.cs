@@ -61,12 +61,16 @@ namespace TunePhere.Models
         [NotMapped]
         public bool IsLiked { get; set; } // Trạng thái like của người dùng hiện tại
         
+        [JsonIgnore]
+        public virtual ICollection<UserFavoriteSong> FavoritedBy { get; set; }
+        
         public Song()
         {
             Lyrics = new HashSet<Lyric>();
             Remixes = new HashSet<Remix>();
             PlaylistSongs = new HashSet<PlaylistSong>();
-            SongLikes = new HashSet<SongLike>();
+            FavoritedBy = new HashSet<UserFavoriteSong>();
+
             Title = "";
             Genre = "";
             FileUrl = "";

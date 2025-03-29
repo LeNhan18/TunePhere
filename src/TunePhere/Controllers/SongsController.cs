@@ -102,9 +102,28 @@ namespace TunePhere.Controllers
                 .Include(s => s.Artists)
                 .Include(s => s.Lyrics)
                 .FirstOrDefaultAsync(m => m.SongId == id);
+            
             if (song == null)
             {
                 return NotFound();
+            }
+
+            // Đếm lại số lượt thích từ bảng UserFavoriteSong
+            var likeCount = await _context.UserFavoriteSongs.CountAsync(f => f.SongId == id.Value);
+            
+            // Cập nhật lại LikeCount nếu không khớp với số thực tế
+            if (song.LikeCount != likeCount)
+            {
+                song.LikeCount = likeCount;
+                await _context.SaveChangesAsync();
+            }
+
+            // Kiểm tra người dùng đã yêu thích bài hát chưa
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = _userManager.GetUserId(User);
+                ViewData["IsFavorited"] = await _context.UserFavoriteSongs
+                    .AnyAsync(f => f.SongId == song.SongId && f.UserId == userId);
             }
 
             // Thêm headers để tránh cache
@@ -404,6 +423,84 @@ namespace TunePhere.Controllers
             }
 
             return Ok(new { playCount = song.PlayCount });
+        }
+
+        // GET: Songs/Search
+        [HttpGet]
+        public async Task<IActionResult> Search(string query)
+        {
+            if (string.IsNullOrEmpty(query))
+            {
+                return Json(new List<object>());
+            }
+
+            var songs = await _context.Songs
+                .Include(s => s.Artists)
+                .Where(s => s.Title.ToLower().Contains(query.ToLower()) || 
+                           s.Artists.ArtistName.ToLower().Contains(query.ToLower()))
+                .Select(s => new
+                {
+                    songId = s.SongId,
+                    title = s.Title,
+                    artistName = s.Artists.ArtistName,
+                    imageUrl = s.ImageUrl
+                })
+                .ToListAsync();
+
+            return Json(songs);
+        }
+
+        // POST: Songs/ToggleFavorite/5
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleFavorite(int id)
+        {
+            var song = await _context.Songs.FindAsync(id);
+            if (song == null)
+            {
+                return NotFound();
+            }
+
+            var userId = _userManager.GetUserId(User);
+            
+            // Kiểm tra xem người dùng đã thích bài hát này chưa
+            var favorite = await _context.UserFavoriteSongs
+                .FirstOrDefaultAsync(f => f.UserId == userId && f.SongId == id);
+
+            bool isNowLiked = false;
+            
+            if (favorite == null)
+            {
+                // Chưa thích - thêm vào danh sách yêu thích
+                _context.UserFavoriteSongs.Add(new UserFavoriteSong
+                {
+                    UserId = userId,
+                    SongId = id,
+                    AddedDate = DateTime.Now
+                });
+                isNowLiked = true;
+            }
+            else
+            {
+                // Đã thích - xóa khỏi danh sách yêu thích
+                _context.UserFavoriteSongs.Remove(favorite);
+                isNowLiked = false;
+            }
+            
+            await _context.SaveChangesAsync();
+            
+            // Đếm lại số lượt thích từ bảng UserFavoriteSong
+            var likeCount = await _context.UserFavoriteSongs.CountAsync(f => f.SongId == id);
+            
+            // Cập nhật lại trường LikeCount trong bảng Song
+            song.LikeCount = likeCount;
+            await _context.SaveChangesAsync();
+            
+            return Json(new { 
+                liked = isNowLiked,
+                likeCount = likeCount 
+            });
         }
 
         private bool SongExists(int id)

@@ -24,6 +24,8 @@ namespace TunePhere.Models
         public DbSet<UserFollower> UserFollowers { get; set; }
         public DbSet<ArtistFollower> ArtistFollowers { get; set; }
 
+        public DbSet<UserFavoriteSong> UserFavoriteSongs { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -145,17 +147,17 @@ namespace TunePhere.Models
                 .HasForeignKey(af => af.ArtistId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Cấu hình mối quan hệ SongLike
-            modelBuilder.Entity<SongLike>()
-                .HasOne(sl => sl.User)
-                .WithMany()
-                .HasForeignKey(sl => sl.UserId)
+            // Cấu hình mối quan hệ UserFavoriteSong
+            modelBuilder.Entity<UserFavoriteSong>()
+                .HasOne(ufs => ufs.User)
+                .WithMany(u => u.FavoriteSongs)
+                .HasForeignKey(ufs => ufs.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<SongLike>()
-                .HasOne(sl => sl.Song)
-                .WithMany(s => s.SongLikes)
-                .HasForeignKey(sl => sl.SongId)
+            
+            modelBuilder.Entity<UserFavoriteSong>()
+                .HasOne(ufs => ufs.Song)
+                .WithMany(s => s.FavoritedBy)
+                .HasForeignKey(ufs => ufs.SongId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }

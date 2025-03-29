@@ -1,12 +1,15 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Identity
 @model TunePhere.Models.Album
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 @{
     ViewData["Title"] = Model.AlbumName;
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<input type="hidden" name="__RequestVerificationToken" value="@token" />
 
 <style>
     .album-header {
@@ -63,7 +66,7 @@
 
     .track-header {
         display: grid;
-        grid-template-columns: 16px 4fr 2fr 1fr;
+        grid-template-columns: 16px 4fr 2fr 1fr 1fr;
         padding: 0.5rem 1rem;
         color: #b3b3b3;
         font-size: 0.875rem;
@@ -73,12 +76,13 @@
 
     .track-item {
         display: grid;
-        grid-template-columns: 16px 4fr 2fr 1fr;
+        grid-template-columns: 16px 4fr 2fr 1fr 1fr;
         padding: 0.5rem 1rem;
         color: white;
         border-radius: 4px;
         transition: background-color 0.2s;
         cursor: pointer;
+        text-decoration: none;
     }
 
     .track-item:hover {
@@ -99,6 +103,15 @@
         align-items: center;
     }
 
+    .track-play-icon {
+        display: none;
+        cursor: pointer;
+    }
+
+    .track-item:hover .track-play-icon {
+        display: inline-block;
+    }
+
     .track-title {
         display: flex;
         align-items: center;
@@ -112,6 +125,14 @@
 
     .track-name {
         font-weight: 500;
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    .track-name:hover {
+        text-decoration: underline;
+        color: white;
     }
 
     .track-artist {
@@ -124,6 +145,17 @@
         display: flex;
         align-items: center;
         gap: 1rem;
+    }
+
+    .track-stats {
+        color: #b3b3b3;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+    }
+
+    .track-play-count {
+        white-space: nowrap;
     }
 
     .track-actions {
@@ -380,6 +412,18 @@
     .volume-bar:hover .volume-bar-filled {
         background: #1ed760;
     }
+
+    .song-item {
+        display: grid;
+        grid-template-columns: 16px 4fr 2fr 1fr 1fr;
+        text-decoration: none;
+        color: white;
+    }
+
+    .song-item:hover {
+        text-decoration: none;
+        color: white;
+    }
 </style>
 
 <div class="album-header" style="background: linear-gradient(transparent 0, rgba(0, 0, 0, .5) 100%), url('@Model.ImageUrl') center/cover">
@@ -412,6 +456,7 @@
         <div>#</div>
         <div>Tiêu đề</div>
         <div>Ngày thêm</div>
+        <div>Lượt nghe</div>
         <div>Thời lượng</div>
     </div>
 
@@ -420,25 +465,22 @@
         <div class="track-item" data-song-id="@song.SongId" data-song-url="@song.FileUrl" data-song-title="@song.Title" data-song-artist="@Model.Artists?.ArtistName" data-song-image="@song.ImageUrl">
             <div class="track-number">
                 <span class="track-number-text">@(Model.Songs.ToList().IndexOf(song) + 1)</span>
-                <i class="fas fa-play track-play-icon" style="display: none;"></i>
+                <i class="fas fa-play track-play-icon"></i>
             </div>
             <div class="track-title">
                 <img src="@song.ImageUrl" alt="@song.Title">
                 <div>
-                    <div class="track-name">@song.Title</div>
+                    <a href="@Url.Action("Details", "Songs", new { id = song.SongId })" class="track-name">@song.Title</a>
                     <div class="track-artist">@Model.Artists?.ArtistName</div>
                 </div>
             </div>
             <div class="track-artist">@song.UploadDate.ToString("dd/MM/yyyy")</div>
+            <div class="track-stats">
+                <span class="track-play-count">@song.PlayCount lượt nghe</span>
+            </div>
             <div class="track-duration">
                 <span>@song.Duration.ToString("mm\\:ss")</span>
                 <div class="track-actions">
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <button class="btn-action add-to-playlist" data-song-id="@song.SongId" title="Thêm vào playlist">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    }
                     @if (User.IsInRole("Artist") && Model.Artists?.userId == User.FindFirst(ClaimTypes.NameIdentifier)?.Value)
                     {
                         <form asp-action="DeleteSong" method="post" class="d-inline">
@@ -464,7 +506,8 @@
     }
 </div>
 
-<!-- Modal chọn playlist -->
+<!-- Modal chọn playlist - Tạm thời vô hiệu hóa -->
+<!--
 <div class="modal fade" id="playlistModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -480,6 +523,7 @@
         </div>
     </div>
 </div>
+-->
 
 <!-- Thanh phát nhạc cố định ở dưới cùng -->
 <div class="now-playing-bar" style="display: none;">
@@ -545,28 +589,54 @@
                 songs.push(songData);
             });
 
-            // Xử lý sự kiện click vào bài hát
-            $('.track-item').click(function(e) {
-                // Nếu click vào nút thêm vào playlist hoặc nút xóa, không phát nhạc
-                if ($(e.target).closest('.add-to-playlist').length || $(e.target).closest('form').length) {
-                    return;
-                }
-
-                const songId = $(this).data('song-id');
+            // Xử lý sự kiện click vào icon play của bài hát
+            $('.track-play-icon').click(function(e) {
+                e.stopPropagation(); // Ngăn sự kiện lan ra phần tử cha
+                
+                const trackItem = $(this).closest('.track-item');
+                const songId = trackItem.data('song-id');
                 const songIndex = songs.findIndex(song => song.id === songId);
                 
                 if (songIndex !== -1) {
                     playSong(songIndex);
                 }
             });
+            
+            // Khi click vào tên bài hát thì chuyển trang (hành vi mặc định của thẻ a)
+            $('.track-name').click(function(e) {
+                // Không tăng lượt nghe ở đây nữa, lượt nghe sẽ được tăng ở trang chi tiết bài hát
+                // const songId = $(this).closest('.track-item').data('song-id');
+                // incrementPlayCount(songId);
+            });
+            
+            // Đảm bảo các phần khác của track-item không có tác dụng khi click
+            $('.track-item').click(function(e) {
+                // Nếu click vào form xóa bài hát hoặc nút action khác
+                if ($(e.target).closest('form').length || $(e.target).closest('.btn-action').length) {
+                    return; // Cho phép hành vi mặc định của các phần tử đó
+                }
+                
+                // Nếu click vào track-play-icon hoặc track-name (là thẻ a), đã có xử lý riêng
+                if ($(e.target).hasClass('track-play-icon') || 
+                    $(e.target).hasClass('track-name') ||
+                    $(e.target).closest('.track-name').length) {
+                    return;
+                }
+                
+                // Ngăn chặn hành vi mặc định cho các vùng khác
+                e.preventDefault();
+                e.stopPropagation();
+            });
 
-            // Xử lý sự kiện thêm vào playlist
+            // Xử lý sự kiện thêm vào playlist - Đã vô hiệu hóa
+            /* 
             $('.add-to-playlist').click(function(e) {
                 e.stopPropagation(); // Ngăn sự kiện click lan ra track-item
                 selectedSongId = $(this).data('song-id');
                 loadPlaylists();
                 $('#playlistModal').modal('show');
             });
+            */
 
             // Xử lý sự kiện ẩn modal playlist
             $('#playlistModal').on('hidden.bs.modal', function () {
@@ -743,15 +813,35 @@
 
         // Hàm tăng playcount
         function incrementPlayCount(songId) {
-            $.post('/Songs/IncrementPlayCount/' + songId)
-                .done(function(response) {
-                    console.log('Đã tăng lượt nghe:', response.playCount);
-                })
-                .fail(function(error) {
-                    console.error('Lỗi khi tăng lượt nghe:', error);
+            // Kiểm tra nếu có token CSRF
+            const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+            const headers = tokenElement ? {
+                'RequestVerificationToken': tokenElement.value
+            } : {};
+            
+            fetch('/Songs/IncrementPlayCount/' + songId, {
+                method: 'POST',
+                headers: headers
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Đã tăng lượt nghe:', data.playCount);
+                
+                // Cập nhật số lượt nghe trên UI nếu có
+                $(`.track-item[data-song-id="${songId}"]`).each(function() {
+                    const playCountEl = $(this).find('.track-play-count');
+                    if (playCountEl.length) {
+                        playCountEl.text(data.playCount + ' lượt nghe');
+                    }
                 });
+            })
+            .catch(error => {
+                console.error('Lỗi khi tăng lượt nghe:', error);
+            });
         }
 
+        // Các hàm liên quan đến playlist đã bị vô hiệu hóa
+        /*
         function loadPlaylists() {
             $.get('/Albums/GetUserPlaylists', function(playlists) {
                 const playlistList = $('#playlistList');
@@ -788,5 +878,6 @@
                 });
             }
         }
+        */
     </script>
 } 

@@ -3,9 +3,31 @@
 @{
     ViewData["Title"] = "Trang nghệ sĩ";
 }
-@await Html.PartialAsync("_NavigationPartial")
+
 @section Styles {
     <link rel="stylesheet" href="~/css/artist-profile.css" />
+    <style>
+        /* CSS nội tuyến để ghi đè lên mọi quy tắc khác */
+        a, a:hover, a:focus, a:active, a:visited {
+            text-decoration: none !important;
+            border-bottom: none !important;
+        }
+        
+        .song-item {
+            text-decoration: none !important;
+            color: white;
+        }
+        
+        .song-item:hover {
+            text-decoration: none !important;
+            color: #bb86fc;
+        }
+        
+        .profile-section a[href*="Songs/Details"]:hover,
+        .profile-section a[href*="tan-hoc"]:hover {
+            text-decoration: none !important;
+        }
+    </style>
 }
 
 <div class="artist-profile">
@@ -25,7 +47,7 @@
                 </div>
                 <div class="profile-details">
                     <div class="profile-top">
-                        <div>
+                        <div>   
                             <span class="artist-type">Nghệ sĩ</span>
                             <h1>@Model.ArtistName</h1>
                         </div>
@@ -72,7 +94,7 @@
             <div class="albums-grid">
                 @foreach (var album in Model.Albums.OrderByDescending(a => a.ReleaseDate).Take(4))
                 {
-                    <div class="album-card">
+                    <a href="@Url.Action("Details", "Albums", new { id = album.AlbumId })" class="album-card">
                         <div class="album-image">
                             <img src="@album.ImageUrl" alt="@album.AlbumName" />
                             <div class="album-overlay">
@@ -83,7 +105,7 @@
                             <h3>@album.AlbumName</h3>
                             <p>@(DateTime.TryParse(album.ReleaseDate, out DateTime date) ? date.Year.ToString() : "") • @album.Songs.Count() bài hát</p>
                         </div>
-                    </div>
+                    </a>
                 }
             </div>
         </div>
