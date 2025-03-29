@@ -247,8 +247,8 @@ body {
 }
 
 .song-image img {
-    width: 42%; /* Hơi lớn hơn ảnh mẫu một chút */
-    height: 42%;
+    width: 75%;
+    height: 75%;
     object-fit: cover;
     border-radius: 50%;
     position: absolute;
