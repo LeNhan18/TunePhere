@@ -40,6 +40,11 @@ namespace TunePhere.Models
         [NotMapped]
         public bool IsLiked { get; set; }
 
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        public DateTime? UpdatedAt { get; set; }
+
+        public bool IsActive { get; set; } = true;
         public string? VideoUrl { get; set; }
 
         [JsonIgnore]

@@ -482,12 +482,16 @@ body {
 
     /* Dòng đang active */
     .lyric-line.active {
-        background-color: transparent !important;
-        padding: 5px 0 !important;
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5) !important;
-        color: #fff !important;
-        font-weight: bold !important;
-
+        color: #cbb3f6;
+        font-size: 19px;
+        font-weight: bold;
+        background-color: rgb(55 22 124 / 10%);
+        padding: 12px;
+        border-radius: 8px;
+        white-space: normal;
+        overflow: hidden;
+        word-break: break-word;
+        max-width: 100%;
     }
 
 /* Định dạng lời bài hát với thẻ pre */
@@ -794,6 +798,7 @@ body {
 .song-image:not(.playing) img {
     animation: none;
 }
+
 @keyframes song-image {
     from {
         transform: rotate(0deg);
