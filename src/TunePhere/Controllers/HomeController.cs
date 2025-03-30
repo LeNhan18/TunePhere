@@ -28,7 +28,7 @@ namespace TunePhere.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var topSongs = await _songRepo.GetTopSongsAsync();
+            var topSongs = await _songRepo.GetActiveSongsAsync();
             var suggestedPlaylists = await _playlistRepo.GetSuggestedPlaylistsAsync();
             var trendingRemixes = await _remixRepo.GetTopRemixesAsync();
 
