@@ -108,7 +108,7 @@ namespace TunePhere.Controllers
                 .Include(s => s.Artists)
                 .Include(s => s.Lyrics)
                 .FirstOrDefaultAsync(m => m.SongId == id);
-            
+
             if (song == null)
             {
                 return NotFound();
@@ -116,7 +116,7 @@ namespace TunePhere.Controllers
 
             // Đếm lại số lượt thích từ bảng UserFavoriteSong
             var likeCount = await _context.UserFavoriteSongs.CountAsync(f => f.SongId == id.Value);
-            
+
             // Cập nhật lại LikeCount nếu không khớp với số thực tế
             if (song.LikeCount != likeCount)
             {
@@ -421,7 +421,7 @@ namespace TunePhere.Controllers
             // Kiểm tra xem người nghe có phải là nghệ sĩ của bài hát không
             var user = await _userManager.GetUserAsync(User);
             var artist = await _context.Artists.FirstOrDefaultAsync(a => a.userId == user.Id);
-            
+
             if (artist == null || artist.ArtistId != song.ArtistId)
             {
                 song.PlayCount++;
@@ -442,7 +442,7 @@ namespace TunePhere.Controllers
 
             var songs = await _context.Songs
                 .Include(s => s.Artists)
-                .Where(s => s.Title.ToLower().Contains(query.ToLower()) || 
+                .Where(s => s.Title.ToLower().Contains(query.ToLower()) ||
                            s.Artists.ArtistName.ToLower().Contains(query.ToLower()))
                 .Select(s => new
                 {
@@ -469,13 +469,13 @@ namespace TunePhere.Controllers
             }
 
             var userId = _userManager.GetUserId(User);
-            
+
             // Kiểm tra xem người dùng đã thích bài hát này chưa
             var favorite = await _context.UserFavoriteSongs
                 .FirstOrDefaultAsync(f => f.UserId == userId && f.SongId == id);
 
             bool isNowLiked = false;
-            
+
             if (favorite == null)
             {
                 // Chưa thích - thêm vào danh sách yêu thích
@@ -493,19 +493,20 @@ namespace TunePhere.Controllers
                 _context.UserFavoriteSongs.Remove(favorite);
                 isNowLiked = false;
             }
-            
+
             await _context.SaveChangesAsync();
-            
+
             // Đếm lại số lượt thích từ bảng UserFavoriteSong
             var likeCount = await _context.UserFavoriteSongs.CountAsync(f => f.SongId == id);
-            
+
             // Cập nhật lại trường LikeCount trong bảng Song
             song.LikeCount = likeCount;
             await _context.SaveChangesAsync();
-            
-            return Json(new { 
+
+            return Json(new
+            {
                 liked = isNowLiked,
-                likeCount = likeCount 
+                likeCount = likeCount
             });
         }
 
