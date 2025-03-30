@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using TunePhere.Models;
 using TunePhere.Repository.IMPRepository;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace TunePhere.Repository.EFRepository
 {
@@ -15,40 +17,51 @@ namespace TunePhere.Repository.EFRepository
 
         public async Task<IEnumerable<Song>> GetAllAsync()
         {
-            return await _context.Songs.ToListAsync();
+            return await _context.Songs
+                .OrderBy(s => s.Title)
+                .ToListAsync();
         }
 
-        public async Task<Song?> GetByIdAsync(int songId)
+        public async Task<Song?> GetByIdAsync(int id)
         {
-            return await _context.Songs.FindAsync(songId);
+            return await _context.Songs.FindAsync(id);
+        }
+
+        public async Task<bool> ExistsAsync(int id)
+        {
+            return await _context.Songs.AnyAsync(s => s.SongId == id);
         }
 
         public async Task AddAsync(Song song)
         {
+            song.CreatedAt = DateTime.Now;
             _context.Songs.Add(song);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Song song)
         {
+            song.UpdatedAt = DateTime.Now;
             _context.Songs.Update(song);
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int songId)
+        public async Task DeleteAsync(int id)
         {
-            var song = await _context.Songs.FindAsync(songId);
+            var song = await _context.Songs.FindAsync(id);
             if (song != null)
             {
-                _context.Songs.Remove(song);
+                song.IsActive = false;
+                song.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync();
             }
         }
-        public async Task<IEnumerable<Song>> GetTopSongsAsync()
+
+        public async Task<IEnumerable<Song>> GetActiveSongsAsync()
         {
             return await _context.Songs
-                .OrderByDescending(s => s.UploadDate)
-                .Take(10)
+                .Where(s => s.IsActive)
+                .OrderBy(s => s.Title)
                 .ToListAsync();
         }
 
@@ -106,6 +119,21 @@ namespace TunePhere.Repository.EFRepository
                 .Include(f => f.Song)
                 .ThenInclude(s => s.Artists)
                 .Select(f => f.Song)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Song>> SearchSongsAsync(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return await GetActiveSongsAsync();
+
+            searchTerm = searchTerm.ToLower();
+            return await _context.Songs
+                .Include(s => s.Artists)
+                .Where(s => s.IsActive &&
+                    (s.Title.ToLower().Contains(searchTerm) ||
+                     (s.Artists != null && s.Artists.ArtistName.ToLower().Contains(searchTerm))))
+                .OrderBy(s => s.Title)
                 .ToListAsync();
         }
     }

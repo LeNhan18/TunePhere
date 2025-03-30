@@ -1,52 +1,198 @@
 ﻿@model TunePhere.Models.ListeningRoom
 
 @{
-    ViewData["Title"] = "Create";
-    Layout = "_Layout";
+    ViewData["Title"] = "Tạo Phòng Nghe Nhạc";
 }
 
-<h1>Create</h1>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold">
+                            <i class="fas fa-music me-2"></i>Tạo Phòng Nghe Nhạc
+                        </h2>
+                        <p class="text-muted">Tạo không gian âm nhạc của riêng bạn</p>
+                    </div>
 
-<h4>ListeningRoom</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="CreatorId" class="control-label"></label>
-                <select asp-for="CreatorId" class ="form-control" asp-items="ViewBag.CreatorId"></select>
+                    <form asp-action="Create" class="needs-validation" novalidate>
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Lỗi!</strong>
+                                <div asp-validation-summary="All" class="text-danger"></div>
+                            </div>
+                        }
+
+                        <div class="mb-4">
+                            <label asp-for="Title" class="form-label">
+                                <i class="fas fa-heading me-1"></i>Tên Phòng
+                            </label>
+                            <div class="input-group has-validation">
+                                <span class="input-group-text bg-primary text-white">
+                                    <i class="fas fa-signature"></i>
+                                </span>
+                                <input asp-for="Title" class="form-control" placeholder="Nhập tên phòng nghe nhạc..." required />
+                                <div class="invalid-feedback">
+                                    Vui lòng nhập tên phòng
+                                </div>
+                            </div>
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="CurrentSongId" class="form-label">
+                                <i class="fas fa-play me-1"></i>Bài Hát Hiện Tại
+                            </label>
+                            <select asp-for="CurrentSongId" class="form-control select2-search" required
+                                    asp-items="ViewBag.CurrentSongId">
+                                <option value="">-- Chọn bài hát --</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Vui lòng chọn một bài hát
+                            </div>
+                            <span asp-validation-for="CurrentSongId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                                <label asp-for="IsActive" class="form-check-label">
+                                    <i class="fas fa-toggle-on me-1"></i>Kích Hoạt Phòng
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Lưu ý:</strong> Thời gian tạo và người tạo sẽ được tự động cập nhật.
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-plus-circle me-2"></i>Tạo Phòng
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay Lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="CurrentSongId" class="control-label"></label>
-                <select asp-for="CurrentSongId" class ="form-control" asp-items="ViewBag.CurrentSongId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        .select2-container .select2-selection--single {
+            height: 38px;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px;
+            padding-left: 12px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--bs-primary);
+        }
+        .card {
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+        }
+        .form-control:focus, .form-check-input:focus {
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+        }
+        .alert {
+            border-radius: 0.5rem;
+        }
+        .invalid-feedback {
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .was-validated .form-control:invalid,
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+    </style>
+}
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.select2-search').select2({
+                theme: 'classic',
+                placeholder: 'Tìm kiếm bài hát...',
+                allowClear: true,
+                minimumInputLength: 2,
+                language: {
+                    inputTooShort: function() {
+                        return 'Vui lòng nhập ít nhất 2 ký tự để tìm kiếm';
+                    },
+                    noResults: function() {
+                        return 'Không tìm thấy bài hát nào';
+                    },
+                    searching: function() {
+                        return 'Đang tìm kiếm...';
+                    }
+                },
+                ajax: {
+                    url: '@Url.Action("SearchSongs")',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            searchTerm: params.term
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+            // Thêm validation styles
+            (function() {
+                'use strict';
+                var forms = document.querySelectorAll('.needs-validation');
+                Array.prototype.slice.call(forms).forEach(function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            })();
+
+            // Xử lý lỗi Ajax
+            $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
+                console.error('Lỗi Ajax:', thrownError);
+                alert('Có lỗi xảy ra khi tìm kiếm bài hát. Vui lòng thử lại sau.');
+            });
+        });
+    </script>
 }

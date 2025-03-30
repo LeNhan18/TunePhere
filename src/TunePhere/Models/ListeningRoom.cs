@@ -10,17 +10,21 @@ namespace TunePhere.Models
         [Key]
         public int RoomId { get; set; } // Khóa chính
 
-        [Required]
-        public string CreatorId { get; set; } // Khóa ngoại liên kết với User (người tạo phòng)
+        public string CreatorId { get; set; }
 
         [ForeignKey("CreatorId")]
-        public required AppUser? Creator { get; set; } // Quan hệ với User
+        public AppUser? Creator { get; set; } // Quan hệ với User
 
-        [Required, StringLength(200)]
-        public required string Title { get; set; } // Tên phòng nghe nhạc
+        [Required(ErrorMessage = "Vui lòng nhập tên phòng")]
+        [StringLength(200, ErrorMessage = "Tên phòng không được vượt quá 200 ký tự")]
+        [Display(Name = "Tên Phòng")]
+        public string Title { get; set; }
 
+        [Display(Name = "Kích Hoạt")]
         public bool IsActive { get; set; } = true; // Trạng thái phòng (đang hoạt động hay không)
 
+        [Required(ErrorMessage = "Vui lòng chọn bài hát")]
+        [Display(Name = "Bài Hát Hiện Tại")]
         public int? CurrentSongId { get; set; } // ID của bài hát đang phát (có thể null)
 
         [ForeignKey("CurrentSongId")]
@@ -33,6 +37,8 @@ namespace TunePhere.Models
 
         public ListeningRoom()
         {
+            Title = string.Empty;
+            CreatorId = string.Empty;
             Participants = new HashSet<ListeningRoomParticipant>();
         }
     }
