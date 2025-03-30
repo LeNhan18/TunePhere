@@ -1,49 +1,285 @@
 ﻿@model TunePhere.Models.ListeningRoom
 
 @{
-    ViewData["Title"] = "Details";
-    Layout = "_Layout";
+    ViewData["Title"] = "Chi Tiết Phòng Nghe Nhạc";
 }
 
-<h1>Details</h1>
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-action="Index" class="text-decoration-none">
+                    <i class="fas fa-headphones-alt me-1"></i>Phòng Nghe Nhạc
+                </a>
+            </li>
+            <li class="breadcrumb-item active">Chi Tiết</li>
+        </ol>
+    </nav>
 
-<div>
-    <h4>ListeningRoom</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Creator)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Creator.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsActive)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsActive)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CurrentSong)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CurrentSong.Artists.ArtistName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-    </dl>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-lg mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="card-title mb-0">
+                            <i class="fas fa-music me-2"></i>@Model.Title
+                        </h2>
+                        <span class="badge @(Model.IsActive ? "bg-success" : "bg-danger")">
+                            @(Model.IsActive ? "Đang Hoạt Động" : "Không Hoạt Động")
+                        </span>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="info-group">
+                                <label class="text-muted">
+                                    <i class="fas fa-user me-1"></i>Người Tạo
+                                </label>
+                                <p class="mb-0">@Model.Creator?.UserName</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-group">
+                                <label class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>Thời Gian Tạo
+                                </label>
+                                <p class="mb-0">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        </div>
+
+                        @if (Model.CurrentSong != null)
+                        {
+                            <div class="col-12">
+                                <div class="info-group">
+                                    <label class="text-muted">
+                                        <i class="fas fa-play me-1"></i>Bài Hát Đang Phát
+                                    </label>
+                                    <div class="d-flex align-items-center">
+                                        <img src="@Model.CurrentSong.ImageUrl" alt="@Model.CurrentSong.Title"
+                                             class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                        <div>
+                                            <h6 class="mb-1">@Model.CurrentSong.Title</h6>
+                                            <p class="mb-0 text-muted">
+                                                <small>
+                                                    <i class="fas fa-user-music me-1"></i>
+                                                    @(Model.CurrentSong.Artists?.ArtistName ?? "Unknown Artist")
+                                                </small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.Participants != null && Model.Participants.Any())
+                        {
+                            <div class="col-12">
+                                <div class="info-group">
+                                    <label class="text-muted">
+                                        <i class="fas fa-users me-1"></i>Người Tham Gia (@Model.Participants.Count)
+                                    </label>
+                                    <div class="participant-list">
+                                        @foreach (var participant in Model.Participants)
+                                        {
+                                            <div class="participant-item">
+                                                <img src="@(participant.User?.CoverImage ?? "/images/default-avatar.png")"
+                                                     alt="@participant.User?.UserName"
+                                                     class="rounded-circle me-2" style="width: 32px; height: 32px;">
+                                                <span>@participant.User?.UserName</span>
+                                                <small class="text-muted ms-2">
+                                                    (Tham gia: @participant.JoinedAt.ToString("dd/MM/yyyy HH:mm"))
+                                                </small>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                @if (Model.IsActive)
+                {
+                    <a asp-action="Join" asp-route-id="@Model.RoomId" class="btn btn-success">
+                        <i class="fas fa-sign-in-alt me-2"></i>Tham Gia
+                    </a>
+                }
+                <a asp-action="Edit" asp-route-id="@Model.RoomId" class="btn btn-primary">
+                    <i class="fas fa-edit me-2"></i>Chỉnh Sửa
+                </a>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Quay Lại
+                </a>
+                <a asp-action="Delete" asp-route-id="@Model.RoomId" class="btn btn-outline-danger">
+                    <i class="fas fa-trash me-2"></i>Xóa Phòng
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-lg">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-info-circle me-2"></i>Thống Kê
+                    </h5>
+                    <div class="stats-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Số người tham gia</span>
+                            <span class="badge bg-primary">@Model.Participants?.Count ?? 0</span>
+                        </div>
+                    </div>
+                    <div class="stats-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Thời gian hoạt động</span>
+                            <span class="badge bg-info">@((DateTime.Now - Model.CreatedAt).Days) ngày</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.RoomId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+@section Styles {
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="~/css/listening-rooms.css" rel="stylesheet">
+    <style>
+        .info-group {
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .info-group:hover {
+            background-color: rgba(var(--bs-primary-rgb), 0.05);
+            transform: translateX(5px);
+        }
+        .info-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+        .info-group:hover label {
+            color: var(--bs-primary) !important;
+        }
+        .participant-list {
+            max-height: 300px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--bs-primary) #f0f0f0;
+        }
+        .participant-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .participant-list::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 3px;
+        }
+        .participant-list::-webkit-scrollbar-thumb {
+            background-color: var(--bs-primary);
+            border-radius: 3px;
+        }
+        .participant-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #eee;
+            transition: all 0.2s ease;
+        }
+        .participant-item:hover {
+            background-color: rgba(var(--bs-primary-rgb), 0.05);
+            transform: translateX(5px);
+        }
+        .participant-item img {
+            transition: transform 0.2s ease;
+        }
+        .participant-item:hover img {
+            transform: scale(1.1);
+        }
+        .badge {
+            padding: 0.5em 1em;
+            transition: all 0.2s ease;
+        }
+        .badge:hover {
+            transform: scale(1.05);
+        }
+        .stats-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+        .stats-item:hover {
+            background-color: rgba(var(--bs-primary-rgb), 0.05);
+            padding-left: 1rem;
+        }
+        .btn {
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .card {
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+        }
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .breadcrumb-item {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        .breadcrumb-item:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const audioPlayer = document.getElementById('audioPlayer');
+            const progressBar = document.getElementById('progressBar');
+            const currentTimeDisplay = document.getElementById('currentTime');
+            const durationDisplay = document.getElementById('duration');
+
+            if (audioPlayer) {
+                audioPlayer.addEventListener('timeupdate', function() {
+                    const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                    progressBar.style.width = progress + '%';
+                    currentTimeDisplay.textContent = formatTime(audioPlayer.currentTime);
+                });
+
+                audioPlayer.addEventListener('loadedmetadata', function() {
+                    durationDisplay.textContent = formatTime(audioPlayer.duration);
+                });
+
+                audioPlayer.play().catch(function(error) {
+                    console.log("Không thể tự động phát nhạc:", error);
+                });
+            }
+
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                seconds = Math.floor(seconds % 60);
+                return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+            }
+        });
+    </script>
+}

@@ -18,7 +18,7 @@
             <div class="songs-list">
                 @foreach (var song in Model.Songs)
                 {
-                    <div class="song-item" data-song-id="@song.SongId" data-song-url="@song.FileUrl" data-song-title="@song.Title" data-song-artist="@(song.Artists?.ArtistName ?? "Unknown")" data-song-image="@song.ImageUrl">
+                    <div class="song-item"  data-song-id="@song.SongId" data-song-url="@song.FileUrl" data-song-title="@song.Title" data-song-artist="@(song.Artists?.ArtistName ?? "Unknown")" data-song-image="@song.ImageUrl">
                         <div class="song-number">
                             <span class="number">@(Model.Songs.ToList().IndexOf(song) + 1)</span>
                             <i class="fas fa-play play-icon"></i>
@@ -36,7 +36,7 @@
                                 </div>
                             }
                         </div>
-                        <div class="song-info">
+                        <div class="song-info" ondblclick="location.href='/Songs/Details/@song.SongId'">
                             <h3>@song.Title</h3>
                             <div class="song-meta">
                                 <a href="@Url.Action("Index", "Search", new { searchTerm = song.Artists?.ArtistName })" class="artist-name">

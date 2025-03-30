@@ -424,12 +424,12 @@ body {
     margin-top: 40px;
     width: 750px;
     max-width: 750px;
-    height: 550px;
+    height: 520px !important;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding: 0 20px;
+    padding: 20px 20px;
 }
 
     .lyrics-container::-webkit-scrollbar {
@@ -438,10 +438,11 @@ body {
 
 .lyrics-content {
     position: relative;
-    padding-bottom: 200px;
+    padding-bottom: 220px;
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
+    padding-top: 10px;
 }
 
     .lyrics-content::after {
@@ -450,8 +451,8 @@ body {
         bottom: 0;
         left: 0;
         right: 0;
-        height: 250px;
-        background: linear-gradient( to bottom, rgba(18, 18, 18, 0) 0%, rgba(18, 18, 18, 0.15) 15%, rgba(18, 18, 18, 0.3) 30%, rgba(18, 18, 18, 0.45) 45%, rgba(18, 18, 18, 0.6) 60%, rgba(18, 18, 18, 0.75) 75%, rgba(18, 18, 18, 0.9) 90%, rgba(18, 18, 18, 1) 100% );
+        height: 270px;
+        background: linear-gradient( to bottom, rgba(18, 18, 18, 0) 0%, rgba(18, 18, 18, 0.2) 15%, rgba(18, 18, 18, 0.35) 30%, rgba(18, 18, 18, 0.5) 45%, rgba(18, 18, 18, 0.65) 60%, rgba(18, 18, 18, 0.8) 75%, rgba(18, 18, 18, 0.95) 90%, rgba(18, 18, 18, 1) 100% );
         pointer-events: none;
         z-index: 2;
     }
@@ -461,26 +462,21 @@ body {
     font-size: 18px !important;
     line-height: 2.5;
     color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     white-space: pre-wrap;
     font-family: inherit;
     background: transparent;
     border: none;
-    padding: 0;
+    padding-top: 0;
 }
 
     /* Dòng đang active */
     .lyric-line.active {
-        color: #cbb3f6;
-        font-size: 19px;
-        font-weight: bold;
-        background-color: rgb(55 22 124 / 10%);
-        padding: 12px;
-        border-radius: 8px;
-        white-space: normal;
-        overflow: hidden;
-        word-break: break-word;
-        max-width: 100%;
+        background-color: transparent !important;
+        padding: 5px 0 !important;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5) !important;
+        color: #fff !important;
+        font-weight: bold !important;
     }
 
 /* Định dạng lời bài hát với thẻ pre */
@@ -787,6 +783,7 @@ body {
 .song-image:not(.playing) img {
     animation: none;
 }
+
 @keyframes song-image {
     from {
         transform: rotate(0deg);

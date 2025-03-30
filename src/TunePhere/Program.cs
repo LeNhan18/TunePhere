@@ -51,6 +51,8 @@ builder.Services.AddScoped<IPlaylistRepository, EFPlaylistRepository>();
 builder.Services.AddScoped<IRemixRepository,EFRemixRepository>();
 builder.Services.AddScoped<IUserRepository, EFUserRepository>();
 builder.Services.AddScoped<IUserFavoriteSongs, EFUserFavoriteSongs>();
+builder.Services.AddScoped<IListeningRoomRepository, EFListeningRoomRepository>();
+builder.Services.AddScoped<IListeningRoomParticipantRepository, EFListeningRoomParticipantRepository>();
 
 var app = builder.Build();
 

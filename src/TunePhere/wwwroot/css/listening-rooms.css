@@ -1,0 +1,201 @@
+/* Common styles */
+.btn {
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+.btn:active {
+    transform: translateY(0);
+}
+.btn i {
+    transition: transform 0.2s ease;
+}
+.btn:hover i {
+    transform: scale(1.1);
+}
+
+.badge {
+    padding: 0.5em 1em;
+    transition: all 0.2s ease;
+}
+.badge:hover {
+    transform: scale(1.05);
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+.card:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Index page styles */
+.hover-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    border-color: var(--bs-primary);
+}
+
+.display-4 {
+    position: relative;
+    display: inline-block;
+}
+.display-4::after {
+    content: '';
+    position: absolute;
+    width: 50%;
+    height: 2px;
+    bottom: -5px;
+    left: 0;
+    background-color: var(--bs-primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+.display-4:hover::after {
+    transform: scaleX(1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.card {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Details page styles */
+.info-group {
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+.info-group:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+    transform: translateX(5px);
+}
+.info-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    transition: color 0.2s ease;
+}
+.info-group:hover label {
+    color: var(--bs-primary) !important;
+}
+
+.participant-list {
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bs-primary) #f0f0f0;
+}
+.participant-list::-webkit-scrollbar {
+    width: 6px;
+}
+.participant-list::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 3px;
+}
+.participant-list::-webkit-scrollbar-thumb {
+    background-color: var(--bs-primary);
+    border-radius: 3px;
+}
+
+.participant-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid #eee;
+    transition: all 0.2s ease;
+}
+.participant-item:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+    transform: translateX(5px);
+}
+.participant-item img {
+    transition: transform 0.2s ease;
+}
+.participant-item:hover img {
+    transform: scale(1.1);
+}
+
+.stats-item {
+    padding: 0.75rem;
+    border-bottom: 1px solid #eee;
+    transition: all 0.3s ease;
+}
+.stats-item:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+    padding-left: 1rem;
+}
+
+/* Delete page styles */
+.room-info {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+.room-info:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.02);
+}
+
+.info-item {
+    text-align: center;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+}
+.info-item:hover {
+    transform: translateY(-3px);
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+    border-radius: 0.5rem;
+}
+.info-item small {
+    display: block;
+    margin-bottom: 0.25rem;
+    transition: color 0.2s ease;
+}
+.info-item:hover small {
+    color: var(--bs-primary) !important;
+}
+
+.alert {
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--bs-warning);
+}
+.alert:hover {
+    transform: translateX(5px);
+}
+
+.fa-exclamation-triangle {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Breadcrumb animations */
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+.breadcrumb-item {
+    animation: slideIn 0.3s ease-out forwards;
+}
+.breadcrumb-item:nth-child(2) {
+    animation-delay: 0.1s;
+} 

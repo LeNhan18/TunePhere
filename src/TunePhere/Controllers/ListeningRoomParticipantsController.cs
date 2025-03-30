@@ -6,23 +6,31 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TunePhere.Models;
+using TunePhere.Repository.IMPRepository;
 
 namespace TunePhere.Controllers
 {
     public class ListeningRoomParticipantsController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IListeningRoomParticipantRepository _participantRepository;
+        private readonly IListeningRoomRepository _roomRepository;
+        private readonly IUserRepository _userRepository;
 
-        public ListeningRoomParticipantsController(AppDbContext context)
+        public ListeningRoomParticipantsController(
+            IListeningRoomParticipantRepository participantRepository,
+            IListeningRoomRepository roomRepository,
+            IUserRepository userRepository)
         {
-            _context = context;
+            _participantRepository = participantRepository;
+            _roomRepository = roomRepository;
+            _userRepository = userRepository;
         }
 
         // GET: ListeningRoomParticipants
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.ListeningRoomParticipants.Include(l => l.Room).Include(l => l.User);
-            return View(await appDbContext.ToListAsync());
+            var participants = await _participantRepository.GetAllAsync();
+            return View(participants);
         }
 
         // GET: ListeningRoomParticipants/Details/5
@@ -33,42 +41,54 @@ namespace TunePhere.Controllers
                 return NotFound();
             }
 
-            var listeningRoomParticipant = await _context.ListeningRoomParticipants
-                .Include(l => l.Room)
-                .Include(l => l.User)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (listeningRoomParticipant == null)
+            var participant = await _participantRepository.GetByIdAsync(id.Value);
+            if (participant == null)
             {
                 return NotFound();
             }
 
-            return View(listeningRoomParticipant);
+            return View(participant);
         }
 
         // GET: ListeningRoomParticipants/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["RoomId"] = new SelectList(_context.ListeningRooms, "RoomId", "CreatorId");
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
+            var rooms = await _roomRepository.GetAllAsync();
+            var users = await _userRepository.GetAllAsync();
+
+            ViewBag.RoomId = new SelectList(rooms, "RoomId", "Title");
+            ViewBag.UserId = new SelectList(users, "Id", "UserName");
+
             return View();
         }
 
         // POST: ListeningRoomParticipants/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,RoomId,UserId,JoinedAt")] ListeningRoomParticipant listeningRoomParticipant)
+        public async Task<IActionResult> Create([Bind("RoomId,UserId")] ListeningRoomParticipant participant)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(listeningRoomParticipant);
-                await _context.SaveChangesAsync();
+                // Kiểm tra xem người dùng đã tham gia phòng chưa
+                var existingParticipant = await _participantRepository.GetByIdsAsync(participant.RoomId, participant.UserId);
+                if (existingParticipant != null)
+                {
+                    ModelState.AddModelError("", "Người dùng đã tham gia phòng này.");
+                    return View(participant);
+                }
+
+                await _participantRepository.AddAsync(participant);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RoomId"] = new SelectList(_context.ListeningRooms, "RoomId", "CreatorId", listeningRoomParticipant.RoomId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", listeningRoomParticipant.UserId);
-            return View(listeningRoomParticipant);
+
+            // Nếu có lỗi, load lại danh sách cho dropdown
+            var rooms = await _roomRepository.GetAllAsync();
+            var users = await _userRepository.GetAllAsync();
+
+            ViewBag.RoomId = new SelectList(rooms, "RoomId", "Title", participant.RoomId);
+            ViewBag.UserId = new SelectList(users, "Id", "UserName", participant.UserId);
+
+            return View(participant);
         }
 
         // GET: ListeningRoomParticipants/Edit/5
@@ -79,24 +99,27 @@ namespace TunePhere.Controllers
                 return NotFound();
             }
 
-            var listeningRoomParticipant = await _context.ListeningRoomParticipants.FindAsync(id);
-            if (listeningRoomParticipant == null)
+            var participant = await _participantRepository.GetByIdAsync(id.Value);
+            if (participant == null)
             {
                 return NotFound();
             }
-            ViewData["RoomId"] = new SelectList(_context.ListeningRooms, "RoomId", "CreatorId", listeningRoomParticipant.RoomId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", listeningRoomParticipant.UserId);
-            return View(listeningRoomParticipant);
+
+            var rooms = await _roomRepository.GetAllAsync();
+            var users = await _userRepository.GetAllAsync();
+
+            ViewBag.RoomId = new SelectList(rooms, "RoomId", "Title", participant.RoomId);
+            ViewBag.UserId = new SelectList(users, "Id", "UserName", participant.UserId);
+
+            return View(participant);
         }
 
         // POST: ListeningRoomParticipants/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,RoomId,UserId,JoinedAt")] ListeningRoomParticipant listeningRoomParticipant)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,RoomId,UserId")] ListeningRoomParticipant participant)
         {
-            if (id != listeningRoomParticipant.Id)
+            if (id != participant.Id)
             {
                 return NotFound();
             }
@@ -105,12 +128,19 @@ namespace TunePhere.Controllers
             {
                 try
                 {
-                    _context.Update(listeningRoomParticipant);
-                    await _context.SaveChangesAsync();
+                    // Kiểm tra xem người dùng đã tham gia phòng khác chưa
+                    var existingParticipant = await _participantRepository.GetByIdsAsync(participant.RoomId, participant.UserId);
+                    if (existingParticipant != null && existingParticipant.Id != id)
+                    {
+                        ModelState.AddModelError("", "Người dùng đã tham gia phòng này.");
+                        return View(participant);
+                    }
+
+                    await _participantRepository.UpdateAsync(participant);
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (Exception)
                 {
-                    if (!ListeningRoomParticipantExists(listeningRoomParticipant.Id))
+                    if (!await _participantRepository.ExistsAsync(id))
                     {
                         return NotFound();
                     }
@@ -121,9 +151,15 @@ namespace TunePhere.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RoomId"] = new SelectList(_context.ListeningRooms, "RoomId", "CreatorId", listeningRoomParticipant.RoomId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", listeningRoomParticipant.UserId);
-            return View(listeningRoomParticipant);
+
+            // Nếu có lỗi, load lại danh sách cho dropdown
+            var rooms = await _roomRepository.GetAllAsync();
+            var users = await _userRepository.GetAllAsync();
+
+            ViewBag.RoomId = new SelectList(rooms, "RoomId", "Title", participant.RoomId);
+            ViewBag.UserId = new SelectList(users, "Id", "UserName", participant.UserId);
+
+            return View(participant);
         }
 
         // GET: ListeningRoomParticipants/Delete/5
@@ -134,16 +170,13 @@ namespace TunePhere.Controllers
                 return NotFound();
             }
 
-            var listeningRoomParticipant = await _context.ListeningRoomParticipants
-                .Include(l => l.Room)
-                .Include(l => l.User)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (listeningRoomParticipant == null)
+            var participant = await _participantRepository.GetByIdAsync(id.Value);
+            if (participant == null)
             {
                 return NotFound();
             }
 
-            return View(listeningRoomParticipant);
+            return View(participant);
         }
 
         // POST: ListeningRoomParticipants/Delete/5
@@ -151,19 +184,13 @@ namespace TunePhere.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var listeningRoomParticipant = await _context.ListeningRoomParticipants.FindAsync(id);
-            if (listeningRoomParticipant != null)
+            var participant = await _participantRepository.GetByIdAsync(id);
+            if (participant != null)
             {
-                _context.ListeningRoomParticipants.Remove(listeningRoomParticipant);
+                await _participantRepository.DeleteAsync(participant.RoomId, participant.UserId);
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ListeningRoomParticipantExists(int id)
-        {
-            return _context.ListeningRoomParticipants.Any(e => e.Id == id);
         }
     }
 }
