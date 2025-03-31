@@ -97,7 +97,7 @@ namespace TunePhere.Controllers
             }
         }
         // GET: Songs/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, int? playlistId, int? albumId)
         {
             if (id == null)
             {
@@ -130,6 +130,74 @@ namespace TunePhere.Controllers
                 var userId = _userManager.GetUserId(User);
                 ViewData["IsFavorited"] = await _context.UserFavoriteSongs
                     .AnyAsync(f => f.SongId == song.SongId && f.UserId == userId);
+            }
+
+            // Nếu có playlistId, lấy thông tin để điều hướng bài hát
+            if (playlistId.HasValue)
+            {
+                var playlistSongs = await _context.PlaylistSongs
+                    .Where(ps => ps.PlaylistId == playlistId.Value)
+                    .Select(ps => ps.SongId)
+                    .ToListAsync();
+
+                // Kiểm tra nếu danh sách không rỗng
+                if (playlistSongs.Any())
+                {
+                    var currentIndex = playlistSongs.IndexOf(id.Value);
+                    if (currentIndex != -1)
+                    {
+                        // Lấy ID của bài hát trước đó
+                        var prevSongId = currentIndex > 0 ? playlistSongs[currentIndex - 1] : -1;
+                        
+                        // Lấy ID của bài hát tiếp theo
+                        var nextSongId = currentIndex < playlistSongs.Count - 1 ? playlistSongs[currentIndex + 1] : -1;
+                        
+                        ViewData["PrevSongId"] = prevSongId;
+                        ViewData["NextSongId"] = nextSongId;
+                        ViewData["PlaylistId"] = playlistId.Value;
+                        
+                        // Thêm thông tin tên playlist
+                        var playlist = await _context.Playlists.FindAsync(playlistId.Value);
+                        if (playlist != null)
+                        {
+                            ViewData["PlaylistName"] = playlist.Title;
+                        }
+                    }
+                }
+            }
+            // Nếu có albumId, lấy thông tin để điều hướng bài hát trong album
+            else if (albumId.HasValue)
+            {
+                var albumSongs = await _context.Songs
+                    .Where(s => s.AlbumId == albumId.Value)
+                    .OrderBy(s => s.SongId) // Sắp xếp theo ID bài hát (có thể thay đổi tiêu chí sắp xếp)
+                    .Select(s => s.SongId)
+                    .ToListAsync();
+
+                // Kiểm tra nếu danh sách không rỗng
+                if (albumSongs.Any())
+                {
+                    var currentIndex = albumSongs.IndexOf(id.Value);
+                    if (currentIndex != -1)
+                    {
+                        // Lấy ID của bài hát trước đó
+                        var prevSongId = currentIndex > 0 ? albumSongs[currentIndex - 1] : -1;
+                        
+                        // Lấy ID của bài hát tiếp theo
+                        var nextSongId = currentIndex < albumSongs.Count - 1 ? albumSongs[currentIndex + 1] : -1;
+                        
+                        ViewData["PrevSongId"] = prevSongId;
+                        ViewData["NextSongId"] = nextSongId;
+                        ViewData["AlbumId"] = albumId.Value;
+                        
+                        // Thêm thông tin tên album
+                        var album = await _context.Albums.FindAsync(albumId.Value);
+                        if (album != null)
+                        {
+                            ViewData["AlbumName"] = album.AlbumName;
+                        }
+                    }
+                }
             }
 
             // Thêm headers để tránh cache

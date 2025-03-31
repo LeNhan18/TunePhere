@@ -470,7 +470,7 @@
             <div class="track-title">
                 <img src="@song.ImageUrl" alt="@song.Title">
                 <div>
-                    <a href="@Url.Action("Details", "Songs", new { id = song.SongId })" class="track-name">@song.Title</a>
+                    <a href="@Url.Action("Details", "Songs", new { id = song.SongId, albumId = Model.AlbumId })" class="track-name">@song.Title</a>
                     <div class="track-artist">@Model.Artists?.ArtistName</div>
                 </div>
             </div>

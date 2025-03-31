@@ -239,7 +239,11 @@
             userId: '@User.FindFirstValue(ClaimTypes.NameIdentifier)',
             artistUserId: '@Model.Artists?.userId',
             userIsAdmin: '@User.IsInRole("Admin")' === 'True',
-            userIsOwner: '@(Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier))' === 'True'
+            userIsOwner: '@(Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier))' === 'True',
+            prevSongId: '@ViewData["PrevSongId"]',
+            nextSongId: '@ViewData["NextSongId"]',
+            playlistId: '@ViewData["PlaylistId"]',
+            albumId: '@ViewData["AlbumId"]'
         };
     </script>
     <script src="~/js/song-details.js"></script>
@@ -345,6 +349,22 @@
     </script>
 
     <script src="~/js/lyrics.js"></script>
+
+    <!-- Thêm thông tin playlist (nếu đang xem từ playlist) dưới title -->
+    @if (ViewData["PlaylistId"] != null)
+    {
+        <div class="playlist-info">
+            <span>Từ playlist: <a href="@Url.Action("Details", "Playlists", new { id = ViewData["PlaylistId"] })">@ViewData["PlaylistName"]</a></span>
+        </div>
+    }
+
+    <!-- Thêm thông tin album (nếu đang xem từ album) sau phần playlist-info -->
+    @if (ViewData["AlbumId"] != null)
+    {
+        <div class="playlist-info album-info">
+            <span>Từ album: <a href="@Url.Action("Details", "Albums", new { id = ViewData["AlbumId"] })">@ViewData["AlbumName"]</a></span>
+        </div>
+    }
 </body>
 </html>
 

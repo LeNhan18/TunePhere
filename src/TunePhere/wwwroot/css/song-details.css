@@ -796,3 +796,54 @@ body {
 .vinyl-reflection {
     display: none;
 }
+
+/* Thêm vào cuối file */
+.playlist-info {
+    text-align: center;
+    margin-top: 5px;
+    font-size: 14px;
+    color: #aaa;
+}
+
+.playlist-info a {
+    color: #a165fa;
+    text-decoration: none;
+}
+
+.playlist-info a:hover {
+    text-decoration: underline;
+}
+
+.playlist-notification {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 9999;
+    animation: fadeIn 0.3s;
+}
+
+.playlist-notification.fade-out {
+    animation: fadeOut 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, 20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translate(-50%, 0); }
+    to { opacity: 0; transform: translate(-50%, 20px); }
+}
+
+/* Đã có các class cần thiết từ chức năng playlist */
+.album-info {
+    /* Giữ nguyên style từ playlist-info */
+    margin-bottom: 10px;
+}

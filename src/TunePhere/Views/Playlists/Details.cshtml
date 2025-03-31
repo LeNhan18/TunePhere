@@ -102,7 +102,7 @@
                                         <button class="play-btn" onclick="playSong(this.parentElement)">
                                             <i class="fa-solid fa-play"></i>
                                         </button>
-                                        <a href="@Url.Action("Details", "Songs", new { id = playlistSong.Song?.SongId })" 
+                                        <a href="@Url.Action("Details", "Songs", new { id = playlistSong.Song?.SongId, playlistId = Model.PlaylistId })" 
                                            class="song-link">
                                             @(playlistSong.Song?.Title ?? "Không có tiêu đề")
                                         </a>

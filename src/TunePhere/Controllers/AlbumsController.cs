@@ -653,6 +653,12 @@ namespace TunePhere.Controllers
             return Json(playlists);
         }
 
+        // Phương thức để xử lý khi người dùng click vào bài hát trong album
+        public IActionResult PlaySong(int songId, int albumId)
+        {
+            return RedirectToAction("Details", "Songs", new { id = songId, albumId = albumId });
+        }
+
         private bool AlbumExists(int id)
         {
             return _context.Albums.Any(e => e.AlbumId == id);

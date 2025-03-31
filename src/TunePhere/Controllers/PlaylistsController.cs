@@ -340,6 +340,12 @@ namespace TunePhere.Controllers
             return View("SearchResults", playlists);
         }
 
+        // Phương thức để xử lý khi người dùng click vào bài hát trong playlist
+        public IActionResult PlaySong(int songId, int playlistId)
+        {
+            return RedirectToAction("Details", "Songs", new { id = songId, playlistId = playlistId });
+        }
+
         private bool PlaylistExists(int id)
         {
             return _context.Playlists.Any(e => e.PlaylistId == id);

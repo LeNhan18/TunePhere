@@ -299,16 +299,82 @@ function updatePlayPauseButton() {
     }
 }
 
-// Phát bài tiếp theo (không có hành động vì chỉ có 1 bài)
+// Phát bài tiếp theo - cập nhật để hỗ trợ cả playlist và album
 function nextSong() {
-    // Giữ nguyên bài hiện tại vì đây là trang chi tiết 1 bài
-    console.log("Không có bài tiếp theo");
+    const nextSongId = window.songData.nextSongId;
+    const playlistId = window.songData.playlistId;
+    const albumId = window.songData.albumId;
+    
+    if (nextSongId && nextSongId !== "-1") {
+        // Chuyển đến bài hát tiếp theo
+        let url = `/Songs/Details/${nextSongId}`;
+        
+        // Thêm playlistId hoặc albumId vào URL nếu có
+        if (playlistId) {
+            url += `?playlistId=${playlistId}`;
+        } else if (albumId) {
+            url += `?albumId=${albumId}`;
+        }
+        
+        window.location.href = url;
+    } else {
+        // Xác định loại nguồn (playlist hoặc album)
+        const sourceType = playlistId ? "playlist" : albumId ? "album" : "";
+        console.log(`Đã là bài cuối cùng trong ${sourceType}`);
+        
+        // Hiển thị thông báo cho người dùng
+        const notification = document.createElement('div');
+        notification.className = 'playlist-notification';
+        notification.textContent = `Đã là bài cuối cùng trong ${sourceType ? sourceType : 'danh sách'}`;
+        document.body.appendChild(notification);
+        
+        // Ẩn thông báo sau 2 giây
+        setTimeout(() => {
+            notification.classList.add('fade-out');
+            setTimeout(() => {
+                notification.remove();
+            }, 500);
+        }, 2000);
+    }
 }
 
-// Phát bài trước (không có hành động vì chỉ có 1 bài)
+// Phát bài trước - cập nhật để hỗ trợ cả playlist và album
 function previousSong() {
-    // Giữ nguyên bài hiện tại vì đây là trang chi tiết 1 bài
-    console.log("Không có bài trước");
+    const prevSongId = window.songData.prevSongId;
+    const playlistId = window.songData.playlistId;
+    const albumId = window.songData.albumId;
+    
+    if (prevSongId && prevSongId !== "-1") {
+        // Chuyển đến bài hát trước đó
+        let url = `/Songs/Details/${prevSongId}`;
+        
+        // Thêm playlistId hoặc albumId vào URL nếu có
+        if (playlistId) {
+            url += `?playlistId=${playlistId}`;
+        } else if (albumId) {
+            url += `?albumId=${albumId}`;
+        }
+        
+        window.location.href = url;
+    } else {
+        // Xác định loại nguồn (playlist hoặc album)
+        const sourceType = playlistId ? "playlist" : albumId ? "album" : "";
+        console.log(`Đã là bài đầu tiên trong ${sourceType}`);
+        
+        // Hiển thị thông báo cho người dùng
+        const notification = document.createElement('div');
+        notification.className = 'playlist-notification';
+        notification.textContent = `Đã là bài đầu tiên trong ${sourceType ? sourceType : 'danh sách'}`;
+        document.body.appendChild(notification);
+        
+        // Ẩn thông báo sau 2 giây
+        setTimeout(() => {
+            notification.classList.add('fade-out');
+            setTimeout(() => {
+                notification.remove();
+            }, 500);
+        }, 2000);
+    }
 }
 
 // Xử lý tắt/bật âm thanh
