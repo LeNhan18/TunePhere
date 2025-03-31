@@ -187,7 +187,7 @@ namespace TunePhere.Controllers
             var participant = await _participantRepository.GetByIdAsync(id);
             if (participant != null)
             {
-                await _participantRepository.DeleteAsync(participant.RoomId, participant.UserId);
+                await _participantRepository.DeleteAsync(participant);
             }
 
             return RedirectToAction(nameof(Index));

@@ -256,5 +256,24 @@ namespace TunePhere.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Leave(int id)
+        {
+            var userId = User.Identity?.Name;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var participant = await _participantRepository.GetParticipantAsync(id, userId);
+            if (participant == null)
+            {
+                return NotFound();
+            }
+
+            await _participantRepository.DeleteAsync(participant);
+            return Ok();
+        }
     }
 }

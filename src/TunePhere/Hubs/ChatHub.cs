@@ -9,7 +9,6 @@ namespace TunePhere.Hubs
     [Authorize]
     public class ChatHub : Hub
     {
-        private static Dictionary<string, string> _userRooms = new Dictionary<string, string>();
         private readonly ILogger<ChatHub> _logger;
         private readonly IChatMessageRepository _chatRepository;
 
@@ -25,11 +24,11 @@ namespace TunePhere.Hubs
             {
                 await base.OnConnectedAsync();
                 _logger.LogInformation($"Client connected: {Context.ConnectionId}");
-                await Clients.Caller.SendAsync("ConnectionEstablished", Context.ConnectionId);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error in OnConnectedAsync: {ex.Message}");
+                throw;
             }
         }
 
@@ -39,7 +38,6 @@ namespace TunePhere.Hubs
             {
                 string roomName = $"Room_{roomId}";
                 await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
-                _userRooms[Context.ConnectionId] = roomName;
                 
                 string userName = Context.User?.Identity?.Name ?? "Anonymous";
                 _logger.LogInformation($"User {userName} joined room {roomId}");
@@ -49,20 +47,13 @@ namespace TunePhere.Hubs
                 await Clients.Caller.SendAsync("LoadMessages", messages);
                 
                 // Thông báo cho tất cả người dùng trong phòng
-                var systemMessage = new ChatMessage
-                {
-                    Content = $"{userName} đã tham gia phòng chat",
-                    RoomId = roomId,
-                    SenderId = Context.UserIdentifier,
-                    IsSystemMessage = true
-                };
-                await _chatRepository.AddMessageAsync(systemMessage);
                 await Clients.Group(roomName).SendAsync("UserJoined", userName);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error in JoinRoom: {ex.Message}");
                 await Clients.Caller.SendAsync("ErrorOccurred", "Không thể tham gia phòng chat: " + ex.Message);
+                throw;
             }
         }
 
@@ -83,17 +74,13 @@ namespace TunePhere.Hubs
                     throw new Exception("Bạn cần đăng nhập để gửi tin nhắn");
                 }
 
-                if (!_userRooms.ContainsValue(roomName))
-                {
-                    throw new Exception("Bạn cần tham gia phòng để gửi tin nhắn");
-                }
-
                 // Lưu tin nhắn vào database
                 var chatMessage = new ChatMessage
                 {
                     Content = message,
                     RoomId = roomId,
                     SenderId = Context.UserIdentifier,
+                    SentAt = DateTime.Now,
                     IsSystemMessage = false
                 };
                 await _chatRepository.AddMessageAsync(chatMessage);
@@ -101,12 +88,13 @@ namespace TunePhere.Hubs
                 _logger.LogInformation($"User {userName} sending message to room {roomId}: {message}");
                 
                 // Gửi tin nhắn đến tất cả người dùng trong phòng
-                await Clients.Group(roomName).SendAsync("ReceiveMessage", userName, message, DateTime.Now);
+                await Clients.Group(roomName).SendAsync("ReceiveMessage", userName, message, chatMessage.SentAt);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error in SendMessage: {ex.Message}");
                 await Clients.Caller.SendAsync("ErrorOccurred", "Không thể gửi tin nhắn: " + ex.Message);
+                throw;
             }
         }
 
@@ -114,33 +102,14 @@ namespace TunePhere.Hubs
         {
             try
             {
-                if (_userRooms.TryGetValue(Context.ConnectionId, out string? roomName))
-                {
-                    string userName = Context.User?.Identity?.Name ?? "Anonymous";
-                    _logger.LogInformation($"User {userName} disconnected from room {roomName}");
-
-                    // Lưu thông báo rời phòng
-                    var roomId = int.Parse(roomName.Replace("Room_", ""));
-                    var systemMessage = new ChatMessage
-                    {
-                        Content = $"{userName} đã rời phòng chat",
-                        RoomId = roomId,
-                        SenderId = Context.UserIdentifier,
-                        IsSystemMessage = true
-                    };
-                    await _chatRepository.AddMessageAsync(systemMessage);
-                    
-                    // Thông báo cho tất cả người dùng trong phòng
-                    await Clients.Group(roomName).SendAsync("UserLeft", userName);
-                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
-                    _userRooms.Remove(Context.ConnectionId);
-                }
+                await base.OnDisconnectedAsync(exception);
+                _logger.LogInformation($"Client disconnected: {Context.ConnectionId}");
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error in OnDisconnectedAsync: {ex.Message}");
+                throw;
             }
-            await base.OnDisconnectedAsync(exception);
         }
     }
 } 
