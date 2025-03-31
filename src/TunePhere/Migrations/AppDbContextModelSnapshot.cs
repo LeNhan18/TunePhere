@@ -354,7 +354,7 @@ namespace TunePhere.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("CurrentSongId")
+                    b.Property<int>("CurrentSongId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
@@ -802,7 +802,8 @@ namespace TunePhere.Migrations
                     b.HasOne("TunePhere.Models.Song", "CurrentSong")
                         .WithMany()
                         .HasForeignKey("CurrentSongId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("Creator");
 
