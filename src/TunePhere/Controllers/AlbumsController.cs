@@ -596,47 +596,58 @@ namespace TunePhere.Controllers
 
         // Thêm bài hát vào playlist
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize]
         public async Task<IActionResult> AddToPlaylist(int songId, int playlistId)
         {
-            // Kiểm tra bài hát tồn tại
-            var song = await _context.Songs.FindAsync(songId);
-            if (song == null)
+            try
             {
-                return Json(new { success = false, message = "Không tìm thấy bài hát" });
+                // Kiểm tra bài hát tồn tại
+                var song = await _context.Songs.FindAsync(songId);
+                if (song == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bài hát" });
+                }
+
+                // Kiểm tra playlist tồn tại và thuộc về user hiện tại
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var playlist = await _context.Playlists
+                    .FirstOrDefaultAsync(p => p.PlaylistId == playlistId && p.UserId == userId);
+
+                if (playlist == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy playlist" });
+                }
+
+                // Kiểm tra bài hát đã có trong playlist chưa
+                var existingEntry = await _context.PlaylistSongs
+                    .FirstOrDefaultAsync(ps => ps.PlaylistId == playlistId && ps.SongId == songId);
+
+                if (existingEntry != null)
+                {
+                    return Json(new { success = false, message = "Bài hát đã có trong playlist" });
+                }
+
+                // Thêm bài hát vào playlist
+                var playlistSong = new PlaylistSong
+                {
+                    PlaylistId = playlistId,
+                    SongId = songId,
+                    AddedAt = DateTime.Now,
+                    AddedByUserId = userId
+                };
+
+                _context.PlaylistSongs.Add(playlistSong);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Đã thêm bài hát vào playlist" });
             }
-
-            // Kiểm tra playlist tồn tại và thuộc về user hiện tại
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var playlist = await _context.Playlists
-                .FirstOrDefaultAsync(p => p.PlaylistId == playlistId && p.UserId == userId);
-
-            if (playlist == null)
+            catch (Exception ex)
             {
-                return Json(new { success = false, message = "Không tìm thấy playlist" });
+                // Ghi log lỗi
+                Console.WriteLine($"Lỗi khi thêm bài hát vào playlist: {ex.Message}");
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
             }
-
-            // Kiểm tra bài hát đã có trong playlist chưa
-            var existingEntry = await _context.PlaylistSongs
-                .FirstOrDefaultAsync(ps => ps.PlaylistId == playlistId && ps.SongId == songId);
-
-            if (existingEntry != null)
-            {
-                return Json(new { success = false, message = "Bài hát đã có trong playlist" });
-            }
-
-            // Thêm bài hát vào playlist
-            var playlistSong = new PlaylistSong
-            {
-                PlaylistId = playlistId,
-                SongId = songId,
-                AddedAt = DateTime.Now
-            };
-
-            _context.PlaylistSongs.Add(playlistSong);
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true });
         }
 
         // Lấy danh sách playlist của user
