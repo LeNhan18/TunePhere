@@ -6,6 +6,7 @@ using TunePhere.Repository.EFRepository;
 using TunePhere.Repository.IMPRepository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
+using TunePhere.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +54,9 @@ builder.Services.AddScoped<IUserRepository, EFUserRepository>();
 builder.Services.AddScoped<IUserFavoriteSongs, EFUserFavoriteSongs>();
 builder.Services.AddScoped<IListeningRoomRepository, EFListeningRoomRepository>();
 builder.Services.AddScoped<IListeningRoomParticipantRepository, EFListeningRoomParticipantRepository>();
+builder.Services.AddScoped<IChatMessageRepository, EFChatMessageRepository>();
+
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -106,8 +110,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -116,10 +118,13 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.MapRazorPages();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+    endpoints.MapRazorPages();
+    endpoints.MapHub<ChatHub>("/chatHub");
+});
 
 app.Run();
