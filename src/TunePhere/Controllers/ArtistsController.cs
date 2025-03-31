@@ -266,6 +266,25 @@ namespace TunePhere.Controllers
                 return NotFound();
             }
 
+            // Lấy danh sách nghệ sĩ tương tự và tính tổng lượt nghe
+            var similarArtistsQuery = await _context.Artists
+                .Include(a => a.Songs)
+                .Where(a => a.ArtistId != artist.ArtistId)
+                .Select(a => new
+                {
+                    Artist = a,
+                    PlayCount = a.Songs.Sum(s => s.PlayCount)
+                })
+                .OrderByDescending(x => x.PlayCount)
+                .Take(4)
+                .ToListAsync();
+
+            var similarArtists = similarArtistsQuery.Select(x => x.Artist).ToList();
+            var artistPlayCounts = similarArtistsQuery.ToDictionary(x => x.Artist.ArtistId, x => x.PlayCount);
+
+            ViewBag.SimilarArtists = similarArtists;
+            ViewBag.ArtistPlayCounts = artistPlayCounts;
+
             return View(artist);
         }
 
@@ -348,6 +367,116 @@ namespace TunePhere.Controllers
             }
 
             return View(artist);
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> ToggleFollowUser(string userId)
+        {
+            try
+            {
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(currentUserId))
+                {
+                    return Json(new { success = false, message = "Bạn cần đăng nhập để thực hiện chức năng này" });
+                }
+
+                if (currentUserId == userId)
+                {
+                    return Json(new { success = false, message = "Bạn không thể theo dõi chính mình" });
+                }
+
+                var existingFollow = await _context.UserFollowers
+                    .FirstOrDefaultAsync(f => f.FollowerId == currentUserId && f.FollowingId == userId);
+
+                if (existingFollow != null)
+                {
+                    _context.UserFollowers.Remove(existingFollow);
+                }
+                else
+                {
+                    var follow = new UserFollower
+                    {
+                        FollowerId = currentUserId,
+                        FollowingId = userId,
+                        FollowedAt = DateTime.Now
+                    };
+                    _context.UserFollowers.Add(follow);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Json(new { 
+                    success = true, 
+                    isFollowing = existingFollow == null,
+                    message = existingFollow == null ? "Đã theo dõi người dùng" : "Đã hủy theo dõi người dùng"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Following(string userId = null)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                // Nếu không có userId, lấy danh sách theo dõi của người đang đăng nhập
+                userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return RedirectToAction("Login", "Account");
+                }
+            }
+
+            // Lấy thông tin nghệ sĩ để hiển thị tên
+            var artist = await _context.Artists
+                .FirstOrDefaultAsync(a => a.userId == userId);
+
+            ViewBag.DisplayName = artist?.ArtistName ?? "Người dùng";
+            ViewBag.UserId = userId;
+
+            // Lấy danh sách nghệ sĩ đang theo dõi
+            var artistFollowing = await _context.ArtistFollowers
+                .Include(f => f.Artist)
+                .Where(f => f.UserId == userId)
+                .OrderByDescending(f => f.FollowedAt)
+                .Select(f => new UserFollower
+                {
+                    FollowerId = userId,
+                    FollowingId = f.Artist.userId,
+                    FollowedAt = f.FollowedAt,
+                    Following = new AppUser
+                    {
+                        Id = f.Artist.userId,
+                        FullName = f.Artist.ArtistName,
+                        ImageUrl = f.Artist.ImageUrl
+                    }
+                })
+                .ToListAsync();
+
+            // Lấy danh sách người dùng đang theo dõi
+            var userFollowing = await _context.UserFollowers
+                .Include(f => f.Following)
+                .Where(f => f.FollowerId == userId)
+                .OrderByDescending(f => f.FollowedAt)
+                .ToListAsync();
+
+            // Tạo map giữa userId và ArtistId
+            var artistMap = await _context.Artists
+                .Where(a => artistFollowing.Select(f => f.FollowingId).Contains(a.userId))
+                .ToDictionaryAsync(a => a.userId, a => a);
+
+            ViewBag.ArtistMap = artistMap;
+
+            // Kết hợp cả 2 danh sách
+            var allFollowing = artistFollowing.Concat(userFollowing)
+                .OrderByDescending(f => f.FollowedAt)
+                .ToList();
+
+            return View(allFollowing);
         }
     }
 }
