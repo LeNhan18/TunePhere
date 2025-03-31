@@ -40,6 +40,11 @@ namespace TunePhere.Models
         [NotMapped]
         public bool IsLiked { get; set; }
 
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        public DateTime? UpdatedAt { get; set; }
+
+        public bool IsActive { get; set; } = true;
         public string? VideoUrl { get; set; }
 
         [JsonIgnore]
@@ -56,7 +61,11 @@ namespace TunePhere.Models
         
         [JsonIgnore]
         public virtual ICollection<PlaylistSong>? PlaylistSongs { get; set; } // Danh sách playlist chứa bài hát này
-                                                                              // 
+        
+        [JsonIgnore]
+        public virtual ICollection<SongLike>? SongLikes { get; set; } // Danh sách người đã like bài hát
+        
+        
         [JsonIgnore]
         public virtual ICollection<UserFavoriteSong> FavoritedBy { get; set; }
         

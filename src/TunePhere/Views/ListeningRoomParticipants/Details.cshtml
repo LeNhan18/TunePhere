@@ -1,37 +1,97 @@
 ﻿@model TunePhere.Models.ListeningRoomParticipant
 
 @{
-    ViewData["Title"] = "Details";
-    Layout = "_Layout";
+    ViewData["Title"] = "Chi Tiết Người Tham Gia";
 }
 
-<h1>Details</h1>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="card-title mb-0">Chi Tiết Người Tham Gia</h2>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Quay Lại
+                        </a>
+                    </div>
 
-<div>
-    <h4>ListeningRoomParticipant</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Room)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Room.CreatorId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.JoinedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.JoinedAt)
-        </dd>
-    </dl>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card h-100 bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-user"></i> Thông Tin Người Dùng
+                                    </h5>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <strong>Tên người dùng:</strong> @Model.User.UserName
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>ID:</strong> @Model.User.Id
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card h-100 bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-door-open"></i> Thông Tin Phòng
+                                    </h5>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <strong>Tên phòng:</strong> @Model.Room.Title
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Trạng thái:</strong>
+                                            <span class="badge @(Model.Room.IsActive ? "bg-success" : "bg-danger")">
+                                                @(Model.Room.IsActive ? "Đang hoạt động" : "Đã đóng")
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light mt-4">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-clock"></i> Thông Tin Tham Gia
+                            </h5>
+                            <p class="card-text mb-0">
+                                <strong>Thời gian tham gia:</strong> @Model.JoinedAt.ToString("dd/MM/yyyy HH:mm")
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <div class="btn-group">
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Chỉnh Sửa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    .badge {
+        padding: 0.5em 1em;
+        border-radius: 20px;
+    }
+    .btn {
+        border-radius: 20px;
+        padding: 0.5em 1.5em;
+    }
+</style>

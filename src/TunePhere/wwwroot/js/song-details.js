@@ -563,8 +563,10 @@ function initLyricSyncing() {
 
         lineElement.appendChild(timeMarker);
         lineElement.appendChild(document.createTextNode(' ' + lineText));
+        lineElement.a
 
         currentLine++;
+
 
         // Nếu đã đồng bộ hết các dòng
         if (currentLine >= syncPreview.children.length) {

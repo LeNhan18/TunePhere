@@ -1,45 +1,88 @@
 ﻿@model TunePhere.Models.ListeningRoomParticipant
 
 @{
-    ViewData["Title"] = "Edit";
-    Layout = "_Layout";
+    ViewData["Title"] = "Chỉnh Sửa Người Tham Gia";
 }
 
-<h1>Edit</h1>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Chỉnh Sửa Thông Tin Người Tham Gia</h2>
+                    
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="mb-3">
+                            <label asp-for="RoomId" class="form-label">Chọn Phòng</label>
+                            <select asp-for="RoomId" class="form-select" asp-items="ViewBag.RoomId">
+                                <option value="">-- Chọn phòng --</option>
+                            </select>
+                            <span asp-validation-for="RoomId" class="text-danger"></span>
+                        </div>
 
-<h4>ListeningRoomParticipant</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="RoomId" class="control-label"></label>
-                <select asp-for="RoomId" class="form-control" asp-items="ViewBag.RoomId"></select>
-                <span asp-validation-for="RoomId" class="text-danger"></span>
+                        <div class="mb-3">
+                            <label asp-for="UserId" class="form-label">Chọn Người Dùng</label>
+                            <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId">
+                                <option value="">-- Chọn người dùng --</option>
+                            </select>
+                            <span asp-validation-for="UserId" class="text-danger"></span>
+                        </div>
+
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-info-circle"></i> Thông Tin Bổ Sung
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-1">
+                                            <strong>Phòng hiện tại:</strong> @Model.Room.Title
+                                        </p>
+                                        <p class="mb-1">
+                                            <strong>Người dùng:</strong> @Model.User.UserName
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1">
+                                            <strong>Thời gian tham gia:</strong> @Model.JoinedAt.ToString("dd/MM/yyyy HH:mm")
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Lưu Thay Đổi
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Quay Lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId"></select>
-                <span asp-validation-for="UserId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="JoinedAt" class="control-label"></label>
-                <input asp-for="JoinedAt" class="form-control" />
-                <span asp-validation-for="JoinedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
+
+<style>
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    .btn {
+        border-radius: 20px;
+        padding: 0.5em 1.5em;
+    }
+    .form-control, .form-select {
+        border-radius: 10px;
+    }
+</style>

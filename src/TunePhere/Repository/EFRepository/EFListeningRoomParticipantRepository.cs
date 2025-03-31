@@ -15,17 +15,36 @@ namespace TunePhere.Repository.EFRepository
 
         public async Task<IEnumerable<ListeningRoomParticipant>> GetAllAsync()
         {
-            return await _context.ListeningRoomParticipants.ToListAsync();
+            return await _context.ListeningRoomParticipants
+                .Include(p => p.Room)
+                .Include(p => p.User)
+                .ToListAsync();
+        }
+
+        public async Task<ListeningRoomParticipant?> GetByIdAsync(int id)
+        {
+            return await _context.ListeningRoomParticipants
+                .Include(p => p.Room)
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task<ListeningRoomParticipant?> GetByIdsAsync(int roomId, string userId)
         {
             return await _context.ListeningRoomParticipants
-                .FirstOrDefaultAsync(p => p.RoomId == roomId && p.UserId.Equals(userId));
+                .Include(p => p.Room)
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.RoomId == roomId && p.UserId == userId);
+        }
+
+        public async Task<bool> ExistsAsync(int id)
+        {
+            return await _context.ListeningRoomParticipants.AnyAsync(p => p.Id == id);
         }
 
         public async Task AddAsync(ListeningRoomParticipant participant)
         {
+            participant.JoinedAt = DateTime.Now;
             _context.ListeningRoomParticipants.Add(participant);
             await _context.SaveChangesAsync();
         }
@@ -39,7 +58,8 @@ namespace TunePhere.Repository.EFRepository
         public async Task DeleteAsync(int roomId, string userId)
         {
             var participant = await _context.ListeningRoomParticipants
-                .FirstOrDefaultAsync(p => p.RoomId == roomId && p.UserId.Equals(userId));
+                .FirstOrDefaultAsync(p => p.RoomId == roomId && p.UserId == userId);
+            
             if (participant != null)
             {
                 _context.ListeningRoomParticipants.Remove(participant);

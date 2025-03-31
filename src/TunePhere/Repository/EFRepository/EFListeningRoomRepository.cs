@@ -15,12 +15,26 @@ namespace TunePhere.Repository.EFRepository
 
         public async Task<IEnumerable<ListeningRoom>> GetAllAsync()
         {
-            return await _context.ListeningRooms.ToListAsync();
+            return await _context.ListeningRooms
+                .Include(r => r.Creator)
+                .Include(r => r.CurrentSong)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
         }
 
-        public async Task<ListeningRoom?> GetByIdAsync(int roomId)
+        public async Task<ListeningRoom?> GetByIdAsync(int id)
         {
-            return await _context.ListeningRooms.FindAsync(roomId);
+            return await _context.ListeningRooms
+                .Include(r => r.Creator)
+                .Include(r => r.CurrentSong)
+                .Include(r => r.Participants)
+                    .ThenInclude(p => p.User)
+                .FirstOrDefaultAsync(r => r.RoomId == id);
+        }
+
+        public async Task<bool> ExistsAsync(int id)
+        {
+            return await _context.ListeningRooms.AnyAsync(r => r.RoomId == id);
         }
 
         public async Task AddAsync(ListeningRoom room)
@@ -31,19 +45,24 @@ namespace TunePhere.Repository.EFRepository
 
         public async Task UpdateAsync(ListeningRoom room)
         {
-            _context.ListeningRooms.Update(room);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(int roomId)
-        {
-            var room = await _context.ListeningRooms.FindAsync(roomId);
-            if (room != null)
+            var existingRoom = await _context.ListeningRooms.FindAsync(room.RoomId);
+            if (existingRoom != null)
             {
-                _context.ListeningRooms.Remove(room);
+                _context.Entry(existingRoom).CurrentValues.SetValues(room);
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task DeleteAsync(int id)
+        {
+            var room = await _context.ListeningRooms.FindAsync(id);
+            if (room != null)
+            {
+                room.IsActive = false;
+                await _context.SaveChangesAsync();
+            }
+        }
+
         // Lấy các phòng nghe nhạc đang hoạt động
         public async Task<IEnumerable<ListeningRoom>> GetActiveRoomsAsync()
         {
