@@ -12,8 +12,8 @@ using TunePhere.Models;
 namespace TunePhere.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250330135236_Tune7")]
-    partial class Tune7
+    [Migration("20250330152415_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -357,7 +357,7 @@ namespace TunePhere.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("CurrentSongId")
+                    b.Property<int>("CurrentSongId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
@@ -805,7 +805,8 @@ namespace TunePhere.Migrations
                     b.HasOne("TunePhere.Models.Song", "CurrentSong")
                         .WithMany()
                         .HasForeignKey("CurrentSongId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("Creator");
 
