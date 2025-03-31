@@ -9,7 +9,7 @@
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<input type="hidden" name="__RequestVerificationToken" value="@token" />
+<input type="hidden" id="RequestVerificationToken" name="__RequestVerificationToken" value="@token" />
 
 <style>
     .album-header {
@@ -424,6 +424,48 @@
         text-decoration: none;
         color: white;
     }
+
+    /* Tùy chỉnh style cho dropdown menu */
+    .dropdown-menu-dark {
+        background-color: #282828;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        min-width: 200px;
+        padding: 4px 0;
+        margin-top: 8px;
+        z-index: 1050;
+        position: absolute;
+    }
+    
+    .dropdown-menu-dark .dropdown-item {
+        color: #EEEEEE;
+        font-size: 14px;
+        padding: 10px 16px;
+    }
+    
+    .dropdown-menu-dark .dropdown-item:hover, 
+    .dropdown-menu-dark .dropdown-item:focus {
+        background-color: rgba(255,255,255,0.1);
+        color: white;
+    }
+    
+    /* Đảm bảo dropdown nằm đúng vị trí */
+    .track-actions .dropdown {
+        position: relative;
+    }
+    
+    /* Tùy chỉnh nút dropdown */
+    .song-options-btn {
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Ẩn mũi tên dropdown mặc định của Bootstrap */
+    .dropdown-toggle::after {
+        display: none;
+    }
 </style>
 
 <div class="album-header" style="background: linear-gradient(transparent 0, rgba(0, 0, 0, .5) 100%), url('@Model.ImageUrl') center/cover">
@@ -481,6 +523,15 @@
             <div class="track-duration">
                 <span>@song.Duration.ToString("mm\\:ss")</span>
                 <div class="track-actions">
+                    <div class="dropdown">
+                        <button type="button" class="btn-action song-options-btn" title="Tùy chọn" data-song-id="@song.SongId">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                            <li><a class="dropdown-item add-to-playlist-option" href="javascript:void(0)" data-song-id="@song.SongId">Thêm vào playlist</a></li>
+                            <!-- Có thể thêm các submenu item khác ở đây sau này -->
+                        </ul>
+                    </div>
                     @if (User.IsInRole("Artist") && Model.Artists?.userId == User.FindFirst(ClaimTypes.NameIdentifier)?.Value)
                     {
                         <form asp-action="DeleteSong" method="post" class="d-inline">
@@ -506,24 +557,38 @@
     }
 </div>
 
-<!-- Modal chọn playlist - Tạm thời vô hiệu hóa -->
-<!--
-<div class="modal fade" id="playlistModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Chọn playlist</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Modal thêm vào playlist -->
+<div class="modal fade" id="addToPlaylistModal" tabindex="-1" aria-labelledby="addToPlaylistModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="addToPlaylistModalLabel">Thêm vào playlist</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="list-group" id="playlistList">
-                    <!-- Danh sách playlist sẽ được load động -->
+                <div class="text-center mb-3" id="playlist-loading">
+                    <div class="spinner-border text-light" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+                <div id="playlists-container" class="d-none">
+                    <ul class="list-group playlist-list">
+                        <!-- Danh sách playlist sẽ được load vào đây -->
+                    </ul>
+                    <div class="text-center mt-3">
+                        <a href="@Url.Action("Create", "Playlists")" class="btn btn-outline-success" target="_blank">
+                            <i class="fas fa-plus"></i> Tạo playlist mới
+                        </a>
+                    </div>
+                </div>
+                <div id="no-playlists-message" class="text-center d-none">
+                    <p>Bạn chưa có playlist nào.</p>
+                    <a href="@Url.Action("Create", "Playlists")" class="btn btn-outline-light mt-2" target="_blank">Tạo playlist mới</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
--->
 
 <!-- Thanh phát nhạc cố định ở dưới cùng -->
 <div class="now-playing-bar" style="display: none;">
@@ -573,6 +638,7 @@
         let selectedPlaylistId = null;
         let currentSongIndex = -1;
         let songs = [];
+        let currentSongId = null;
         const audioPlayer = document.getElementById('audio-player');
 
         $(document).ready(function() {
@@ -724,6 +790,168 @@
                     $('.volume-bar-filled').css('width', '70%');
                 }
             });
+
+            // Khởi tạo dropdown thủ công
+            $('.song-options-btn').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Đóng tất cả các dropdown khác trước
+                $('.dropdown-menu').not($(this).siblings('.dropdown-menu')).hide();
+                
+                // Hiển thị/ẩn dropdown menu
+                const dropdownMenu = $(this).siblings('.dropdown-menu');
+                dropdownMenu.toggle();
+                
+                // Lưu ID bài hát hiện tại
+                currentSongId = $(this).data('song-id');
+            });
+            
+            // Xử lý sự kiện click cho tùy chọn "Thêm vào playlist"
+            $('.add-to-playlist-option').click(function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Đóng dropdown
+                $(this).closest('.dropdown-menu').hide();
+                
+                // Lấy ID bài hát từ data attribute
+                currentSongId = $(this).data('song-id');
+                
+                // Tải danh sách playlist và hiển thị modal
+                loadUserPlaylists();
+                $('#addToPlaylistModal').modal('show');
+            });
+            
+            // Đóng dropdown khi click ra ngoài
+            $(document).on('click', function() {
+                $('.dropdown-menu').hide();
+            });
+            
+            // Ngăn sự kiện click lan ra document từ dropdown-menu
+            $('.dropdown-menu').on('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Đặt biến để theo dõi trạng thái focus
+            let wasBlurred = false;
+            
+            // Bắt sự kiện khi tab bị mất focus (chuyển sang tab khác)
+            $(window).on('blur', function() {
+                wasBlurred = true;
+            });
+            
+            // Bắt sự kiện khi tab được focus lại (quay lại từ tab khác)
+            $(window).on('focus', function() {
+                if (wasBlurred && $('#addToPlaylistModal').hasClass('show')) {
+                    // Nếu modal đang mở và tab vừa được focus lại, tải lại danh sách playlist
+                    loadUserPlaylists();
+                    wasBlurred = false;
+                }
+            });
+            
+            // Bắt sự kiện khi modal hiển thị
+            $('#addToPlaylistModal').on('show.bs.modal', function() {
+                wasBlurred = false;
+            });
+            
+            // Hàm load danh sách playlist của người dùng
+            function loadUserPlaylists() {
+                $('#playlist-loading').removeClass('d-none');
+                $('#playlists-container').addClass('d-none');
+                $('#no-playlists-message').addClass('d-none');
+                
+                $.ajax({
+                    url: '@Url.Action("GetUserPlaylists", "Albums")',
+                    type: 'GET',
+                    success: function(data) {
+                        $('#playlist-loading').addClass('d-none');
+                        
+                        if (data && data.length > 0) {
+                            // Có playlist, hiển thị danh sách
+                            const playlistList = $('.playlist-list');
+                            playlistList.empty();
+                            
+                            data.forEach(function(playlist) {
+                                playlistList.append(`
+                                    <li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center">
+                                        <span>${playlist.name}</span>
+                                        <button class="btn btn-sm btn-outline-success add-to-playlist-btn" 
+                                                data-playlist-id="${playlist.id}" 
+                                                data-song-id="${currentSongId}">
+                                            Thêm
+                                        </button>
+                                    </li>
+                                `);
+                            });
+                            
+                            $('#playlists-container').removeClass('d-none');
+                            
+                            // Gắn sự kiện click cho nút "Thêm"
+                            $('.add-to-playlist-btn').click(function() {
+                                const songId = $(this).data('song-id');
+                                const playlistId = $(this).data('playlist-id');
+                                addSongToPlaylist(songId, playlistId, $(this));
+                            });
+                        } else {
+                            // Không có playlist nào
+                            $('#no-playlists-message').removeClass('d-none');
+                        }
+                    },
+                    error: function() {
+                        $('#playlist-loading').addClass('d-none');
+                        alert('Đã xảy ra lỗi khi tải danh sách playlist.');
+                    }
+                });
+            }
+            
+            // Hàm thêm bài hát vào playlist
+            function addSongToPlaylist(songId, playlistId, button) {
+                button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+                
+                // Kiểm tra xem songId và playlistId có giá trị hợp lệ không
+                console.log("Thêm bài hát:", songId, "vào playlist:", playlistId);
+                
+                // Lấy token từ input có ID
+                const token = $('#RequestVerificationToken').val();
+                console.log("Token:", token);
+                
+                $.ajax({
+                    url: '@Url.Action("AddToPlaylist", "Albums")',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        songId: songId,
+                        playlistId: playlistId,
+                        __RequestVerificationToken: token
+                    },
+                    success: function(response) {
+                        console.log("Phản hồi:", response);
+                        if (response.success) {
+                            button.removeClass('btn-outline-success').addClass('btn-success')
+                                .html('<i class="fas fa-check"></i> Đã thêm');
+                            
+                            // Tự động đóng modal sau 1.5 giây
+                            setTimeout(function() {
+                                $('#addToPlaylistModal').modal('hide');
+                            }, 1500);
+                        } else {
+                            button.prop('disabled', false).text(response.message || 'Lỗi');
+                            setTimeout(function() {
+                                button.text('Thêm');
+                            }, 2000);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Lỗi AJAX:", xhr.status, xhr.statusText);
+                        console.error("Chi tiết lỗi:", xhr.responseText);
+                        button.prop('disabled', false).text('Lỗi kết nối');
+                        setTimeout(function() {
+                            button.text('Thêm');
+                        }, 2000);
+                    }
+                });
+            }
         });
 
         // Hàm phát bài hát theo index
@@ -839,45 +1067,5 @@
                 console.error('Lỗi khi tăng lượt nghe:', error);
             });
         }
-
-        // Các hàm liên quan đến playlist đã bị vô hiệu hóa
-        /*
-        function loadPlaylists() {
-            $.get('/Albums/GetUserPlaylists', function(playlists) {
-                const playlistList = $('#playlistList');
-                playlistList.empty();
-
-                playlists.forEach(function(playlist) {
-                    const item = $('<a>')
-                        .addClass('list-group-item list-group-item-action')
-                        .text(playlist.name)
-                        .click(function(e) {
-                            e.preventDefault();
-                            selectedPlaylistId = playlist.id;
-                            addSongToPlaylist();
-                        });
-                    playlistList.append(item);
-                });
-            });
-        }
-
-        function addSongToPlaylist() {
-            if (selectedSongId && selectedPlaylistId) {
-                $.post('/Albums/AddToPlaylist', { 
-                    songId: selectedSongId, 
-                    playlistId: selectedPlaylistId 
-                })
-                .done(function(response) {
-                    if (response.success) {
-                        alert('Đã thêm bài hát vào playlist!');
-                        $('#playlistModal').modal('hide');
-                    }
-                })
-                .fail(function() {
-                    alert('Có lỗi xảy ra khi thêm bài hát vào playlist.');
-                });
-            }
-        }
-        */
     </script>
 } 
