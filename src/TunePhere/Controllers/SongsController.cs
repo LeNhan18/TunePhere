@@ -368,44 +368,61 @@ namespace TunePhere.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var song = await _context.Songs
-                .Include(s => s.Artists)
-                .FirstOrDefaultAsync(m => m.SongId == id);
-
-            if (song == null)
+            try
             {
-                return NotFound();
-            }
+                var song = await _context.Songs
+                    .Include(s => s.Lyrics)  // Include lyrics
+                    .Include(s => s.FavoritedBy) // Include favorites
+                    .FirstOrDefaultAsync(s => s.SongId == id);
 
-            // Kiểm tra quyền sở hữu
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null || song.Artists?.userId != user.Id)
-            {
-                return Forbid();
-            }
-
-            // Xóa file nhạc và ảnh bìa
-            if (!string.IsNullOrEmpty(song.FileUrl))
-            {
-                var audioPath = Path.Combine(_environment.WebRootPath, song.FileUrl.TrimStart('/'));
-                if (System.IO.File.Exists(audioPath))
+                if (song == null)
                 {
-                    System.IO.File.Delete(audioPath);
+                    return NotFound();
                 }
-            }
 
-            if (!string.IsNullOrEmpty(song.ImageUrl))
-            {
-                var imagePath = Path.Combine(_environment.WebRootPath, song.ImageUrl.TrimStart('/'));
-                if (System.IO.File.Exists(imagePath))
+                // Xóa lyrics trước
+                if (song.Lyrics != null && song.Lyrics.Any())
                 {
-                    System.IO.File.Delete(imagePath);
+                    _context.Lyrics.RemoveRange(song.Lyrics);
                 }
-            }
 
-            _context.Songs.Remove(song);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                // Xóa favorites nếu có
+                if (song.FavoritedBy != null && song.FavoritedBy.Any())
+                {
+                    _context.UserFavoriteSongs.RemoveRange(song.FavoritedBy);
+                }
+
+                // Xóa file nhạc và ảnh từ storage
+                if (!string.IsNullOrEmpty(song.FileUrl))
+                {
+                    var audioFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", song.FileUrl.TrimStart('/'));
+                    if (System.IO.File.Exists(audioFilePath))
+                    {
+                        System.IO.File.Delete(audioFilePath);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(song.ImageUrl))
+                {
+                    var imageFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", song.ImageUrl.TrimStart('/'));
+                    if (System.IO.File.Exists(imageFilePath))
+                    {
+                        System.IO.File.Delete(imageFilePath);
+                    }
+                }
+
+                // Xóa bài hát
+                _context.Songs.Remove(song);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Xóa bài hát thành công!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Có lỗi xảy ra khi xóa bài hát: " + ex.Message;
+                return RedirectToAction(nameof(Delete), new { id });
+            }
         }
 
         // POST: Songs/IncrementPlayCount/5
