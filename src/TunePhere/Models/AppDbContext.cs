@@ -24,6 +24,7 @@ namespace TunePhere.Models
         public DbSet<ArtistFollower> ArtistFollowers { get; set; }
 
         public DbSet<UserFavoriteSong> UserFavoriteSongs { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -158,6 +159,20 @@ namespace TunePhere.Models
                 .WithMany(s => s.FavoritedBy)
                 .HasForeignKey(ufs => ufs.SongId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // Cấu hình ChatMessage
+            modelBuilder.Entity<ChatMessage>(entity =>
+            {
+                entity.HasOne(m => m.Sender)
+                    .WithMany()
+                    .HasForeignKey(m => m.SenderId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(m => m.Room)
+                    .WithMany()
+                    .HasForeignKey(m => m.RoomId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
         }
     }
 }
