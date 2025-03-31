@@ -35,7 +35,7 @@
                                 <label class="text-muted">
                                     <i class="fas fa-user me-1"></i>Người Tạo
                                 </label>
-                                <p class="mb-0">@Model.Creator?.UserName</p>
+                                <p class="mb-0">@Model.Creator?.Email</p>
                             </div>
                         </div>
 
@@ -51,21 +51,37 @@
                         @if (Model.CurrentSong != null)
                         {
                             <div class="col-12">
-                                <div class="info-group">
-                                    <label class="text-muted">
-                                        <i class="fas fa-play me-1"></i>Bài Hát Đang Phát
-                                    </label>
-                                    <div class="d-flex align-items-center">
-                                        <img src="@Model.CurrentSong.ImageUrl" alt="@Model.CurrentSong.Title"
-                                             class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
-                                        <div>
-                                            <h6 class="mb-1">@Model.CurrentSong.Title</h6>
-                                            <p class="mb-0 text-muted">
-                                                <small>
-                                                    <i class="fas fa-user-music me-1"></i>
-                                                    @(Model.CurrentSong.Artists?.ArtistName ?? "Unknown Artist")
-                                                </small>
-                                            </p>
+                                <div class="card mt-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fas fa-play me-2"></i>Bài Hát Đang Phát</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <img src="@(string.IsNullOrEmpty(Model.CurrentSong.ImageUrl) ? "/images/default-song.png" : Model.CurrentSong.ImageUrl)" 
+                                                     alt="@Model.CurrentSong.Title" 
+                                                     class="img-fluid rounded" style="width: 100px; height: 100px; object-fit: cover;">
+                                            </div>
+                                            <div class="col">
+                                                <h5 class="mb-1">@Model.CurrentSong.Title</h5>
+                                                <p class="mb-2 text-muted">@(!string.IsNullOrEmpty(Model.CurrentSong.Artists?.ArtistName) ? Model.CurrentSong.Artists.ArtistName : "Nghệ sĩ không xác định")</p>
+                                                
+                                                <div class="audio-player-container">
+                                                    <audio id="audioPlayer" class="w-100" controls>
+                                                        <source src="@Model.CurrentSong.FileUrl" type="audio/mpeg">
+                                                        Trình duyệt của bạn không hỗ trợ phát audio.
+                                                    </audio>
+
+                                                    <div class="progress mt-2" style="height: 4px;">
+                                                        <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                                    </div>
+
+                                                    <div class="d-flex justify-content-between mt-2">
+                                                        <small id="currentTime">0:00</small>
+                                                        <small id="duration">0:00</small>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -83,10 +99,10 @@
                                         @foreach (var participant in Model.Participants)
                                         {
                                             <div class="participant-item">
-                                                <img src="@(participant.User?.CoverImage ?? "/images/default-avatar.png")"
+                                                <img src="@(!string.IsNullOrEmpty(participant.User?.ImageUrl) ? participant.User.ImageUrl : "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y")"
                                                      alt="@participant.User?.UserName"
-                                                     class="rounded-circle me-2" style="width: 32px; height: 32px;">
-                                                <span>@participant.User?.UserName</span>
+                                                     class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                                <span>@(!string.IsNullOrEmpty(participant.User?.UserName) ? participant.User.UserName : "Người dùng không xác định")</span>
                                                 <small class="text-muted ms-2">
                                                     (Tham gia: @participant.JoinedAt.ToString("dd/MM/yyyy HH:mm"))
                                                 </small>
@@ -120,6 +136,27 @@
         </div>
 
         <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-lg mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fas fa-comments me-2"></i>Trò Chuyện
+                    </h5>
+                    <div class="chat-container" style="height: 400px;">
+                        <div class="chat-messages" id="chatMessages" style="height: 320px; overflow-y: auto;">
+                            <!-- Tin nhắn sẽ được thêm vào đây -->
+                        </div>
+                        <div class="chat-input mt-3">
+                            <div class="input-group">
+                                <input type="text" id="messageInput" class="form-control" placeholder="Nhập tin nhắn...">
+                                <button class="btn btn-primary" id="sendMessage" type="button">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card shadow-sm border-0 rounded-lg">
                 <div class="card-body">
                     <h5 class="card-title mb-3">
@@ -248,12 +285,219 @@
         .breadcrumb-item:nth-child(2) {
             animation-delay: 0.1s;
         }
+        .chat-messages {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+        }
+        
+        .chat-message {
+            margin-bottom: 1rem;
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        
+        .chat-message .message-content {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: inline-block;
+            max-width: 80%;
+        }
+        
+        .chat-message.own-message {
+            text-align: right;
+        }
+        
+        .chat-message.own-message .message-content {
+            background: var(--bs-primary);
+            color: white;
+        }
+        
+        .chat-message .user-name {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+        
+        .chat-message .timestamp {
+            font-size: 0.7rem;
+            color: #999;
+            margin-top: 0.25rem;
+        }
+        
+        .chat-input .input-group {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        #messageInput {
+            border-radius: 1.5rem 0 0 1.5rem;
+            padding-left: 1rem;
+        }
+        
+        #sendMessage {
+            border-radius: 0 1.5rem 1.5rem 0;
+            padding: 0.5rem 1.25rem;
+        }
+
+        .system-message {
+            text-align: center;
+            margin: 0.5rem 0;
+        }
+
+        .system-message .system-content {
+            background: #f0f0f0;
+            color: #666;
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            display: inline-block;
+        }
+
+        .error-message .system-content {
+            background: #fff3f3;
+            color: #dc3545;
+        }
     </style>
 }
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendMessage');
+            const chatMessages = document.getElementById('chatMessages');
+            const roomId = @Model.RoomId;
+            const currentUser = '@User.Identity?.Name';
+            
+            // Tạo kết nối SignalR
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chatHub", {
+                    skipNegotiation: true,
+                    transport: signalR.HttpTransportType.WebSockets
+                })
+                .withAutomaticReconnect([0, 2000, 5000, 10000, 20000])
+                .configureLogging(signalR.LogLevel.Debug)
+                .build();
+                
+            // Bắt đầu kết nối
+            async function startConnection() {
+                try {
+                    await connection.start();
+                    console.log("Đã kết nối SignalR");
+                    await connection.invoke("JoinRoom", roomId);
+                    messageInput.disabled = false;
+                    sendButton.disabled = false;
+                    addSystemMessage("Đã kết nối thành công!");
+                } catch (err) {
+                    console.error("Lỗi kết nối:", err);
+                    messageInput.disabled = true;
+                    sendButton.disabled = true;
+                    addSystemMessage("Không thể kết nối. Đang thử lại...", true);
+                    setTimeout(startConnection, 5000);
+                }
+            }
+            
+            connection.onclose(async () => {
+                messageInput.disabled = true;
+                sendButton.disabled = true;
+                addSystemMessage("Mất kết nối. Đang kết nối lại...", true);
+                await startConnection();
+            });
+            
+            // Xử lý các sự kiện
+            connection.on("ConnectionEstablished", (connectionId) => {
+                console.log("Đã kết nối với ID:", connectionId);
+                addSystemMessage("Đã kết nối với phòng chat!");
+            });
+            
+            connection.on("LoadMessages", (messages) => {
+                chatMessages.innerHTML = ''; // Xóa tin nhắn hiện tại
+                messages.forEach(message => {
+                    if (message.isSystemMessage) {
+                        addSystemMessage(message.content);
+                    } else {
+                        addMessage(message.sender.userName, message.content, message.sentAt, message.sender.id === currentUser);
+                    }
+                });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+            
+            connection.on("UserJoined", (userName) => {
+                addSystemMessage(`${userName} đã tham gia phòng chat`);
+            });
+            
+            connection.on("UserLeft", (userName) => {
+                addSystemMessage(`${userName} đã rời phòng chat`);
+            });
+            
+            connection.on("ErrorOccurred", (error) => {
+                console.error("Lỗi:", error);
+                addSystemMessage(error, true);
+            });
+                
+            // Nhận tin nhắn
+            connection.on("ReceiveMessage", (user, message, timestamp) => {
+                addMessage(user, message, timestamp, user === currentUser);
+            });
+            
+            // Gửi tin nhắn
+            async function sendMessage() {
+                const message = messageInput.value.trim();
+                if (message) {
+                    try {
+                        await connection.invoke("SendMessage", roomId, message);
+                        messageInput.value = '';
+                    } catch (err) {
+                        console.error("Lỗi gửi tin nhắn:", err);
+                        addSystemMessage("Không thể gửi tin nhắn. Vui lòng thử lại.", true);
+                    }
+                }
+            }
+            
+            // Thêm tin nhắn vào chat box
+            function addMessage(user, message, timestamp, isOwnMessage) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${isOwnMessage ? 'own-message' : ''}`;
+                messageDiv.innerHTML = `
+                    <div class="user-name">${user}</div>
+                    <div class="message-content">${message}</div>
+                    <div class="timestamp">${new Date(timestamp).toLocaleTimeString()}</div>
+                `;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // Thêm tin nhắn hệ thống
+            function addSystemMessage(message, isError = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message system-message ${isError ? 'error-message' : ''}`;
+                messageDiv.innerHTML = `
+                    <div class="message-content system-content">
+                        ${message}
+                    </div>
+                `;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // Sự kiện click nút gửi
+            sendButton.addEventListener('click', sendMessage);
+            
+            // Sự kiện nhấn Enter
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Khởi động kết nối
+            messageInput.disabled = true;
+            sendButton.disabled = true;
+            startConnection();
+
+            // Xử lý audio player
             const audioPlayer = document.getElementById('audioPlayer');
             const progressBar = document.getElementById('progressBar');
             const currentTimeDisplay = document.getElementById('currentTime');
@@ -270,15 +514,11 @@
                     durationDisplay.textContent = formatTime(audioPlayer.duration);
                 });
 
-                audioPlayer.play().catch(function(error) {
-                    console.log("Không thể tự động phát nhạc:", error);
-                });
-            }
-
-            function formatTime(seconds) {
-                const minutes = Math.floor(seconds / 60);
-                seconds = Math.floor(seconds % 60);
-                return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+                function formatTime(seconds) {
+                    const minutes = Math.floor(seconds / 60);
+                    seconds = Math.floor(seconds % 60);
+                    return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+                }
             }
         });
     </script>
