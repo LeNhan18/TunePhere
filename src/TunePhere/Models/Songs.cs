@@ -27,6 +27,9 @@ namespace TunePhere.Models
         [Required]
         public required string ImageUrl { get; set; } // Đường dẫn ảnh bìa
 
+        [StringLength(10)]
+        public string? FileType { get; set; } // Lưu định dạng file (.mp3, .m4a, v.v.)
+
         public DateTime UploadDate { get; set; } = DateTime.Now; // Ngày tải lên
 
         [ForeignKey("AlbumId")]
@@ -79,6 +82,7 @@ namespace TunePhere.Models
             UploadDate = DateTime.Now;
             PlayCount = 0;
             LikeCount = 0;
+            FileType = ".mp3"; // Mặc định là mp3
         }
     }
 }
