@@ -52,12 +52,12 @@
         @if (SignInManager.IsSignedIn(User))
         {
             var user = await UserManager.GetUserAsync(User);
-            var isArtist = await UserManager.IsInRoleAsync(user, "Artist");
+            var isArtist = user != null ? await UserManager.IsInRoleAsync(user, "Artist") : false;
 
             <div class="user-menu-container">
                 <div class="user-menu-button">
                     <div class="user-avatar">
-                        @if (isArtist)
+                        @if (isArtist && user != null)
                         {
                             // Lấy thông tin nghệ sĩ từ database
                             var artist = DbContext.Artists.FirstOrDefault(a => a.userId == user.Id);
@@ -66,7 +66,7 @@
                             {
                                 <img src="@artist.ImageUrl" alt="Artist Profile" class="rounded-avatar" />
                             }
-                            else if (!string.IsNullOrEmpty(user.ImageUrl))
+                            else if (user != null && !string.IsNullOrEmpty(user.ImageUrl))
                             {
                                 <img src="@user.ImageUrl" alt="Profile" class="rounded-avatar" />
                             }
@@ -77,7 +77,7 @@
                         }
                         else
                         {
-                            @if (!string.IsNullOrEmpty(user.ImageUrl))
+                            @if (user != null && !string.IsNullOrEmpty(user.ImageUrl))
                             {
                                 <img src="@user.ImageUrl" alt="Profile" class="rounded-avatar" />
                             }
@@ -88,14 +88,14 @@
                         }
                     </div>
                     <span class="user-name">
-                        @if (isArtist)
+                        @if (isArtist && user != null)
                         {
                             var artist = DbContext.Artists.FirstOrDefault(a => a.userId == user.Id);
-                            @(artist != null ? artist.ArtistName : user.FullName)
+                            @(artist != null ? artist.ArtistName : (user != null ? user.FullName : ""))
                         }
                         else
                         {
-                            @user.FullName
+                            @(user != null ? user.FullName : "")
                         }
                     </span>
                     <i class="fas fa-caret-down"></i>
