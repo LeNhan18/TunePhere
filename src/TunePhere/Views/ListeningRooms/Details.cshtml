@@ -58,14 +58,14 @@
                                     <div class="card-body">
                                         <div class="row align-items-center">
                                             <div class="col-auto">
-                                                <img src="@(string.IsNullOrEmpty(Model.CurrentSong.ImageUrl) ? "/images/default-song.png" : Model.CurrentSong.ImageUrl)" 
-                                                     alt="@Model.CurrentSong.Title" 
+                                                <img src="@(string.IsNullOrEmpty(Model.CurrentSong.ImageUrl) ? "/images/default-song.png" : Model.CurrentSong.ImageUrl)"
+                                                     alt="@Model.CurrentSong.Title"
                                                      class="img-fluid rounded" style="width: 100px; height: 100px; object-fit: cover;">
                                             </div>
                                             <div class="col">
                                                 <h5 class="mb-1">@Model.CurrentSong.Title</h5>
                                                 <p class="mb-2 text-muted">@(!string.IsNullOrEmpty(Model.CurrentSong.Artists?.ArtistName) ? Model.CurrentSong.Artists.ArtistName : "Nghệ sĩ không xác định")</p>
-                                                
+
                                                 <div class="audio-player-container">
                                                     <audio id="audioPlayer" class="w-100" controls>
                                                         <source src="@Model.CurrentSong.FileUrl" type="audio/mpeg">
@@ -190,36 +190,44 @@
             padding: 1rem;
             border-radius: 0.5rem;
         }
-        .info-group:hover {
-            background-color: rgba(var(--bs-primary-rgb), 0.05);
-            transform: translateX(5px);
-        }
-        .info-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.875rem;
-            transition: color 0.2s ease;
-        }
-        .info-group:hover label {
-            color: var(--bs-primary) !important;
-        }
+
+            .info-group:hover {
+                background-color: rgba(var(--bs-primary-rgb), 0.05);
+                transform: translateX(5px);
+            }
+
+            .info-group label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-size: 0.875rem;
+                transition: color 0.2s ease;
+            }
+
+            .info-group:hover label {
+                color: var(--bs-primary) !important;
+            }
+
         .participant-list {
             max-height: 300px;
             overflow-y: auto;
             scrollbar-width: thin;
             scrollbar-color: var(--bs-primary) #f0f0f0;
         }
-        .participant-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        .participant-list::-webkit-scrollbar-track {
-            background: #f0f0f0;
-            border-radius: 3px;
-        }
-        .participant-list::-webkit-scrollbar-thumb {
-            background-color: var(--bs-primary);
-            border-radius: 3px;
-        }
+
+            .participant-list::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .participant-list::-webkit-scrollbar-track {
+                background: #f0f0f0;
+                border-radius: 3px;
+            }
+
+            .participant-list::-webkit-scrollbar-thumb {
+                background-color: var(--bs-primary);
+                border-radius: 3px;
+            }
+
         .participant-item {
             display: flex;
             align-items: center;
@@ -227,114 +235,131 @@
             border-bottom: 1px solid #eee;
             transition: all 0.2s ease;
         }
-        .participant-item:hover {
-            background-color: rgba(var(--bs-primary-rgb), 0.05);
-            transform: translateX(5px);
-        }
-        .participant-item img {
-            transition: transform 0.2s ease;
-        }
-        .participant-item:hover img {
-            transform: scale(1.1);
-        }
+
+            .participant-item:hover {
+                background-color: rgba(var(--bs-primary-rgb), 0.05);
+                transform: translateX(5px);
+            }
+
+            .participant-item img {
+                transition: transform 0.2s ease;
+            }
+
+            .participant-item:hover img {
+                transform: scale(1.1);
+            }
+
         .badge {
             padding: 0.5em 1em;
             transition: all 0.2s ease;
         }
-        .badge:hover {
-            transform: scale(1.05);
-        }
+
+            .badge:hover {
+                transform: scale(1.05);
+            }
+
         .stats-item {
             padding: 0.75rem;
             border-bottom: 1px solid #eee;
             transition: all 0.3s ease;
         }
-        .stats-item:hover {
-            background-color: rgba(var(--bs-primary-rgb), 0.05);
-            padding-left: 1rem;
-        }
+
+            .stats-item:hover {
+                background-color: rgba(var(--bs-primary-rgb), 0.05);
+                padding-left: 1rem;
+            }
+
         .btn {
             transition: all 0.2s ease;
         }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        .btn:active {
-            transform: translateY(0);
-        }
+
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .btn:active {
+                transform: translateY(0);
+            }
+
         .card {
             transition: all 0.3s ease;
         }
-        .card:hover {
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
-        }
+
+            .card:hover {
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+            }
+
         @@keyframes slideIn {
             from {
                 opacity: 0;
                 transform: translateX(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
             }
         }
+
         .breadcrumb-item {
             animation: slideIn 0.3s ease-out forwards;
         }
-        .breadcrumb-item:nth-child(2) {
-            animation-delay: 0.1s;
-        }
+
+            .breadcrumb-item:nth-child(2) {
+                animation-delay: 0.1s;
+            }
+
         .chat-messages {
             padding: 1rem;
             background: #f8f9fa;
             border-radius: 0.5rem;
         }
-        
+
         .chat-message {
             margin-bottom: 1rem;
             animation: slideIn 0.3s ease-out forwards;
         }
-        
-        .chat-message .message-content {
-            background: white;
-            padding: 0.75rem;
-            border-radius: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: inline-block;
-            max-width: 80%;
-        }
-        
-        .chat-message.own-message {
-            text-align: right;
-        }
-        
-        .chat-message.own-message .message-content {
-            background: var(--bs-primary);
-            color: white;
-        }
-        
-        .chat-message .user-name {
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 0.25rem;
-        }
-        
-        .chat-message .timestamp {
-            font-size: 0.7rem;
-            color: #999;
-            margin-top: 0.25rem;
-        }
-        
+
+            .chat-message .message-content {
+                background: white;
+                padding: 0.75rem;
+                border-radius: 1rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                display: inline-block;
+                max-width: 80%;
+            }
+
+            .chat-message.own-message {
+                text-align: right;
+            }
+
+                .chat-message.own-message .message-content {
+                    background: var(--bs-primary);
+                    color: white;
+                }
+
+            .chat-message .user-name {
+                font-size: 0.8rem;
+                color: #666;
+                margin-bottom: 0.25rem;
+            }
+
+            .chat-message .timestamp {
+                font-size: 0.7rem;
+                color: #999;
+                margin-top: 0.25rem;
+            }
+
         .chat-input .input-group {
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        
+
         #messageInput {
             border-radius: 1.5rem 0 0 1.5rem;
             padding-left: 1rem;
         }
-        
+
         #sendMessage {
             border-radius: 0 1.5rem 1.5rem 0;
             padding: 0.5rem 1.25rem;
@@ -345,14 +370,14 @@
             margin: 0.5rem 0;
         }
 
-        .system-message .system-content {
-            background: #f0f0f0;
-            color: #666;
-            font-size: 0.8rem;
-            padding: 0.5rem 1rem;
-            border-radius: 1rem;
-            display: inline-block;
-        }
+            .system-message .system-content {
+                background: #f0f0f0;
+                color: #666;
+                font-size: 0.8rem;
+                padding: 0.5rem 1rem;
+                border-radius: 1rem;
+                display: inline-block;
+            }
 
         .error-message .system-content {
             background: #fff3f3;
@@ -370,7 +395,7 @@
             const chatMessages = document.getElementById('chatMessages');
             const roomId = @Model.RoomId;
             const currentUser = '@User.Identity?.Name';
-            
+
             // Tạo kết nối SignalR
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl("/chatHub", {
@@ -380,7 +405,7 @@
                 .withAutomaticReconnect([0, 2000, 5000, 10000, 20000])
                 .configureLogging(signalR.LogLevel.Debug)
                 .build();
-                
+
             // Bắt đầu kết nối
             async function startConnection() {
                 try {
@@ -398,20 +423,20 @@
                     setTimeout(startConnection, 5000);
                 }
             }
-            
+
             connection.onclose(async () => {
                 messageInput.disabled = true;
                 sendButton.disabled = true;
                 addSystemMessage("Mất kết nối. Đang kết nối lại...", true);
                 await startConnection();
             });
-            
+
             // Xử lý các sự kiện
             connection.on("ConnectionEstablished", (connectionId) => {
                 console.log("Đã kết nối với ID:", connectionId);
                 addSystemMessage("Đã kết nối với phòng chat!");
             });
-            
+
             connection.on("LoadMessages", (messages) => {
                 chatMessages.innerHTML = ''; // Xóa tin nhắn hiện tại
                 messages.forEach(message => {
@@ -423,25 +448,25 @@
                 });
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             });
-            
+
             connection.on("UserJoined", (userName) => {
                 addSystemMessage(`${userName} đã tham gia phòng chat`);
             });
-            
+
             connection.on("UserLeft", (userName) => {
                 addSystemMessage(`${userName} đã rời phòng chat`);
             });
-            
+
             connection.on("ErrorOccurred", (error) => {
                 console.error("Lỗi:", error);
                 addSystemMessage(error, true);
             });
-                
+
             // Nhận tin nhắn
             connection.on("ReceiveMessage", (user, message, timestamp) => {
                 addMessage(user, message, timestamp, user === currentUser);
             });
-            
+
             // Gửi tin nhắn
             async function sendMessage() {
                 const message = messageInput.value.trim();
@@ -455,7 +480,7 @@
                     }
                 }
             }
-            
+
             // Thêm tin nhắn vào chat box
             function addMessage(user, message, timestamp, isOwnMessage) {
                 const messageDiv = document.createElement('div');
@@ -468,7 +493,7 @@
                 chatMessages.appendChild(messageDiv);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
-            
+
             // Thêm tin nhắn hệ thống
             function addSystemMessage(message, isError = false) {
                 const messageDiv = document.createElement('div');
@@ -481,17 +506,17 @@
                 chatMessages.appendChild(messageDiv);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
-            
+
             // Sự kiện click nút gửi
             sendButton.addEventListener('click', sendMessage);
-            
+
             // Sự kiện nhấn Enter
             messageInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     sendMessage();
                 }
             });
-            
+
             // Khởi động kết nối
             messageInput.disabled = true;
             sendButton.disabled = true;
