@@ -179,31 +179,21 @@ let vinylEffectActive = false;
 
 // Cập nhật hàm phát/dừng nhạc để thêm hiệu ứng đĩa xoay
 function togglePlay() {
-    console.log("togglePlay được gọi, trạng thái hiện tại:", isPlaying);
-
-    if (isPlaying) {
-        audioPlayer.pause();
-        isPlaying = false;
-        // Tắt hiệu ứng đĩa xoay
-        toggleVinylEffect(false);
-
-    } else {
-        audioPlayer.play()
-            .then(() => {
-                isPlaying = true;
-                // Bật hiệu ứng đĩa xoay
-                toggleVinylEffect(true);
-
-                // Không tăng lượt nghe khi người dùng phát lại cùng một bài hát
-                // Lượt nghe đã được tăng khi tải trang
-            })
-            .catch(error => {
-                console.error('Lỗi phát nhạc:', error);
-            });
+    const audioPlayer = document.getElementById('audioPlayer');
+    
+    try {
+        if (audioPlayer.paused || audioPlayer.ended) {
+            playAudio();
+        } else {
+            audioPlayer.pause();
+            toggleVinylEffect(false);
+            updatePlayPauseButton();
+        }
+    } catch (error) {
+        console.error("Lỗi khi chuyển đổi phát/dừng:", error);
+        alert("Có lỗi xảy ra khi phát nhạc. Vui lòng thử lại sau.");
+        updatePlayPauseButton();
     }
-
-    // Đảm bảo cập nhật UI
-    setTimeout(updatePlayPauseButton, 10);
 }
 
 // Thêm hàm mới để xử lý hiệu ứng đĩa xoay
@@ -226,19 +216,100 @@ function toggleVinylEffect(active) {
     }
 }
 
-// Cập nhật hàm phát nhạc để bật hiệu ứng đĩa
+// Hàm chuẩn bị và phát file âm thanh với hỗ trợ nhiều định dạng
 function playAudio() {
-    audioPlayer.play()
-        .then(() => {
-            isPlaying = true;
-            updatePlayPauseButton();
-            toggleVinylEffect(true);
-
-            // Không cần gọi lại vì đã gọi khi trang tải xong
-            // incrementPlayCount(window.songData.songId);
+    const audioPlayer = document.getElementById('audioPlayer');
+    const fileUrl = window.songData.fileUrl;
+    
+    console.log("Thử phát file:", fileUrl);
+    
+    // Mã hóa URL để xử lý ký tự đặc biệt và khoảng trắng
+    const encodedUrl = encodeURI(fileUrl);
+    
+    // Kiểm tra file có tồn tại không
+    fetch(encodedUrl, { method: 'HEAD' })
+        .then(response => {
+            if (!response.ok) {
+                console.error("Không tìm thấy file:", response.status);
+                alert("Không tìm thấy file âm thanh. Vui lòng kiểm tra lại đường dẫn.");
+                return;
+            }
+            
+            // Kiểm tra MIME type của file
+            const fileExtension = fileUrl.split('.').pop().toLowerCase();
+            
+            // Thiết lập loại MIME tương ứng
+            let mimeType;
+            switch (fileExtension) {
+                case 'mp3':
+                    mimeType = 'audio/mpeg';
+                    break;
+                case 'm4a':
+                    mimeType = 'audio/mp4';
+                    break;
+                case 'wav':
+                    mimeType = 'audio/wav';
+                    break;
+                case 'ogg':
+                    mimeType = 'audio/ogg';
+                    break;
+                case 'aac':
+                    mimeType = 'audio/aac';
+                    break;
+                case 'flac':
+                    mimeType = 'audio/flac';
+                    break;
+                default:
+                    mimeType = 'audio/mpeg'; // Mặc định
+            }
+            
+            // Kiểm tra xem trình duyệt có hỗ trợ định dạng này không
+            const canPlayType = audioPlayer.canPlayType(mimeType);
+            if (canPlayType === '' || canPlayType === 'no') {
+                console.warn("Trình duyệt không hỗ trợ định dạng file:", mimeType);
+                alert("Trình duyệt của bạn không hỗ trợ định dạng file này. Vui lòng sử dụng trình duyệt khác hoặc chuyển đổi file.");
+                return;
+            }
+            
+            // Tiến hành phát nhạc
+            try {
+                audioPlayer.src = encodedUrl;
+                audioPlayer.type = mimeType; // Thêm type để trình duyệt nhận diện
+                audioPlayer.load();
+                
+                const playPromise = audioPlayer.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        console.log("Phát nhạc thành công");
+                        toggleVinylEffect(true);
+                        incrementPlayCount(window.songData.songId);
+                        updatePlayPauseButton();
+                    }).catch(error => {
+                        console.error("Lỗi phát nhạc:", error.message);
+                        
+                        // Chi tiết hóa lỗi phát nhạc
+                        let errorMsg = "Không thể phát bài hát. ";
+                        if (error.name === 'NotSupportedError') {
+                            errorMsg += "Định dạng file không được hỗ trợ.";
+                        } else if (error.name === 'NotAllowedError') {
+                            errorMsg += "Trình duyệt không cho phép tự động phát nhạc.";
+                        } else {
+                            errorMsg += error.message;
+                        }
+                        
+                        alert(errorMsg);
+                        updatePlayPauseButton();
+                    });
+                }
+            } catch (error) {
+                console.error("Lỗi xử lý:", error.message);
+                alert("Lỗi khi xử lý file âm thanh: " + error.message);
+            }
         })
         .catch(error => {
-            console.error('Lỗi phát nhạc:', error);
+            console.error("Lỗi kiểm tra file:", error.message);
+            alert("Lỗi khi kiểm tra file: " + error.message);
         });
 }
 
@@ -812,3 +883,205 @@ document.head.insertAdjacentHTML('beforeend', `
     }
     </style>
 `);
+
+// Thêm hàm mới để kiểm tra và chuẩn bị file âm thanh khi trang vừa tải xong
+function initAudioPlayer() {
+    const audioPlayer = document.getElementById('audioPlayer');
+    
+    if (window.songData && window.songData.fileUrl) {
+        try {
+            // Thiết lập nguồn nhưng chưa phát
+            audioPlayer.src = window.songData.fileUrl;
+            audioPlayer.preload = 'auto';
+            
+            // Xử lý lỗi
+            audioPlayer.onerror = function(e) {
+                console.error('Lỗi khi tải file âm thanh:', e);
+            };
+            
+            // Load file nhưng chưa phát
+            audioPlayer.load();
+            console.log('Đã tải file âm thanh:', window.songData.fileUrl);
+        } catch (error) {
+            console.error('Lỗi khi khởi tạo audio player:', error);
+        }
+    } else {
+        console.error('Không tìm thấy thông tin file âm thanh');
+    }
+}
+
+// Khởi tạo audio player khi trang được tải
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+    
+    // Khởi tạo audio player
+    initAudioPlayer();
+});
+
+// Thêm hàm kiểm tra file khi trang tải xong
+function validateAudioFile() {
+    const fileUrl = window.songData.fileUrl;
+    console.log("Kiểm tra file audio:", fileUrl);
+    
+    fetch(fileUrl, { method: 'HEAD' })
+        .then(response => {
+            if (!response.ok) {
+                console.error(`File không tồn tại: ${response.status} - ${fileUrl}`);
+                // Hiển thị cảnh báo nhỏ
+                const warningEl = document.createElement('div');
+                warningEl.className = 'alert alert-warning';
+                warningEl.style.position = 'fixed';
+                warningEl.style.top = '10px';
+                warningEl.style.right = '10px';
+                warningEl.style.zIndex = '9999';
+                warningEl.innerHTML = 'Cảnh báo: File âm thanh không tồn tại hoặc không thể truy cập.';
+                document.body.appendChild(warningEl);
+                setTimeout(() => warningEl.remove(), 5000);
+            } else {
+                console.log("File audio hợp lệ");
+            }
+        })
+        .catch(error => {
+            console.error("Lỗi khi kiểm tra file:", error);
+        });
+}
+
+// Hàm trợ giúp lấy thông báo lỗi chi tiết
+function getAudioErrorMessage(error) {
+    if (!error) return "Lỗi không xác định";
+    
+    switch (error.code) {
+        case MediaError.MEDIA_ERR_ABORTED:
+            return "Phát nhạc bị hủy.";
+        case MediaError.MEDIA_ERR_NETWORK:
+            return "Lỗi mạng khi tải file.";
+        case MediaError.MEDIA_ERR_DECODE:
+            return "Không thể giải mã file âm thanh.";
+        case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            return "Định dạng file không được hỗ trợ.";
+        default:
+            return "Lỗi không xác định: " + error.code;
+    }
+}
+
+// Thêm hàm kiểm tra trực tiếp URL file audio
+function debugAudioFile() {
+    const fileUrl = window.songData.fileUrl;
+    const encodedUrl = encodeURI(fileUrl);
+    
+    console.log("Đường dẫn gốc:", fileUrl);
+    console.log("Đường dẫn mã hóa:", encodedUrl);
+    
+    // Tạo phần tử hiển thị thông tin debug
+    const debugInfo = document.createElement('div');
+    debugInfo.style.position = 'fixed';
+    debugInfo.style.top = '10px';
+    debugInfo.style.left = '10px';
+    debugInfo.style.backgroundColor = 'rgba(0,0,0,0.8)';
+    debugInfo.style.color = 'white';
+    debugInfo.style.padding = '10px';
+    debugInfo.style.borderRadius = '5px';
+    debugInfo.style.zIndex = '9999';
+    debugInfo.style.maxWidth = '80%';
+    debugInfo.style.wordBreak = 'break-all';
+    
+    debugInfo.innerHTML = `
+        <h4>Thông tin debug:</h4>
+        <p>File URL: ${fileUrl}</p>
+        <p>Encoded URL: ${encodedUrl}</p>
+        <button id="testDirectUrl">Mở trực tiếp file</button>
+        <button id="closeDebug">Đóng</button>
+    `;
+    
+    document.body.appendChild(debugInfo);
+    
+    // Thêm sự kiện mở file trực tiếp
+    document.getElementById('testDirectUrl').addEventListener('click', function() {
+        window.open(encodedUrl, '_blank');
+    });
+    
+    // Thêm sự kiện đóng debug
+    document.getElementById('closeDebug').addEventListener('click', function() {
+        debugInfo.remove();
+    });
+}
+
+// Khởi tạo audio player cải tiến
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+    
+    // Thêm nút debug để kiểm tra file
+    const playerControls = document.querySelector('.player-controls');
+    if (playerControls) {
+        const debugButton = document.createElement('button');
+        debugButton.className = 'control-button';
+        debugButton.innerHTML = '<i class="fas fa-bug"></i>';
+        debugButton.title = 'Kiểm tra file audio';
+        debugButton.addEventListener('click', debugAudioFile);
+        playerControls.appendChild(debugButton);
+    }
+    
+    // Xử lý lỗi audio chi tiết hơn
+    const audioPlayer = document.getElementById('audioPlayer');
+    audioPlayer.addEventListener('error', function(e) {
+        const errorCode = e.target.error ? e.target.error.code : 'không xác định';
+        console.error("Lỗi audio:", errorCode);
+        
+        let errorMessage = "Lỗi không xác định";
+        if (e.target.error) {
+            switch (e.target.error.code) {
+                case MediaError.MEDIA_ERR_ABORTED: 
+                    errorMessage = "Phát nhạc bị hủy";
+                    break;
+                case MediaError.MEDIA_ERR_NETWORK:
+                    errorMessage = "Lỗi mạng khi tải file";
+                    break;
+                case MediaError.MEDIA_ERR_DECODE:
+                    errorMessage = "Không thể giải mã file âm thanh";
+                    break;
+                case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                    errorMessage = "Định dạng file không được hỗ trợ";
+                    break;
+            }
+        }
+        
+        alert("Lỗi phát nhạc: " + errorMessage);
+    });
+});
+
+// Thêm kiểm tra định dạng khi trang tải xong
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+    
+    // Phát hiện các định dạng được hỗ trợ
+    const audioPlayer = document.getElementById('audioPlayer');
+    const supportedFormats = {
+        mp3: audioPlayer.canPlayType('audio/mpeg'),
+        m4a: audioPlayer.canPlayType('audio/mp4'),
+        wav: audioPlayer.canPlayType('audio/wav'),
+        ogg: audioPlayer.canPlayType('audio/ogg'),
+        aac: audioPlayer.canPlayType('audio/aac'),
+        flac: audioPlayer.canPlayType('audio/flac')
+    };
+    
+    console.log("Các định dạng hỗ trợ:", supportedFormats);
+    
+    // Kiểm tra nhanh định dạng file hiện tại
+    const fileUrl = window.songData.fileUrl;
+    const fileExtension = fileUrl.split('.').pop().toLowerCase();
+    
+    if (fileExtension && supportedFormats[fileExtension] === '') {
+        console.warn("Trình duyệt không hỗ trợ định dạng file:", fileExtension);
+        
+        // Hiển thị cảnh báo cho người dùng
+        const warningEl = document.createElement('div');
+        warningEl.className = 'alert alert-warning';
+        warningEl.style.position = 'fixed';
+        warningEl.style.top = '10px';
+        warningEl.style.right = '10px';
+        warningEl.style.zIndex = '9999';
+        warningEl.innerHTML = `Cảnh báo: Trình duyệt của bạn không hỗ trợ định dạng file ${fileExtension.toUpperCase()}. Vui lòng sử dụng trình duyệt khác hoặc chuyển đổi file.`;
+        document.body.appendChild(warningEl);
+        setTimeout(() => warningEl.remove(), 8000);
+    }
+});
