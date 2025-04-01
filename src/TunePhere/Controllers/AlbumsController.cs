@@ -158,7 +158,7 @@ namespace TunePhere.Controllers
                     var songs = new List<Song>();
                     var totalDuration = TimeSpan.Zero;
 
-                    // Kiểm tra null SongFiles
+                    // Kiểm tra danh sách SongFiles
                     if (SongFiles != null && SongTitles != null)
                     {
                         for (int i = 0; i < SongFiles.Count; i++)
@@ -168,13 +168,25 @@ namespace TunePhere.Controllers
 
                             if (songFile != null && songFile.Length > 0)
                             {
+                                // Kiểm tra định dạng file
+                                var allowedAudioExtensions = new[] { ".mp3", ".m4a", ".wav", ".ogg", ".aac", ".flac" };
+                                var audioExtension = Path.GetExtension(songFile.FileName).ToLowerInvariant();
+                                
+                                if (!allowedAudioExtensions.Contains(audioExtension))
+                                {
+                                    ModelState.AddModelError("", $"File {songFile.FileName} có định dạng không được hỗ trợ. Hỗ trợ: mp3, m4a, wav, ogg, aac, flac");
+                                    continue; // Bỏ qua file không hợp lệ
+                                }
+
                                 // Upload file bài hát
                                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "songs");
                                 if (!Directory.Exists(uploadsFolder))
                                     Directory.CreateDirectory(uploadsFolder);
 
-                                var uniqueFileName = $"{Guid.NewGuid()}_{songFile.FileName}";
-                                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                                // Tạo tên file không có khoảng trắng hoặc ký tự đặc biệt
+                                var audioFileName = Guid.NewGuid().ToString();
+                                var fullAudioFileName = audioFileName + audioExtension;
+                                var filePath = Path.Combine(uploadsFolder, fullAudioFileName);
 
                                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                                 {
@@ -201,15 +213,16 @@ namespace TunePhere.Controllers
                                 var song = new Song
                                 {
                                     Title = songTitle,
-                                    FileUrl = $"/uploads/songs/{uniqueFileName}",
-                                    ImageUrl = album.ImageUrl ?? "/images/default-song.jpg", // Sử dụng ảnh album hoặc ảnh mặc định
+                                    FileUrl = $"/uploads/songs/{fullAudioFileName}",
+                                    ImageUrl = album.ImageUrl ?? "/images/default-song.jpg", // Sử dụng ảnh album
                                     UploadDate = DateTime.Now,
                                     ArtistId = artist.ArtistId,
                                     AlbumId = album.AlbumId,
                                     Genre = "Unknown", // Giá trị mặc định cho Genre
                                     PlayCount = 0,
                                     LikeCount = 0,
-                                    Duration = duration
+                                    Duration = duration,
+                                    FileType = audioExtension // Lưu định dạng file
                                 };
 
                                 songs.Add(song);
@@ -563,60 +576,85 @@ namespace TunePhere.Controllers
                 return Unauthorized();
             }
 
-            // Xử lý upload file nhạc
-            if (AudioFile != null && AudioFile.Length > 0)
+            // Kiểm tra file audio có tồn tại không
+            if (AudioFile == null || AudioFile.Length == 0)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "songs");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var uniqueFileName = $"{Guid.NewGuid()}_{AudioFile.FileName}";
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await AudioFile.CopyToAsync(fileStream);
-                }
-
-                // Đọc thời lượng từ file audio
-                TimeSpan duration = TimeSpan.Zero;
-                try
-                {
-                    using (var audioFile = TagLib.File.Create(filePath))
-                    {
-                        duration = audioFile.Properties.Duration;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Log lỗi nếu không đọc được thời lượng
-                    Console.WriteLine($"Không thể đọc thời lượng file: {ex.Message}");
-                }
-
-                // Tạo đối tượng Song
-                var song = new Song
-                {
-                    Title = Title,
-                    Genre = Genre,
-                    FileUrl = $"/uploads/songs/{uniqueFileName}",
-                    ImageUrl = album.ImageUrl ?? "/images/default-song.jpg", // Sử dụng ảnh album
-                    UploadDate = DateTime.Now,
-                    ArtistId = album.Artists.ArtistId,
-                    AlbumId = albumId,
-                    PlayCount = 0,
-                    LikeCount = 0,
-                    Duration = duration
-                };
-
-                _context.Songs.Add(song);
-
-                // Cập nhật thông tin album
-                album.numberSongs += 1;
-                album.Time = album.Time.Add(duration);
-                _context.Update(album);
-
-                await _context.SaveChangesAsync();
+                TempData["Error"] = "Vui lòng chọn file nhạc hợp lệ";
+                return RedirectToAction(nameof(Details), new { id = albumId });
             }
+
+            // Mở rộng danh sách định dạng được hỗ trợ
+            var allowedAudioExtensions = new[] { ".mp3", ".m4a", ".wav", ".ogg", ".aac", ".flac" };
+            var audioExtension = Path.GetExtension(AudioFile.FileName).ToLowerInvariant();
+            
+            if (!allowedAudioExtensions.Contains(audioExtension))
+            {
+                TempData["Error"] = "Định dạng file không được hỗ trợ. Hỗ trợ: mp3, m4a, wav, ogg, aac, flac";
+                return RedirectToAction(nameof(Details), new { id = albumId });
+            }
+
+            // Xử lý upload file nhạc
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "songs");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            // Tạo tên file không có khoảng trắng hoặc ký tự đặc biệt
+            var audioFileName = Guid.NewGuid().ToString();
+            var fullAudioFileName = audioFileName + audioExtension;
+            var filePath = Path.Combine(uploadsFolder, fullAudioFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await AudioFile.CopyToAsync(fileStream);
+            }
+
+            // Đọc thời lượng từ file audio
+            TimeSpan duration = TimeSpan.Zero;
+            try
+            {
+                using (var audioFile = TagLib.File.Create(filePath))
+                {
+                    duration = audioFile.Properties.Duration;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi nếu không đọc được thời lượng
+                Console.WriteLine($"Không thể đọc thời lượng file: {ex.Message}");
+                // Nếu không đọc được thời lượng, xóa file đã upload và báo lỗi
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+                TempData["Error"] = "File âm thanh không hợp lệ hoặc bị hỏng";
+                return RedirectToAction(nameof(Details), new { id = albumId });
+            }
+
+            // Tạo đối tượng Song
+            var song = new Song
+            {
+                Title = Title,
+                Genre = Genre,
+                FileUrl = $"/uploads/songs/{fullAudioFileName}",
+                // Sử dụng ảnh album làm ảnh bìa cho bài hát
+                ImageUrl = album.ImageUrl ?? "/images/default-song.jpg",
+                UploadDate = DateTime.Now,
+                ArtistId = album.Artists.ArtistId,
+                AlbumId = albumId,
+                PlayCount = 0,
+                LikeCount = 0,
+                Duration = duration,
+                FileType = audioExtension // Lưu định dạng file
+            };
+
+            _context.Songs.Add(song);
+
+            // Cập nhật thông tin album
+            album.numberSongs += 1;
+            album.Time = album.Time.Add(duration);
+            _context.Update(album);
+
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Details), new { id = albumId });
         }

@@ -224,8 +224,11 @@
         </div>
     </div>
 
-    <!-- Hidden audio element -->
-    <audio id="audioPlayer" style="display: none;"></audio>
+    <!-- Thay thế thẻ audio đơn giản bằng thẻ có nhiều source -->
+    <audio id="audioPlayer" style="display: none;" preload="auto">
+        <source src="@Model.FileUrl" type="@GetMimeType(Model.FileUrl)" />
+        <p>Trình duyệt của bạn không hỗ trợ phát âm thanh HTML5.</p>
+    </audio>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -359,5 +362,32 @@
             .Replace("\r\n", "<br>")
             .Replace("\n", "<br>")
             .Replace("\r", "<br>");
+    }
+
+    public static string GetMimeType(string url)
+    {
+        if (string.IsNullOrEmpty(url))
+            return "audio/mpeg";
+
+        try
+        {
+            // Xử lý url để lấy phần mở rộng
+            string ext = System.IO.Path.GetExtension(url)?.ToLowerInvariant() ?? "";
+            
+            switch (ext) {
+                case ".mp3": return "audio/mpeg";
+                case ".m4a": return "audio/mp4";
+                case ".wav": return "audio/wav";
+                case ".ogg": return "audio/ogg";
+                case ".aac": return "audio/aac";
+                case ".flac": return "audio/flac";
+                default: return "audio/mpeg";
+            }
+        }
+        catch
+        {
+            // Nếu có lỗi khi xử lý URL, trả về định dạng mặc định
+            return "audio/mpeg";
+        }
     }
 }
