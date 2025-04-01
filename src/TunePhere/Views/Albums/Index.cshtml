@@ -7,6 +7,56 @@
 <link rel="stylesheet" href="~/css/albums.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+<!-- CSS cho context menu -->
+<style>
+    .context-menu {
+        display: none;
+        position: absolute;
+        background-color: #282828;
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0 16px 24px rgba(0,0,0,0.3), 0 6px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        min-width: 180px;
+        padding: 4px 0;
+    }
+
+    .context-menu ul {
+        list-style: none;
+        margin: 0;
+        padding: 4px 0;
+    }
+
+    .context-menu li {
+        padding: 10px 15px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.2s;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+    }
+
+    .context-menu li:hover {
+        background-color: #3e3e3e;
+    }
+
+    .album-item {
+        position: relative;
+    }
+
+    .context-menu li i {
+        margin-right: 10px;
+        width: 16px;
+        text-align: center;
+        color: #b3b3b3;
+    }
+
+    .context-menu li:hover i {
+        color: #ffffff;
+    }
+</style>
+
 <div class="spotify-albums-container">
     <div class="spotify-header">
         <h1 class="page-title">Albums</h1>
@@ -25,7 +75,7 @@
             <div class="spotify-grid">
                 @foreach (var album in ViewBag.MyAlbums)
                 {
-                    <div class="spotify-card">
+                    <div class="spotify-card album-item" data-album-id="@album.AlbumId" oncontextmenu="showContextMenu(event, @album.AlbumId); return false;">
                         <div class="spotify-card-img-container">
                             <img src="@(string.IsNullOrEmpty(album.ImageUrl) ? "/images/default-album.jpg" : album.ImageUrl)" alt="@album.AlbumName" />
                             <div class="spotify-card-play">
@@ -130,3 +180,70 @@
         </div>
     </section>
 </div>
+
+<!-- Context Menu -->
+<div id="albumContextMenu" class="context-menu">
+    <ul>
+        <li onclick="handleMenuClick('details')"><i class="fas fa-info-circle"></i>Chi tiết album</li>
+        <li onclick="handleMenuClick('edit')"><i class="fas fa-edit"></i>Chỉnh sửa album</li>
+        <li onclick="handleMenuClick('delete')"><i class="fas fa-trash"></i>Xóa album</li>
+    </ul>
+</div>
+
+@section Scripts {
+    <script>
+        let selectedAlbumId = null;
+
+        // Hàm hiển thị context menu khi chuột phải
+        function showContextMenu(event, albumId) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            selectedAlbumId = albumId;
+            console.log("Album được chọn:", selectedAlbumId);
+            
+            const contextMenu = document.getElementById('albumContextMenu');
+            
+            // Hiển thị context menu tại vị trí chuột
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = event.pageX + 'px';
+            contextMenu.style.top = event.pageY + 'px';
+            
+            return false;
+        }
+
+        // Hàm xử lý khi chọn một mục trong menu
+        function handleMenuClick(action) {
+            if (!selectedAlbumId) {
+                console.error("Không có album nào được chọn");
+                return;
+            }
+            
+            console.log("Thực hiện hành động:", action, "cho album:", selectedAlbumId);
+
+            switch(action) {
+                case 'details':
+                    window.location.href = `/Albums/Details/${selectedAlbumId}`;
+                    break;
+                case 'edit':
+                    window.location.href = `/Albums/Edit/${selectedAlbumId}`;
+                    break;
+                case 'delete':
+                    window.location.href = `/Albums/Delete/${selectedAlbumId}`;
+                    break;
+            }
+        }
+
+        // Ẩn context menu khi click ra ngoài
+        document.addEventListener('click', function() {
+            document.getElementById('albumContextMenu').style.display = 'none';
+        });
+        
+        // Ẩn context menu khi nhấn Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('albumContextMenu').style.display = 'none';
+            }
+        });
+    </script>
+}

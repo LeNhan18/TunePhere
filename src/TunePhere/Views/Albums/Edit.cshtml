@@ -1,61 +1,126 @@
 ﻿@model TunePhere.Models.Album
 
 @{
-    ViewData["Title"] = "Edit";
-
+    ViewData["Title"] = "Chỉnh sửa Album";
     Layout = "_Layout";
 }
 
-<h1>Edit</h1>
+<link rel="stylesheet" href="~/css/album-create.css?v=@DateTime.Now.Ticks" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-<h4>Album</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<style>
+    /* Đảm bảo input ẩn không gây trở ngại cho việc click */
+    .hidden-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+</style>
+
+<div class="spotify-create-container">
+    <div class="spotify-create-header">
+        <div class="header-left">
+            <a href="@Url.Action("Index", "Albums")" class="spotify-back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1>Chỉnh sửa Album</h1>
+        </div>
+    </div>
+
+    <div class="spotify-create-content">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data" class="spotify-form">
+            <div asp-validation-summary="ModelOnly" class="spotify-error"></div>
             <input type="hidden" asp-for="AlbumId" />
-            <div class="form-group">
-                <label asp-for="AlbumName" class="control-label"></label>
-                <input asp-for="AlbumName" class="form-control" />
-                <span asp-validation-for="AlbumName" class="text-danger"></span>
+
+            <div class="spotify-form-layout">
+                <div class="spotify-image-upload">
+                    <div class="spotify-album-cover">
+                        <img id="coverPreview" src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/album-placeholder.jpg" : Model.ImageUrl)" alt="Album Cover" />
+                        <div class="spotify-image-overlay">
+                            <i class="fas fa-camera"></i>
+                            <span>Chọn ảnh bìa</span>
+                        </div>
+                    </div>
+                    <input type="file" id="AlbumImage" name="AlbumImage" class="hidden-input" accept="image/*" />
+                    <div class="spotify-upload-hint">Click vào ảnh để thay đổi</div>
+                </div>
+
+                <div class="spotify-form-fields">
+                    <div class="spotify-form-group">
+                        <label asp-for="AlbumName" class="spotify-label">Tên Album</label>
+                        <input asp-for="AlbumName" class="spotify-input" placeholder="Tên album của bạn" required />
+                        <span asp-validation-for="AlbumName" class="spotify-error"></span>
+                    </div>
+
+                    <div class="spotify-form-group">
+                        <label asp-for="AlbumDescription" class="spotify-label">Mô tả</label>
+                        <textarea asp-for="AlbumDescription" class="spotify-textarea" rows="3" 
+                                placeholder="Mô tả ngắn về album của bạn..."></textarea>
+                        <span asp-validation-for="AlbumDescription" class="spotify-error"></span>
+                    </div>
+
+                    <div class="spotify-form-group">
+                        <label asp-for="ReleaseDate" class="spotify-label">Ngày phát hành</label>
+                        <input asp-for="ReleaseDate" type="date" class="spotify-input" required />
+                        <span asp-validation-for="ReleaseDate" class="spotify-error"></span>
+                    </div>
+                    
+                    <!-- Ẩn các trường không cần chỉnh sửa -->
+                    <input type="hidden" asp-for="numberSongs" />
+                    <input type="hidden" asp-for="Time" />
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="AlbumDescription" class="control-label"></label>
-                <input asp-for="AlbumDescription" class="form-control" />
-                <span asp-validation-for="AlbumDescription" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ImageUrl" class="control-label"></label>
-                <input asp-for="ImageUrl" class="form-control" />
-                <span asp-validation-for="ImageUrl" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ReleaseDate" class="control-label"></label>
-                <input asp-for="ReleaseDate" class="form-control" />
-                <span asp-validation-for="ReleaseDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="numberSongs" class="control-label"></label>
-                <input asp-for="numberSongs" class="form-control" />
-                <span asp-validation-for="numberSongs" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Time" class="control-label"></label>
-                <input asp-for="Time" class="form-control" />
-                <span asp-validation-for="Time" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+
+            <div class="spotify-form-actions">
+                <button type="submit" class="spotify-primary-button">
+                    <span>Lưu thay đổi</span>
+                </button>
+                <a href="@Url.Action("Index", "Albums")" class="spotify-secondary-button">Hủy</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
+    
+    <div class="spotify-info-section">
+        <div class="spotify-section-header">
+            <h2>Thông tin Album</h2>
+        </div>
+        <div class="spotify-info-item">
+            <strong>Số bài hát:</strong> @Model.numberSongs
+        </div>
+        <div class="spotify-info-item">
+            <strong>Thời lượng:</strong> @Model.Time.ToString(@"mm\:ss")
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Preview ảnh bìa album
+        document.getElementById('AlbumImage').addEventListener('change', function (e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('coverPreview').src = e.target.result;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // Xử lý upload ảnh album
+        window.addEventListener('DOMContentLoaded', function() {
+            const albumCover = document.querySelector('.spotify-album-cover');
+            const imageInput = document.getElementById('AlbumImage');
+            
+            albumCover.addEventListener('click', function() {
+                imageInput.click();
+            });
+        });
+    </script>
 }
