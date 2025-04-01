@@ -66,5 +66,24 @@ namespace TunePhere.Repository.EFRepository
                 await _context.SaveChangesAsync();
             }
         }
+
+        public Task<ListeningRoomParticipant?> GetParticipantAsync(int roomId, string userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteAsync(ListeningRoomParticipant participant)
+        {
+
+            var participants =  _context.ListeningRoomParticipants
+               .FirstOrDefaultAsync(p => p.RoomId == participant.RoomId && p.UserId == participant.UserId);
+
+            if (participant != null)
+            {
+                _context.ListeningRoomParticipants.Remove(participant);
+              
+            }
+            return _context.SaveChangesAsync();
+        }
     }
 }

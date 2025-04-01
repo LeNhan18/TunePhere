@@ -39,7 +39,7 @@
                         <div class="song-info" ondblclick="location.href='/Songs/Details/@song.SongId'">
                             <h3>@song.Title</h3>
                             <div class="song-meta">
-                                <a href="@Url.Action("Index", "Search", new { searchTerm = song.Artists?.ArtistName })" class="artist-name">
+                                <a href="/Artists/Profile/@song.Artists?.ArtistId" class="artist-name">
                                     @(song.Artists?.ArtistName ?? "Unknown")
                                 </a>
                                 <span class="separator">•</span>
@@ -58,14 +58,6 @@
                                 @song.LikeCount
                             </span>
                         </div>
-                        <div class="song-actions">
-                            <button class="btn-add-playlist" title="Thêm vào playlist" onclick="openPlaylistModal('@song.SongId')">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button class="btn-like @(song.IsLiked ? "active" : "")" title="Yêu thích" onclick="toggleLike('@song.SongId')">
-                                <i class="@(song.IsLiked ? "fas" : "far") fa-heart"></i>
-                            </button>
-                        </div>
                     </div>
                 }
             </div>
@@ -81,92 +73,328 @@
     </div>
 </div>
 
-<!-- Modal thêm vào playlist -->
-<div class="modal fade" id="playlistModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Thêm vào playlist</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="playlist-list">
-                    <!-- Danh sách playlist sẽ được thêm bằng JavaScript -->
-                </div>
-            </div>
+@if (Model.Songs.Any())
+{
+    <div class="related-songs-section">
+        <div class="container">
+            @{
+                // Nhóm bài hát theo nghệ sĩ
+                var groupedByArtist = Model.Songs
+                    .Where(s => s.Artists != null)
+                    .GroupBy(s => s.Artists.ArtistId)
+                    .Where(g => g.Count() > 0);
+                
+                foreach (var artistGroup in groupedByArtist.Take(2))
+                {
+                    var artist = artistGroup.First().Artists;
+                    var artistSongs = artist.Songs
+                        .Where(s => !artistGroup.Select(sg => sg.SongId).Contains(s.SongId))
+                        .OrderByDescending(s => s.PlayCount)
+                        .Take(6);
+                    
+                    if (artistSongs.Any())
+                    {
+                        <div class="artist-songs-container">
+                            <div class="artist-header">
+                                <div class="artist-info">
+                                    <img src="@artist.ImageUrl" alt="@artist.ArtistName" class="artist-image">
+                                    <div class="artist-details">
+                                        <h3>Khám phá thêm từ</h3>
+                                        <a href="/Artists/Profile/@artist.ArtistId" class="artist-name-large">@artist.ArtistName</a>
+                                    </div>
+                                </div>
+                                <a href="/Artists/Profile/@artist.ArtistId" class="view-all-btn">Xem tất cả <i class="fas fa-chevron-right"></i></a>
+                            </div>
+                            
+                            <div class="related-songs-grid">
+                                @foreach (var song in artistSongs)
+                                {
+                                    <div class="related-song-card" data-song-id="@song.SongId" data-song-url="@song.FileUrl">
+                                        <div class="related-song-image">
+                                            <img src="@song.ImageUrl" alt="@song.Title">
+                                            <div class="play-overlay">
+                                                <i class="fas fa-play"></i>
+                                            </div>
+                                        </div>
+                                        <div class="related-song-info">
+                                            <h4 class="related-song-title">@song.Title</h4>
+                                            <p class="related-song-meta">
+                                                <span class="related-song-duration">@song.Duration.ToString(@"mm\:ss")</span>
+                                                <span class="separator">•</span>
+                                                <span class="related-song-plays">@song.PlayCount lượt nghe</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            }
         </div>
     </div>
-</div>
+}
 
 <style>
     .search-results {
         padding: 0;
         max-width: 100%;
         margin: 0;
-        background: #121212;
+        background: linear-gradient(to bottom, #121212, #0a0a0a);
         min-height: 100vh;
         color: white;
+        font-family: 'Montserrat', sans-serif;
     }
 
     .search-header {
-        background: linear-gradient(to bottom, #1DB954, #121212);
-        padding: 4rem 2rem 2rem;
-        margin-bottom: 2rem;
+        background: linear-gradient(135deg, #2b2b2b, #484848, #656565);
+        padding: 5rem 2rem 3.5rem;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+        transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        border-radius: 0 0 30px 30px;
+    }
+
+    .search-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,10 C70,30 50,15 0,30 Z" fill="rgba(255,255,255,0.07)"/></svg>');
+        background-size: cover;
+        opacity: 0.6;
+        z-index: 1;
+    }
+
+    .search-header::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 70% 20%, rgba(255,255,255,0.12), transparent 60%);
+        z-index: 0;
     }
 
     .search-info {
         max-width: 1200px;
         margin: 0 auto;
+        position: relative;
+        z-index: 2;
+        transform: translateY(-5px);
     }
 
-        .search-info h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 1rem;
-        }
+    .search-info h1 {
+        font-size: 4rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.05em;
+        text-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+        position: relative;
+        display: inline-block;
+        color: white;
+    }
+
+    .search-info h1::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 0;
+        width: 150px;
+        height: 5px;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.3));
+        border-radius: 5px;
+        transform-origin: left;
+        animation: lineExpand 3s infinite alternate ease-in-out;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+
+    @@keyframes lineExpand {
+        0% { transform: scaleX(0.5); opacity: 0.7; }
+        100% { transform: scaleX(1); opacity: 1; }
+    }
 
     .search-term {
-        font-size: 1.2rem;
-        color: rgba(255,255,255,0.8);
-        margin-bottom: 0.5rem;
+        font-size: 2.2rem;
+        color: rgba(255, 255, 255, 0.95);
+        margin-bottom: 1rem;
+        margin-top: 2.5rem;
+        font-weight: 700;
+        text-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        display: inline-block;
+        background: linear-gradient(to right, #ffffff, rgba(255,255,255,0.85));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.02em;
+        animation: textShine 6s infinite linear;
+        background-size: 200% auto;
+    }
+
+    @@keyframes textShine {
+        0% { background-position: 0% center; }
+        100% { background-position: 200% center; }
+    }
+
+    .search-term::before {
+        content: '"';
+        margin-right: 5px;
+        opacity: 0.8;
+        font-size: 2.4rem;
+        font-family: Georgia, serif;
+        vertical-align: -5px;
+        -webkit-text-fill-color: rgba(255,255,255,0.8);
+    }
+
+    .search-term::after {
+        content: '"';
+        margin-left: 5px;
+        opacity: 0.8;
+        font-size: 2.4rem;
+        font-family: Georgia, serif;
+        vertical-align: -5px;
+        -webkit-text-fill-color: rgba(255,255,255,0.8);
     }
 
     .result-count {
-        font-size: 1rem;
-        color: rgba(255,255,255,0.6);
+        font-size: 1.3rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+        position: relative;
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        background: rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 30px;
+        margin-top: 1rem;
+        transform: translateX(5px);
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .result-count:hover {
+        background: rgba(0, 0, 0, 0.2);
+        transform: translateX(5px) translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    }
+
+    .search-header:hover {
+        background: linear-gradient(135deg, #313131, #505050, #6d6d6d);
+    }
+
+    .search-header:hover .search-info h1::after {
+        width: 180px;
+        animation: none;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.4));
+    }
+
+    .search-info h1 {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .search-info h1::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transform: skewX(-25deg);
+        transition: all 0s ease;
+    }
+
+    .search-info h1:hover::before {
+        animation: shine 1.5s;
+    }
+
+    @@keyframes shine {
+        100% {
+            left: 150%;
+        }
     }
 
     .songs-section {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 0 2rem;
+        padding: 0 2rem 3rem;
     }
 
     .songs-list {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
 
     .song-item {
         display: flex;
         align-items: center;
-        padding: 0.75rem;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-        background: rgba(255,255,255,0.03);
+        padding: 1rem 1.2rem;
+        border-radius: 10px;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), background-color 0.6s ease;
+        background: rgba(255, 255, 255, 0.04);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
     }
 
-        .song-item:hover {
-            background: rgba(255,255,255,0.1);
-            transform: translateY(-2px);
-        }
+    .song-item::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
+        opacity: 0;
+        z-index: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .song-item:hover::after {
+        opacity: 1;
+    }
+
+    .song-number, .song-image, .song-info, .song-stats, .song-link {
+        position: relative;
+        z-index: 1;
+    }
+
+    .song-image {
+        position: relative;
+        z-index: 2;
+    }
+
+    .song-item:hover .song-image {
+        box-shadow: 0 0 20px var(--song-dominant-color, rgba(29, 185, 84, 0.5));
+    }
 
     .song-number {
-        width: 40px;
+        width: 45px;
+        height: 45px;
         text-align: center;
-        color: rgba(255,255,255,0.7);
-        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.2rem;
+        font-weight: 500;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease, background-color 0.3s ease;
+    }
+
+    .song-item:hover .song-number {
+        background: var(--song-dominant-color, rgba(29, 185, 84, 0.15));
+        color: white;
     }
 
     .song-item:hover .number {
@@ -175,12 +403,23 @@
 
     .song-item:hover .play-icon {
         display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.8); }
+        to { opacity: 1; transform: scale(1); }
     }
 
     .play-icon, .pause-icon {
         display: none;
         cursor: pointer;
-        color: white;
+        color: #1DB954;
+        font-size: 1.2rem;
+    }
+
+    .song-item.playing .song-number {
+        background: rgba(29, 185, 84, 0.3);
     }
 
     .song-item.playing .number,
@@ -194,265 +433,271 @@
     }
 
     .song-image {
-        width: 50px;
-        height: 50px;
-        margin: 0 1rem;
-        border-radius: 4px;
+        width: 60px;
+        height: 60px;
+        margin: 0 1.2rem;
+        border-radius: 8px;
         overflow: hidden;
-        box-shadow: 0 4px 60px rgba(0,0,0,.5);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, .4);
+        transition: all 0.3s ease;
     }
 
-        .song-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    .song-item:hover .song-image {
+        transform: scale(1.05);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, .5);
+    }
+
+    .song-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .song-item:hover .song-image img {
+        transform: scale(1.08);
+    }
 
     .default-song-image {
         width: 100%;
         height: 100%;
-        background: rgba(255,255,255,0.1);
+        background: linear-gradient(135deg, rgba(29, 185, 84, 0.2), rgba(29, 185, 84, 0.05));
         display: flex;
         align-items: center;
         justify-content: center;
-        color: rgba(255,255,255,0.3);
-        font-size: 1.5rem;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 1.8rem;
     }
 
     .song-info {
         flex: 1;
         min-width: 0;
         margin-right: 2rem;
+        transition: transform 0.3s ease;
+        cursor: pointer;
     }
 
-        .song-info h3 {
-            color: white;
-            margin: 0;
-            font-size: 1rem;
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+    .song-item:hover .song-info {
+        transform: translateX(5px);
+    }
+
+    .song-info h3 {
+        color: white;
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        letter-spacing: 0.2px;
+        transition: color 0.3s ease;
+    }
+
+    .song-item:hover .song-info h3 {
+        color: var(--song-text-color, white);
+    }
 
     .song-meta {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        color: rgba(255,255,255,0.7);
-        font-size: 0.9rem;
-        margin-top: 0.25rem;
+        gap: 0.7rem;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.95rem;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
     }
 
     .artist-name {
-        color: rgba(255,255,255,0.7);
+        color: rgba(255, 255, 255, 0.8);
         text-decoration: none;
-        transition: color 0.3s ease;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        position: relative;
+        padding-bottom: 2px;
     }
 
-        .artist-name:hover {
-            color: #1DB954;
-        }
+    .artist-name::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 1px;
+        background: #1DB954;
+        transform: scaleX(0);
+        transform-origin: center;
+        transition: transform 0.3s ease;
+    }
+
+    .artist-name:hover {
+        color: #1DB954;
+    }
+
+    .artist-name:hover::after {
+        transform: scaleX(1);
+    }
 
     .separator {
-        color: rgba(255,255,255,0.3);
+        color: rgba(255, 255, 255, 0.3);
     }
 
     .song-stats {
         display: flex;
-        gap: 1.5rem;
-        margin-right: 2rem;
-        color: rgba(255,255,255,0.7);
-        font-size: 0.9rem;
-    }
-
-        .song-stats span {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .song-stats i {
-            font-size: 0.8rem;
-        }
-
-    .song-actions {
-        display: flex;
-        gap: 1rem;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .song-item:hover .song-actions {
-        opacity: 1;
-    }
-
-    .song-actions button {
-        background: none;
-        border: none;
-        color: rgba(255,255,255,0.7);
-        font-size: 1.1rem;
-        padding: 0.5rem;
-        cursor: pointer;
+        gap: 1.8rem;
+        margin-right: 1rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.95rem;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 0.7rem 1.2rem;
+        border-radius: 25px;
         transition: all 0.3s ease;
     }
 
-        .song-actions button:hover {
-            color: white;
-            transform: scale(1.1);
-        }
+    .song-item:hover .song-stats {
+        background: rgba(255, 255, 255, 0.06);
+    }
 
-    .song-actions .btn-like.active {
+    .song-stats span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .song-stats i {
+        font-size: 0.85rem;
         color: #1DB954;
     }
 
     .no-results {
         text-align: center;
-        padding: 4rem 0;
-        color: rgba(255,255,255,0.7);
+        padding: 5rem 2rem;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 12px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 
-        .no-results i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            color: rgba(255,255,255,0.3);
-        }
+    .no-results i {
+        font-size: 4rem;
+        color: rgba(255, 255, 255, 0.2);
+        margin-bottom: 1.5rem;
+    }
 
-        .no-results p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-        }
+    .no-results p {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 2rem;
+        max-width: 600px;
+    }
 
     .btn-back {
         display: inline-block;
-        padding: 0.75rem 2rem;
+        padding: 0.8rem 1.5rem;
         background: #1DB954;
         color: white;
         text-decoration: none;
-        border-radius: 2rem;
+        border-radius: 25px;
         font-weight: 600;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
     }
 
-        .btn-back:hover {
-            background: #1ed760;
-            transform: scale(1.05);
-        }
-
-    /* Modal styles */
-    .modal-content {
-        background: #282828;
-        color: white;
-        border-radius: 8px;
+    .btn-back:hover {
+        background: #18a449;
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        transform: translateY(-3px);
     }
-
-    .modal-header {
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        padding: 1.5rem;
-    }
-
-    .modal-title {
-        color: white;
-        font-weight: 600;
-    }
-
-    .btn-close {
-        color: white;
-        opacity: 0.7;
-        transition: opacity 0.3s ease;
-    }
-
-        .btn-close:hover {
-            opacity: 1;
-        }
-
-    .modal-body {
-        padding: 1.5rem;
-    }
-
-    .playlist-list {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-
-    .playlist-item {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-        .playlist-item:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        .playlist-item img {
-            width: 40px;
-            height: 40px;
-            border-radius: 4px;
-            margin-right: 1rem;
-        }
-
-        .playlist-item span {
-            color: white;
-            font-size: 0.9rem;
-        }
 
     .search-suggestions {
         max-width: 1200px;
-        margin: 0 auto 2rem;
+        margin: 0 auto 3rem;
         padding: 0 2rem;
     }
 
     .suggestions-container {
-        background: rgba(255,255,255,0.03);
-        border-radius: 8px;
-        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-        .suggestions-container h2 {
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-        }
+    .suggestions-container h2 {
+        color: white;
+        font-size: 1.7rem;
+        font-weight: 700;
+        margin-bottom: 1.8rem;
+        position: relative;
+        padding-bottom: 0.7rem;
+    }
+
+    .suggestions-container h2::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: #1DB954;
+        border-radius: 2px;
+    }
 
     .suggestions-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.2rem;
     }
 
     .suggestion-item {
         display: flex;
         align-items: center;
-        padding: 0.75rem;
-        background: rgba(255,255,255,0.05);
-        border-radius: 4px;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 8px;
         text-decoration: none;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .suggestion-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        border-color: rgba(29, 185, 84, 0.3);
+    }
+
+    .suggestion-image {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin-right: 1.2rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
     }
 
-        .suggestion-item:hover {
-            background: rgba(255,255,255,0.1);
-            transform: translateY(-2px);
-        }
-
-    .suggestion-image {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        overflow: hidden;
-        margin-right: 1rem;
+    .suggestion-item:hover .suggestion-image {
+        border-color: rgba(29, 185, 84, 0.5);
+        transform: scale(1.05);
     }
 
-        .suggestion-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    .suggestion-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .suggestion-item:hover .suggestion-image img {
+        transform: scale(1.08);
+    }
 
     .suggestion-info {
         display: flex;
@@ -461,80 +706,80 @@
 
     .suggestion-name {
         color: white;
-        font-size: 1rem;
-        font-weight: 500;
-        margin-bottom: 0.25rem;
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+        transition: color 0.3s ease;
+    }
+
+    .suggestion-item:hover .suggestion-name {
+        color: #1DB954;
     }
 
     .suggestion-type {
-        color: rgba(255,255,255,0.7);
+        color: rgba(255, 255, 255, 0.7);
         font-size: 0.9rem;
+        background: rgba(29, 185, 84, 0.1);
+        padding: 0.2rem 0.6rem;
+        border-radius: 12px;
+        display: inline-block;
     }
 
     @@media (max-width: 768px) {
         .search-header {
-            padding: 3rem 1rem 1.5rem;
+            padding: 4rem 1.5rem 2.5rem;
+            border-radius: 0 0 20px 20px;
         }
 
         .search-info h1 {
-            font-size: 2rem;
+            font-size: 2.8rem;
         }
 
-        .songs-section {
-            padding: 0 1rem;
+        .search-info h1::after {
+            bottom: -10px;
+            height: 4px;
+            width: 120px;
         }
 
-        .song-item {
-            padding: 0.5rem;
+        .search-term {
+            font-size: 1.6rem;
+            margin-top: 2rem;
         }
 
-        .song-image {
-            width: 40px;
-            height: 40px;
+        .search-term::before,
+        .search-term::after {
+            font-size: 1.8rem;
         }
 
-        .song-info {
-            margin-right: 1rem;
+        .result-count {
+            font-size: 1.1rem;
+            padding: 0.4rem 1.2rem;
+            margin-top: 0.8rem;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .search-header {
+            padding: 3.5rem 1.2rem 2rem;
         }
 
-        .song-meta {
-            flex-wrap: wrap;
+        .search-info h1 {
+            font-size: 2.2rem;
         }
 
-        .song-stats {
-            display: none;
+        .search-term {
+            font-size: 1.4rem;
+            margin-top: 1.5rem;
         }
 
-        .song-actions {
-            opacity: 1;
-        }
-
-        .search-suggestions {
-            padding: 0 1rem;
-        }
-
-        .suggestions-grid {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        }
-
-        .suggestion-item {
-            padding: 0.5rem;
-        }
-
-        .suggestion-image {
-            width: 40px;
-            height: 40px;
-        }
-
-        .suggestion-name {
-            font-size: 0.9rem;
-        }
-
-        .suggestion-type {
-            font-size: 0.8rem;
+        .result-count {
+            font-size: 1rem;
+            padding: 0.3rem 1rem;
         }
     }
 </style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
 
 <script>
     let currentAudio = null;
@@ -667,5 +912,194 @@
             const songItem = this.closest('.song-item');
             playAudio(songItem);
         });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Khởi tạo ColorThief
+        const colorThief = new ColorThief();
+        
+        // Hàm tính màu văn bản phù hợp (đen hoặc trắng) dựa trên độ sáng
+        function getTextColor(r, g, b) {
+            // Tính toán độ sáng theo công thức
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            return brightness > 128 ? '#000000' : '#ffffff';
+        }
+        
+        // Hàm chuyển đổi RGB sang chuỗi CSS
+        function rgbToCSS(r, g, b, alpha = 1) {
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+        
+        // Lấy tất cả các phần tử hình ảnh bài hát
+        const songImages = document.querySelectorAll('.song-item .song-image img');
+        
+        // Xử lý mỗi hình ảnh
+        songImages.forEach(img => {
+            // Đợi ảnh tải xong
+            if (img.complete) {
+                extractColors(img);
+            } else {
+                img.addEventListener('load', () => extractColors(img));
+            }
+        });
+        
+        function extractColors(img) {
+            try {
+                // Trích xuất màu chủ đạo
+                const dominantColor = colorThief.getColor(img);
+                const [r, g, b] = dominantColor;
+                
+                // Lấy phần tử song-item chứa hình ảnh
+                const songItem = img.closest('.song-item');
+                
+                // Thiết lập biến CSS tùy chỉnh
+                songItem.style.setProperty('--song-dominant-color', rgbToCSS(r, g, b, 0.7));
+                songItem.style.setProperty('--song-text-color', getTextColor(r, g, b));
+                
+                // Tạo gradient cá nhân hóa cho mỗi bài hát khi hover
+                songItem.addEventListener('mouseenter', () => {
+                    songItem.style.background = `linear-gradient(to right, rgba(${r}, ${g}, ${b}, 0.2), rgba(${r}, ${g}, ${b}, 0.05))`;
+                });
+                
+                songItem.addEventListener('mouseleave', () => {
+                    songItem.style.background = 'rgba(255, 255, 255, 0.04)';
+                });
+            } catch (error) {
+                console.log('Không thể trích xuất màu từ ảnh:', error);
+            }
+        }
+        
+        // Áp dụng hiệu ứng màu cho các phần tử khác
+        function applyColorEffects() {
+            const songItems = document.querySelectorAll('.song-item');
+            
+            songItems.forEach(item => {
+                // Thêm hiệu ứng nhấp nháy nhẹ cho các bài hát có màu rực rỡ
+                const colorVar = getComputedStyle(item).getPropertyValue('--song-dominant-color');
+                if (colorVar && colorVar !== '') {
+                    // Tạo hiệu ứng pulse nhẹ cho số thứ tự
+                    const numberElement = item.querySelector('.song-number');
+                    if (numberElement) {
+                        numberElement.style.animation = 'none';
+                        setTimeout(() => {
+                            numberElement.style.animation = 'colorPulse 3s infinite';
+                        }, 10);
+                    }
+                }
+            });
+        }
+        
+        // Gọi hàm áp dụng hiệu ứng sau khi đã xử lý màu
+        setTimeout(applyColorEffects, 1000);
+    });
+    
+    // Thêm animation cho hiệu ứng nhịp màu
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            @@keyframes colorPulse {
+                0% { opacity: 0.8; }
+                50% { opacity: 1; }
+                100% { opacity: 0.8; }
+            }
+        </style>
+    `);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Đã có colorThief từ script trước đó
+        const colorThief = new ColorThief();
+        
+        // Tìm ảnh bài hát đầu tiên trong kết quả tìm kiếm
+        const firstSongImage = document.querySelector('.song-item:first-child .song-image img');
+        
+        if (firstSongImage) {
+            // Đợi ảnh tải xong
+            if (firstSongImage.complete) {
+                applyHeaderColors(firstSongImage);
+            } else {
+                firstSongImage.addEventListener('load', () => applyHeaderColors(firstSongImage));
+            }
+        }
+        
+        function applyHeaderColors(img) {
+            try {
+                // Trích xuất màu chủ đạo
+                const dominantColor = colorThief.getColor(img);
+                const [r, g, b] = dominantColor;
+                
+                // Trích xuất bảng màu
+                const palette = colorThief.getPalette(img, 3);
+                const secondColor = palette[1] || dominantColor;
+                const thirdColor = palette[2] || secondColor;
+                
+                const [r2, g2, b2] = secondColor;
+                const [r3, g3, b3] = thirdColor;
+                
+                // Tạo gradient với màu sắc trích xuất từ ảnh
+                const searchHeader = document.querySelector('.search-header');
+                searchHeader.style.background = `linear-gradient(135deg, 
+                    rgba(${r}, ${g}, ${b}, 0.85) 0%, 
+                    rgba(${r2}, ${g2}, ${b2}, 0.75) 50%, 
+                    rgba(${r3}, ${g3}, ${b3}, 0.85) 100%)`;
+                
+                // Tính toán độ sáng để điều chỉnh màu chữ
+                const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                const textColor = brightness > 128 ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.95)';
+                const textShadow = brightness > 128 ? '0 2px 5px rgba(0,0,0,0.1)' : '0 2px 5px rgba(0,0,0,0.3)';
+                
+                // Điều chỉnh màu chữ nếu cần
+                const searchTerm = document.querySelector('.search-term');
+                const resultCount = document.querySelector('.result-count');
+                
+                if (searchTerm) {
+                    searchTerm.style.color = textColor;
+                    searchTerm.style.textShadow = textShadow;
+                }
+                
+                if (resultCount) {
+                    resultCount.style.color = textColor;
+                    resultCount.style.background = brightness > 128 ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.3)';
+                }
+                
+                // Thêm hiệu ứng glowing cho đường kẻ dưới tiêu đề
+                const title = document.querySelector('.search-info h1');
+                if (title) {
+                    title.style.textShadow = `0 0 15px rgba(${r}, ${g}, ${b}, 0.5)`;
+                    const titleLine = document.querySelector('.search-info h1::after');
+                    if (titleLine) {
+                        titleLine.style.background = `rgba(${r2}, ${g2}, ${b2}, 0.8)`;
+                        titleLine.style.boxShadow = `0 0 15px rgba(${r}, ${g}, ${b}, 0.7)`;
+                    }
+                }
+                
+                // Thêm hiệu ứng nhẹ khi di chuột qua header
+                searchHeader.addEventListener('mousemove', (e) => {
+                    const xPos = (e.clientX / window.innerWidth) * 100;
+                    const yPos = (e.clientY / window.innerHeight) * 100;
+                    
+                    searchHeader.style.backgroundImage = `
+                        linear-gradient(135deg, 
+                            rgba(${r}, ${g}, ${b}, 0.85) 0%, 
+                            rgba(${r2}, ${g2}, ${b2}, 0.75) 50%, 
+                            rgba(${r3}, ${g3}, ${b3}, 0.85) 100%),
+                        radial-gradient(circle at ${xPos}% ${yPos}%, 
+                            rgba(255, 255, 255, 0.15), 
+                            transparent 80%)
+                    `;
+                });
+                
+                // Reset khi rời khỏi
+                searchHeader.addEventListener('mouseleave', () => {
+                    searchHeader.style.backgroundImage = `
+                        linear-gradient(135deg, 
+                            rgba(${r}, ${g}, ${b}, 0.85) 0%, 
+                            rgba(${r2}, ${g2}, ${b2}, 0.75) 50%, 
+                            rgba(${r3}, ${g3}, ${b3}, 0.85) 100%)
+                    `;
+                });
+                
+            } catch (error) {
+                console.log('Không thể trích xuất màu cho header:', error);
+            }
+        }
     });
 </script> 
