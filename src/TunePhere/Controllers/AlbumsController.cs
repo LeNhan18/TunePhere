@@ -288,6 +288,7 @@ namespace TunePhere.Controllers
                 {
                     var existingAlbum = await _context.Albums
                         .Include(a => a.Artists)
+                        .Include(a => a.Songs)
                         .FirstOrDefaultAsync(a => a.AlbumId == id);
 
                     if (existingAlbum == null)
@@ -306,6 +307,9 @@ namespace TunePhere.Controllers
                     existingAlbum.AlbumName = album.AlbumName;
                     existingAlbum.AlbumDescription = album.AlbumDescription;
                     existingAlbum.ReleaseDate = album.ReleaseDate;
+
+                    // Biến để lưu URL ảnh mới nếu có
+                    string newImageUrl = existingAlbum.ImageUrl;
 
                     // Xử lý upload ảnh mới nếu có
                     if (AlbumImage != null && AlbumImage.Length > 0)
@@ -332,7 +336,30 @@ namespace TunePhere.Controllers
                             await AlbumImage.CopyToAsync(fileStream);
                         }
 
-                        existingAlbum.ImageUrl = $"/uploads/albums/{uniqueFileName}";
+                        newImageUrl = $"/uploads/albums/{uniqueFileName}";
+                        existingAlbum.ImageUrl = newImageUrl;
+
+                        // Cập nhật ImageUrl cho tất cả các bài hát trong album
+                        if (existingAlbum.Songs != null && existingAlbum.Songs.Any())
+                        {
+                            foreach (var song in existingAlbum.Songs)
+                            {
+                                song.ImageUrl = newImageUrl;
+                            }
+                        }
+                        else
+                        {
+                            // Nếu Songs không được load, tìm và cập nhật riêng
+                            var songsToUpdate = await _context.Songs
+                                .Where(s => s.AlbumId == id)
+                                .ToListAsync();
+
+                            foreach (var song in songsToUpdate)
+                            {
+                                song.ImageUrl = newImageUrl;
+                                _context.Update(song);
+                            }
+                        }
                     }
 
                     _context.Update(existingAlbum);
@@ -405,32 +432,113 @@ namespace TunePhere.Controllers
                 return Unauthorized();
             }
 
-            // Xóa các file bài hát
-            foreach (var song in album.Songs)
+            try
             {
-                if (!string.IsNullOrEmpty(song.FileUrl))
+                // Xóa các bài hát và file bài hát
+                if (album.Songs != null && album.Songs.Any())
                 {
-                    var songPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", song.FileUrl.TrimStart('/'));
-                    if (System.IO.File.Exists(songPath))
+                    foreach (var song in album.Songs)
                     {
-                        System.IO.File.Delete(songPath);
+                        // Xóa file vật lý
+                        if (!string.IsNullOrEmpty(song.FileUrl))
+                        {
+                            var songPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", song.FileUrl.TrimStart('/'));
+                            if (System.IO.File.Exists(songPath))
+                            {
+                                System.IO.File.Delete(songPath);
+                            }
+                        }
+                        
+                        // Xóa bài hát khỏi các playlist (nếu có)
+                        var playlistSongs = await _context.PlaylistSongs
+                            .Where(ps => ps.SongId == song.SongId)
+                            .ToListAsync();
+                        
+                        if (playlistSongs.Any())
+                        {
+                            _context.PlaylistSongs.RemoveRange(playlistSongs);
+                        }
+                        
+                        // Xóa các bài hát khỏi danh sách yêu thích (nếu có)
+                        var favoriteSongs = await _context.UserFavoriteSongs
+                            .Where(fs => fs.SongId == song.SongId)
+                            .ToListAsync();
+                        
+                        if (favoriteSongs.Any())
+                        {
+                            _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
+                        }
+                        
+                        // Xóa bài hát khỏi database
+                        _context.Songs.Remove(song);
                     }
                 }
-            }
-
-            // Xóa ảnh album
-            if (!string.IsNullOrEmpty(album.ImageUrl))
-            {
-                var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", album.ImageUrl.TrimStart('/'));
-                if (System.IO.File.Exists(imagePath))
+                else
                 {
-                    System.IO.File.Delete(imagePath);
+                    // Trường hợp Songs không được load, tìm và xóa riêng
+                    var songsToDelete = await _context.Songs
+                        .Where(s => s.AlbumId == id)
+                        .ToListAsync();
+                        
+                    foreach (var song in songsToDelete)
+                    {
+                        // Xóa file vật lý
+                        if (!string.IsNullOrEmpty(song.FileUrl))
+                        {
+                            var songPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", song.FileUrl.TrimStart('/'));
+                            if (System.IO.File.Exists(songPath))
+                            {
+                                System.IO.File.Delete(songPath);
+                            }
+                        }
+                        
+                        // Xóa bài hát khỏi các playlist (nếu có)
+                        var playlistSongs = await _context.PlaylistSongs
+                            .Where(ps => ps.SongId == song.SongId)
+                            .ToListAsync();
+                        
+                        if (playlistSongs.Any())
+                        {
+                            _context.PlaylistSongs.RemoveRange(playlistSongs);
+                        }
+                        
+                        // Xóa các bài hát khỏi danh sách yêu thích (nếu có)
+                        var favoriteSongs = await _context.UserFavoriteSongs
+                            .Where(fs => fs.SongId == song.SongId)
+                            .ToListAsync();
+                        
+                        if (favoriteSongs.Any())
+                        {
+                            _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
+                        }
+                    }
+                    
+                    _context.Songs.RemoveRange(songsToDelete);
                 }
-            }
 
-            _context.Albums.Remove(album);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                // Xóa ảnh album
+                if (!string.IsNullOrEmpty(album.ImageUrl))
+                {
+                    var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", album.ImageUrl.TrimStart('/'));
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        System.IO.File.Delete(imagePath);
+                    }
+                }
+
+                // Xóa album
+                _context.Albums.Remove(album);
+                await _context.SaveChangesAsync();
+                
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi và hiển thị thông báo
+                Console.WriteLine($"Lỗi khi xóa album: {ex.Message}");
+                ModelState.AddModelError("", $"Có lỗi xảy ra khi xóa album: {ex.Message}");
+                return View(album);
+            }
         }
 
         // POST: Albums/AddSong

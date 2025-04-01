@@ -5,7 +5,7 @@
     --spotify-gray: #282828;
     --spotify-light-gray: #b3b3b3;
     --spotify-green: #1DB954;
-    --spotify-green-hover: #1ed760;
+    --spotify-green-hover: #7B2CBF;
     --spotify-white: #ffffff;
 }
 
@@ -368,10 +368,10 @@ h2 {
     transition: all 0.3s ease;
 }
 
-.create-album-btn:hover {
-    background: #1ed760;
-    transform: scale(1.05);
-}
+    .create-album-btn:hover {
+        background: #7B2CBF;
+        transform: scale(1.05);
+    }
 
 .albums-grid {
     display: grid;
@@ -557,10 +557,10 @@ h2 {
     transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
-.play-btn:hover {
-    transform: scale(1.1);
-    background: #1ed760;
-}
+    .play-btn:hover {
+        transform: scale(1.1);
+        background: #7B2CBF;
+    }
 
 .music-card:hover .play-overlay {
     opacity: 1;
