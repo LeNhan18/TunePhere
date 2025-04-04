@@ -305,7 +305,7 @@
             @:    artistName: '@ViewData["ArtistName"]',
             @:    currentIndex: @(ViewData["ArtistCurrentIndex"] ?? -1),
             @:    songs: @Html.Raw(ViewData["ArtistSongs"]),
-            @:    fromArtist: @(ViewData["FromArtist"] != null && (bool)ViewData["FromArtist"] ? "true" : "false")
+            @:    fromArtist: @(((ViewData["FromArtist"] as bool?) ?? false) ? "true" : "false")
             @:};
             @:console.log("Artist data loaded:", window.artistData);
         }
