@@ -97,8 +97,7 @@ namespace TunePhere.Controllers
             }
         }
         // GET: Songs/Details/5
-        // GET: Songs/Details/5
-        public async Task<IActionResult> Details(int? id, int? playlistId, int? index, int? albumId)
+        public async Task<IActionResult> Details(int? id, int? playlistId, int? index, int? albumId, bool? fromFavorites)
         {
             if (id == null)
             {
@@ -131,6 +130,37 @@ namespace TunePhere.Controllers
                 var userId = _userManager.GetUserId(User);
                 ViewData["IsFavorited"] = await _context.UserFavoriteSongs
                     .AnyAsync(f => f.SongId == song.SongId && f.UserId == userId);
+                
+                // Nếu yêu cầu xem từ danh sách yêu thích HOẶC không có playlist/album, lấy danh sách bài hát yêu thích
+                if (fromFavorites == true)
+                {
+                    var favoriteItems = await _context.UserFavoriteSongs
+                        .Where(f => f.UserId == userId)
+                        .Include(f => f.Song)
+                        .ThenInclude(s => s.Artists)
+                        .OrderByDescending(f => f.AddedDate)
+                        .ToListAsync();
+
+                    if (favoriteItems.Any())
+                    {
+                        var favoriteSongs = favoriteItems
+                            .Select(f => new {
+                                id = f.Song.SongId,
+                                title = f.Song.Title,
+                                artist = f.Song.Artists?.ArtistName ?? "Unknown Artist",
+                                fileUrl = f.Song.FileUrl,
+                                imageUrl = f.Song.ImageUrl
+                            })
+                            .ToList();
+
+                        // Tìm vị trí của bài hát hiện tại trong danh sách yêu thích
+                        var currentIndex = index.HasValue ? index.Value : favoriteSongs.FindIndex(s => s.id == id);
+                        
+                        ViewData["FavoritesSongs"] = System.Text.Json.JsonSerializer.Serialize(favoriteSongs);
+                        ViewData["FavoritesCurrentIndex"] = currentIndex;
+                        ViewData["FromFavorites"] = true;
+                    }
+                }
             }
 
             // Nếu có playlistId, lấy thông tin các bài hát trong playlist
