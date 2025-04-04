@@ -4,16 +4,19 @@
     ViewData["Title"] = "Phòng Nghe Nhạc";
 }
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<link rel="stylesheet" href="~/css/listeningRoom.css" />
+
+<div class="listening-room">
+    <div class="room-header">
         <div>
-            <h1 class="display-4 mb-0">
+            <h1 class="room-title">
                 <i class="fas fa-headphones-alt me-2"></i>Phòng Nghe Nhạc
             </h1>
             <p class="text-muted">Khám phá và tham gia các phòng nghe nhạc</p>
         </div>
-        <a asp-action="Create" class="btn btn-primary btn-lg">
-            <i class="fas fa-plus-circle me-2"></i>Tạo Phòng Mới
+        <a asp-action="Create" class="btn-action btn-join">
+            <i class="fas fa-plus-circle"></i>
+            Tạo Phòng Mới
         </a>
     </div>
 
@@ -23,74 +26,56 @@
             <i class="fas fa-music fa-3x text-muted mb-3"></i>
             <h3>Chưa có phòng nghe nhạc nào</h3>
             <p class="text-muted">Hãy là người đầu tiên tạo phòng!</p>
-            <a asp-action="Create" class="btn btn-primary">
-                <i class="fas fa-plus-circle me-2"></i>Tạo Phòng Ngay
+            <a asp-action="Create" class="btn-action btn-join">
+                <i class="fas fa-plus-circle"></i>
+                Tạo Phòng Ngay
             </a>
         </div>
     }
     else
     {
-        <div class="row g-4">
-            @foreach (var item in Model)
+        <div class="rooms-grid">
+            @foreach (var room in Model)
             {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm hover-card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-music me-2"></i>@item.Title
-                                </h5>
-                                <span class="badge @(item.IsActive ? "bg-success" : "bg-danger")">
-                                    @(item.IsActive ? "Đang Hoạt Động" : "Không Hoạt Động")
-                                </span>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <small class="text-muted">
-                                    <i class="fas fa-user me-1"></i>Người tạo:
-                                </small>
-                                <span>@item.Creator?.UserName</span>
-                            </div>
-
-                            @if (item.CurrentSong != null)
-                            {
-                                <div class="mb-3">
-                                    <small class="text-muted">
-                                        <i class="fas fa-play me-1"></i>Đang phát:
-                                    </small>
-                                    <span>@item.CurrentSong.Title</span>
-                                </div>
-                            }
-
-                            <div class="mb-3">
-                                <small class="text-muted">
-                                    <i class="fas fa-clock me-1"></i>Tạo lúc:
-                                </small>
-                                <span>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
-                            </div>
-
-                            <div class="d-flex gap-2">
-                                @if (item.IsActive)
-                                {
-                                    <a asp-action="Join" asp-route-id="@item.RoomId" 
-                                       class="btn btn-success flex-grow-1">
-                                        <i class="fas fa-sign-in-alt me-1"></i>Tham Gia
-                                    </a>
-                                }
-                                <a asp-action="Details" asp-route-id="@item.RoomId" 
-                                   class="btn btn-outline-primary @(!item.IsActive ? "flex-grow-1" : "")">
-                                    <i class="fas fa-info-circle me-1"></i>Chi Tiết
-                                </a>
-                                <a asp-action="Edit" asp-route-id="@item.RoomId" 
-                                   class="btn btn-outline-secondary">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a asp-action="Delete" asp-route-id="@item.RoomId" 
-                                   class="btn btn-outline-danger">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </div>
+                <div class="room-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3>@room.Title</h3>
+                        <span class="room-status @(room.IsActive ? "status-active" : "status-inactive")">
+                            @(room.IsActive ? "Đang Hoạt Động" : "Không Hoạt Động")
+                        </span>
+                    </div>
+                    
+                    <div class="room-meta">
+                        <div>
+                            <i class="fas fa-user"></i>
+                            <span>@room.Creator?.UserName</span>
                         </div>
+                        <div>
+                            <i class="fas fa-clock"></i>
+                            <span>@room.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                        @if (room.CurrentSong != null)
+                        {
+                            <div>
+                                <i class="fas fa-play"></i>
+                                <span>@room.CurrentSong.Title</span>
+                            </div>
+                        }
+                        <div>
+                            <i class="fas fa-users"></i>
+                            <span>@room.Participants.Count() người tham gia</span>
+                        </div>
+                    </div>
+
+                    <div class="room-actions mt-3">
+                        <a asp-action="Join" asp-route-id="@room.RoomId" class="btn-action btn-join">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Tham Gia
+                        </a>
+                        <a asp-action="Details" asp-route-id="@room.RoomId" class="btn-action btn-details">
+                            <i class="fas fa-info-circle"></i>
+                            Chi Tiết
+                        </a>
                     </div>
                 </div>
             }
@@ -98,79 +83,8 @@
     }
 </div>
 
-@section Styles {
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <link href="~/css/listening-rooms.css" rel="stylesheet">
-    <style>
-        .hover-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-        .hover-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
-            border-color: var(--bs-primary);
-        }
-        .badge {
-            padding: 0.5em 1em;
-            transition: all 0.2s ease;
-        }
-        .badge:hover {
-            transform: scale(1.05);
-        }
-        .btn {
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-        .btn:active {
-            transform: translateY(0);
-        }
-        .btn i {
-            transition: transform 0.2s ease;
-        }
-        .btn:hover i {
-            transform: scale(1.1);
-        }
-        .display-4 {
-            position: relative;
-            display: inline-block;
-        }
-        .display-4::after {
-            content: '';
-            position: absolute;
-            width: 50%;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--bs-primary);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.3s ease;
-        }
-        .display-4:hover::after {
-            transform: scaleX(1);
-        }
-      <style>
-                @@keyframes fadeIn {
-            from
-
-        {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        }</style>
-        .card {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-    </style>
+@section Scripts {
+    <script>
+        // Thêm các script cần thiết ở đây
+    </script>
 }

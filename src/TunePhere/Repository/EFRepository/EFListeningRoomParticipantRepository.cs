@@ -36,12 +36,10 @@ namespace TunePhere.Repository.EFRepository
                 .Include(p => p.User)
                 .FirstOrDefaultAsync(p => p.RoomId == roomId && p.UserId == userId);
         }
-
         public async Task<bool> ExistsAsync(int id)
         {
             return await _context.ListeningRoomParticipants.AnyAsync(p => p.Id == id);
         }
-
         public async Task AddAsync(ListeningRoomParticipant participant)
         {
             participant.JoinedAt = DateTime.Now;
@@ -71,7 +69,6 @@ namespace TunePhere.Repository.EFRepository
         {
             throw new NotImplementedException();
         }
-
         public Task DeleteAsync(ListeningRoomParticipant participant)
         {
 

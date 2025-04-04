@@ -9,6 +9,7 @@ namespace TunePhere.Hubs
     [Authorize]
     public class ChatHub : Hub
     {
+        private static Dictionary<string, string> _userRooms = new Dictionary<string, string>();
         private readonly ILogger<ChatHub> _logger;
         private readonly IChatMessageRepository _chatRepository;
 
@@ -24,36 +25,44 @@ namespace TunePhere.Hubs
             {
                 await base.OnConnectedAsync();
                 _logger.LogInformation($"Client connected: {Context.ConnectionId}");
+                await Clients.Caller.SendAsync("ConnectionEstablished", Context.ConnectionId);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error in OnConnectedAsync: {ex.Message}");
-                throw;
             }
         }
 
         public async Task JoinRoom(int roomId)
         {
-            try 
+            try
             {
                 string roomName = $"Room_{roomId}";
                 await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
-                
+                _userRooms[Context.ConnectionId] = roomName;
+
                 string userName = Context.User?.Identity?.Name ?? "Anonymous";
                 _logger.LogInformation($"User {userName} joined room {roomId}");
 
-                // L·∫•y tin nh·∫Øn c≈©
+                // L?y tin nh?n c?
                 var messages = await _chatRepository.GetRoomMessagesAsync(roomId);
                 await Clients.Caller.SendAsync("LoadMessages", messages);
-                
-                // Th√¥ng b√°o cho t·∫•t c·∫£ ng∆∞·ªùi d√πng trong ph√≤ng
+
+                // ThÙng b·o cho t?t c? ng˝?i d˘ng trong ph?ng
+                var systemMessage = new ChatMessage
+                {
+                    Content = $"{userName} ? tham gia ph?ng chat",
+                    RoomId = roomId,
+                    SenderId = Context.UserIdentifier,
+                    IsSystemMessage = true
+                };
+                await _chatRepository.AddMessageAsync(systemMessage);
                 await Clients.Group(roomName).SendAsync("UserJoined", userName);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error in JoinRoom: {ex.Message}");
-                await Clients.Caller.SendAsync("ErrorOccurred", "Kh√¥ng th·ªÉ tham gia ph√≤ng chat: " + ex.Message);
-                throw;
+                await Clients.Caller.SendAsync("ErrorOccurred", "KhÙng th? tham gia ph?ng chat: " + ex.Message);
             }
         }
 
@@ -63,7 +72,7 @@ namespace TunePhere.Hubs
             {
                 if (string.IsNullOrEmpty(message))
                 {
-                    throw new Exception("Tin nh·∫Øn kh√¥ng ƒë∆∞·ª£c ƒë·ªÉ tr·ªëng");
+                    throw new Exception("Tin nh?n khÙng ˝?c ? tr?ng");
                 }
 
                 string roomName = $"Room_{roomId}";
@@ -71,30 +80,33 @@ namespace TunePhere.Hubs
 
                 if (string.IsNullOrEmpty(userName))
                 {
-                    throw new Exception("B·∫°n c·∫ßn ƒëƒÉng nh·∫≠p ƒë·ªÉ g·ª≠i tin nh·∫Øn");
+                    throw new Exception("B?n c?n „ng nh?p ? g?i tin nh?n");
                 }
 
-                // L∆∞u tin nh·∫Øn v√†o database
+                if (!_userRooms.ContainsValue(roomName))
+                {
+                    throw new Exception("B?n c?n tham gia ph?ng ? g?i tin nh?n");
+                }
+
+                // L˝u tin nh?n v‡o database
                 var chatMessage = new ChatMessage
                 {
                     Content = message,
                     RoomId = roomId,
                     SenderId = Context.UserIdentifier,
-                    SentAt = DateTime.Now,
                     IsSystemMessage = false
                 };
                 await _chatRepository.AddMessageAsync(chatMessage);
 
                 _logger.LogInformation($"User {userName} sending message to room {roomId}: {message}");
-                
-                // G·ª≠i tin nh·∫Øn ƒë·∫øn t·∫•t c·∫£ ng∆∞·ªùi d√πng trong ph√≤ng
-                await Clients.Group(roomName).SendAsync("ReceiveMessage", userName, message, chatMessage.SentAt);
+
+                // G?i tin nh?n ?n t?t c? ng˝?i d˘ng trong ph?ng
+                await Clients.Group(roomName).SendAsync("ReceiveMessage", userName, message, DateTime.Now);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error in SendMessage: {ex.Message}");
-                await Clients.Caller.SendAsync("ErrorOccurred", "Kh√¥ng th·ªÉ g·ª≠i tin nh·∫Øn: " + ex.Message);
-                throw;
+                await Clients.Caller.SendAsync("ErrorOccurred", "KhÙng th? g?i tin nh?n: " + ex.Message);
             }
         }
 
@@ -102,14 +114,33 @@ namespace TunePhere.Hubs
         {
             try
             {
-                await base.OnDisconnectedAsync(exception);
-                _logger.LogInformation($"Client disconnected: {Context.ConnectionId}");
+                if (_userRooms.TryGetValue(Context.ConnectionId, out string? roomName))
+                {
+                    string userName = Context.User?.Identity?.Name ?? "Anonymous";
+                    _logger.LogInformation($"User {userName} disconnected from room {roomName}");
+
+                    // L˝u thÙng b·o r?i ph?ng
+                    var roomId = int.Parse(roomName.Replace("Room_", ""));
+                    var systemMessage = new ChatMessage
+                    {
+                        Content = $"{userName} ? r?i ph?ng chat",
+                        RoomId = roomId,
+                        SenderId = Context.UserIdentifier,
+                        IsSystemMessage = true
+                    };
+                    await _chatRepository.AddMessageAsync(systemMessage);
+
+                    // ThÙng b·o cho t?t c? ng˝?i d˘ng trong ph?ng
+                    await Clients.Group(roomName).SendAsync("UserLeft", userName);
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
+                    _userRooms.Remove(Context.ConnectionId);
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error in OnDisconnectedAsync: {ex.Message}");
-                throw;
             }
+            await base.OnDisconnectedAsync(exception);
         }
     }
-} 
+}
