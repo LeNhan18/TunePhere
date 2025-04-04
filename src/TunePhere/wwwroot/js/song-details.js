@@ -177,21 +177,34 @@ document.addEventListener('DOMContentLoaded', function () {
 // Khai báo biến để theo dõi hiệu ứng đĩa
 let vinylEffectActive = false;
 
-// Cập nhật hàm phát/dừng nhạc để thêm hiệu ứng đĩa xoay
+// Cập nhật hàm togglePlay() để đơn giản hóa và tránh phát lại từ đầu
 function togglePlay() {
     const audioPlayer = document.getElementById('audioPlayer');
     
     try {
         if (audioPlayer.paused || audioPlayer.ended) {
-            playAudio();
+            // Chỉ phát từ vị trí hiện tại, không khởi tạo lại
+            isPlaying = true;
+            updatePlayPauseButton();
+            audioPlayer.play()
+                .then(() => {
+                    toggleVinylEffect(true);
+                })
+                .catch(error => {
+                    console.error("Lỗi khi phát nhạc:", error);
+                    isPlaying = false;
+                    updatePlayPauseButton();
+                });
         } else {
             audioPlayer.pause();
-            toggleVinylEffect(false);
+            isPlaying = false;
             updatePlayPauseButton();
+            toggleVinylEffect(false);
         }
     } catch (error) {
         console.error("Lỗi khi chuyển đổi phát/dừng:", error);
         alert("Có lỗi xảy ra khi phát nhạc. Vui lòng thử lại sau.");
+        isPlaying = false;
         updatePlayPauseButton();
     }
 }
@@ -216,101 +229,107 @@ function toggleVinylEffect(active) {
     }
 }
 
-// Hàm chuẩn bị và phát file âm thanh với hỗ trợ nhiều định dạng
+// Sửa hàm playAudio() - chỉ khởi tạo lần đầu, không phát lại từ đầu
 function playAudio() {
     const audioPlayer = document.getElementById('audioPlayer');
     const fileUrl = window.songData.fileUrl;
     
-    console.log("Thử phát file:", fileUrl);
+    // Cập nhật trạng thái phát ngay khi bắt đầu phát
+    isPlaying = true;
+    updatePlayPauseButton();
     
-    // Mã hóa URL để xử lý ký tự đặc biệt và khoảng trắng
-    const encodedUrl = encodeURI(fileUrl);
-    
-    // Kiểm tra file có tồn tại không
-    fetch(encodedUrl, { method: 'HEAD' })
-        .then(response => {
-            if (!response.ok) {
-                console.error("Không tìm thấy file:", response.status);
-                alert("Không tìm thấy file âm thanh. Vui lòng kiểm tra lại đường dẫn.");
-                return;
-            }
-            
-            // Kiểm tra MIME type của file
-            const fileExtension = fileUrl.split('.').pop().toLowerCase();
-            
-            // Thiết lập loại MIME tương ứng
-            let mimeType;
-            switch (fileExtension) {
-                case 'mp3':
-                    mimeType = 'audio/mpeg';
-                    break;
-                case 'm4a':
-                    mimeType = 'audio/mp4';
-                    break;
-                case 'wav':
-                    mimeType = 'audio/wav';
-                    break;
-                case 'ogg':
-                    mimeType = 'audio/ogg';
-                    break;
-                case 'aac':
-                    mimeType = 'audio/aac';
-                    break;
-                case 'flac':
-                    mimeType = 'audio/flac';
-                    break;
-                default:
-                    mimeType = 'audio/mpeg'; // Mặc định
-            }
-            
-            // Kiểm tra xem trình duyệt có hỗ trợ định dạng này không
-            const canPlayType = audioPlayer.canPlayType(mimeType);
-            if (canPlayType === '' || canPlayType === 'no') {
-                console.warn("Trình duyệt không hỗ trợ định dạng file:", mimeType);
-                alert("Trình duyệt của bạn không hỗ trợ định dạng file này. Vui lòng sử dụng trình duyệt khác hoặc chuyển đổi file.");
-                return;
-            }
-            
-            // Tiến hành phát nhạc
-            try {
-                audioPlayer.src = encodedUrl;
-                audioPlayer.type = mimeType; // Thêm type để trình duyệt nhận diện
-                audioPlayer.load();
-                
-                const playPromise = audioPlayer.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        console.log("Phát nhạc thành công");
-                        toggleVinylEffect(true);
-                        incrementPlayCount(window.songData.songId);
-                        updatePlayPauseButton();
-                    }).catch(error => {
-                        console.error("Lỗi phát nhạc:", error.message);
-                        
-                        // Chi tiết hóa lỗi phát nhạc
-                        let errorMsg = "Không thể phát bài hát. ";
-                        if (error.name === 'NotSupportedError') {
-                            errorMsg += "Định dạng file không được hỗ trợ.";
-                        } else if (error.name === 'NotAllowedError') {
-                            errorMsg += "Trình duyệt không cho phép tự động phát nhạc.";
-                        } else {
-                            errorMsg += error.message;
-                        }
-                        
-                        alert(errorMsg);
-                        updatePlayPauseButton();
-                    });
+    // Kiểm tra xem audio đã được khởi tạo chưa
+    if (!audioPlayer.src || audioPlayer.src !== encodeURI(fileUrl)) {
+        console.log("Khởi tạo audio mới:", fileUrl);
+        
+        // Mã hóa URL để xử lý ký tự đặc biệt và khoảng trắng
+        const encodedUrl = encodeURI(fileUrl);
+        
+        // Kiểm tra file có tồn tại không
+        fetch(encodedUrl, { method: 'HEAD' })
+            .then(response => {
+                if (!response.ok) {
+                    console.error("Không tìm thấy file:", response.status);
+                    alert("Không tìm thấy file âm thanh. Vui lòng kiểm tra lại đường dẫn.");
+                    isPlaying = false;
+                    updatePlayPauseButton();
+                    return;
                 }
-            } catch (error) {
-                console.error("Lỗi xử lý:", error.message);
-                alert("Lỗi khi xử lý file âm thanh: " + error.message);
-            }
-        })
-        .catch(error => {
-            console.error("Lỗi kiểm tra file:", error.message);
-            alert("Lỗi khi kiểm tra file: " + error.message);
-        });
+                
+                // Thiết lập MIME type
+                const fileExtension = fileUrl.split('.').pop().toLowerCase();
+                let mimeType;
+                
+                switch (fileExtension) {
+                    case 'mp3': mimeType = 'audio/mpeg'; break;
+                    case 'm4a': mimeType = 'audio/mp4'; break;
+                    case 'wav': mimeType = 'audio/wav'; break;
+                    case 'ogg': mimeType = 'audio/ogg'; break;
+                    case 'aac': mimeType = 'audio/aac'; break;
+                    case 'flac': mimeType = 'audio/flac'; break;
+                    default: mimeType = 'audio/mpeg';
+                }
+                
+                // Kiểm tra hỗ trợ định dạng
+                const canPlayType = audioPlayer.canPlayType(mimeType);
+                if (canPlayType === '' || canPlayType === 'no') {
+                    console.warn("Trình duyệt không hỗ trợ định dạng file:", mimeType);
+                    alert("Trình duyệt của bạn không hỗ trợ định dạng file này. Vui lòng sử dụng trình duyệt khác hoặc chuyển đổi file.");
+                    isPlaying = false;
+                    updatePlayPauseButton();
+                    return;
+                }
+                
+                // Thiết lập audio source và phát
+                audioPlayer.src = encodedUrl;
+                audioPlayer.type = mimeType;
+                audioPlayer.load();
+                playWithErrorHandling();
+            })
+            .catch(error => {
+                console.error("Lỗi kiểm tra file:", error.message);
+                alert("Lỗi khi kiểm tra file: " + error.message);
+                isPlaying = false;
+                updatePlayPauseButton();
+            });
+    } else {
+        // Nếu audio đã được khởi tạo, chỉ cần phát
+        console.log("Tiếp tục phát từ vị trí hiện tại");
+        playWithErrorHandling();
+    }
+    
+    // Hàm giúp phát nhạc với xử lý lỗi
+    function playWithErrorHandling() {
+        const playPromise = audioPlayer.play();
+                
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                console.log("Phát nhạc thành công");
+                toggleVinylEffect(true);
+                
+                // Chỉ tăng lượt nghe khi bắt đầu từ đầu
+                if (audioPlayer.currentTime < 1) {
+                    incrementPlayCount(window.songData.songId);
+                }
+            }).catch(error => {
+                console.error("Lỗi phát nhạc:", error.message);
+                
+                // Chi tiết hóa lỗi phát nhạc
+                let errorMsg = "Không thể phát bài hát. ";
+                if (error.name === 'NotSupportedError') {
+                    errorMsg += "Định dạng file không được hỗ trợ.";
+                } else if (error.name === 'NotAllowedError') {
+                    errorMsg += "Trình duyệt không cho phép tự động phát nhạc.";
+                } else {
+                    errorMsg += error.message;
+                }
+                
+                alert(errorMsg);
+                isPlaying = false;
+                updatePlayPauseButton();
+            });
+        }
+    }
 }
 
 // Hàm tăng lượt nghe
@@ -339,35 +358,26 @@ function incrementPlayCount(songId) {
         .catch(error => console.error('Lỗi khi tăng lượt nghe:', error));
 }
 
-// Cập nhật nút play/pause - đảm bảo nút hiển thị đúng
+// Đảm bảo hàm updatePlayPauseButton làm việc chính xác
 function updatePlayPauseButton() {
-    // Chọn nút play ở thanh điều khiển phía dưới
     const button = document.getElementById('playPauseButton');
-
+    
     if (!button) {
         console.error('Không tìm thấy nút playPauseButton');
         return;
     }
-
+    
     const icon = button.querySelector('i');
-
+    
     if (!icon) {
         console.error('Không tìm thấy icon trong nút playPauseButton');
         return;
     }
-
-    // Log để debug
+    
     console.log("Cập nhật trạng thái nút play/pause:", isPlaying ? "Đang phát" : "Đã dừng");
-
-    // Xóa tất cả class cũ
-    icon.className = '';
-
-    // Thêm class mới dựa trên trạng thái
-    if (isPlaying) {
-        icon.className = 'fas fa-pause'; // Hiển thị nút tạm dừng khi đang phát
-    } else {
-        icon.className = 'fas fa-play';  // Hiển thị nút phát khi đang dừng
-    }
+    
+    // Xóa và thêm class mới
+    icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
 }
 
 // Phát bài tiếp theo (không có hành động vì chỉ có 1 bài)
@@ -1010,7 +1020,8 @@ function debugAudioFile() {
 document.addEventListener('DOMContentLoaded', function() {
     // ... existing code ...
     
-    // Thêm nút debug để kiểm tra file
+    /* 
+    // Xóa nút debug để kiểm tra file
     const playerControls = document.querySelector('.player-controls');
     if (playerControls) {
         const debugButton = document.createElement('button');
@@ -1020,6 +1031,7 @@ document.addEventListener('DOMContentLoaded', function() {
         debugButton.addEventListener('click', debugAudioFile);
         playerControls.appendChild(debugButton);
     }
+    */
     
     // Xử lý lỗi audio chi tiết hơn
     const audioPlayer = document.getElementById('audioPlayer');
@@ -1046,6 +1058,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         alert("Lỗi phát nhạc: " + errorMessage);
+        isPlaying = false;
+        updatePlayPauseButton();
     });
 });
 
