@@ -15,8 +15,8 @@ namespace TunePhere.Models
         [Required, StringLength(200)]
         public required string Title { get; set; } // Tên bài hát
 
-        [Required, StringLength(50)]
-        public required string Genre { get; set; } // Thể loại nhạc
+        [StringLength(50)]
+        public string? Genre { get; set; } // Thể loại nhạc
 
         [Required]
         public TimeSpan Duration { get; set; } // Thời lượng bài hát
