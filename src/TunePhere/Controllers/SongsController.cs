@@ -97,7 +97,7 @@ namespace TunePhere.Controllers
             }
         }
         // GET: Songs/Details/5
-        public async Task<IActionResult> Details(int? id, int? playlistId, int? index, int? albumId, bool? fromFavorites)
+        public async Task<IActionResult> Details(int? id, int? playlistId, int? index, int? albumId, bool? fromFavorites, int? artistId, bool? fromArtist)
         {
             if (id == null)
             {
@@ -217,6 +217,40 @@ namespace TunePhere.Controllers
                     ViewData["AlbumTitle"] = album.AlbumName;
                     ViewData["AlbumSongs"] = System.Text.Json.JsonSerializer.Serialize(albumSongs);
                     ViewData["CurrentIndex"] = albumSongs.FindIndex(s => s.id == id);
+                }
+            }
+            // Thêm xử lý cho trường hợp từ trang nghệ sĩ
+            else if (artistId.HasValue || fromArtist == true || artistId == null)
+            {
+                // Lấy ID của nghệ sĩ từ tham số hoặc từ bài hát hiện tại
+                int targetArtistId = artistId.HasValue ? artistId.Value : song.ArtistId;
+
+                if (targetArtistId > 0)
+                {
+                    var artist = await _context.Artists
+                        .Include(a => a.Songs)
+                        .FirstOrDefaultAsync(a => a.ArtistId == targetArtistId);
+
+                    if (artist != null && artist.Songs.Any())
+                    {
+                        var artistSongs = artist.Songs
+                            .Where(s => s.IsActive)
+                            .OrderBy(s => s.UploadDate)
+                            .Select(s => new {
+                                id = s.SongId,
+                                title = s.Title,
+                                artist = artist.ArtistName,
+                                fileUrl = s.FileUrl,
+                                imageUrl = s.ImageUrl
+                            })
+                            .ToList();
+
+                        ViewData["ArtistId"] = artist.ArtistId;
+                        ViewData["ArtistName"] = artist.ArtistName;
+                        ViewData["ArtistSongs"] = System.Text.Json.JsonSerializer.Serialize(artistSongs);
+                        ViewData["ArtistCurrentIndex"] = artistSongs.FindIndex(s => s.id == id);
+                        ViewData["FromArtist"] = true;
+                    }
                 }
             }
 

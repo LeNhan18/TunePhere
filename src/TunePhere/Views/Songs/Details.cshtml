@@ -296,6 +296,23 @@
         {
             @:window.albumData = null;
         }
+
+        // Thêm thông tin artist nếu có
+        @if (ViewData["ArtistSongs"] != null)
+        {
+            @:window.artistData = {
+            @:    artistId: '@ViewData["ArtistId"]',
+            @:    artistName: '@ViewData["ArtistName"]',
+            @:    currentIndex: @(ViewData["ArtistCurrentIndex"] ?? -1),
+            @:    songs: @Html.Raw(ViewData["ArtistSongs"]),
+            @:    fromArtist: @(ViewData["FromArtist"] != null && (bool)ViewData["FromArtist"] ? "true" : "false")
+            @:};
+            @:console.log("Artist data loaded:", window.artistData);
+        }
+        else
+        {
+            @:window.artistData = null;
+        }
     </script>
     <script src="~/js/song-details.js"></script>
     <script src="@Url.Content("~/js/navigation.js")" asp-append-version="true"></script>
