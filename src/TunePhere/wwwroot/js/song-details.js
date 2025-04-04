@@ -1,8 +1,9 @@
 ﻿// Sử dụng biến toàn cục từ view
 let audioPlayer = document.getElementById('audioPlayer');
 let isPlaying = false;
-let currentSongIndex = 0;
 let songs = [];
+let relatedSongs = [];
+let currentSongIndex = 0;
 
 // Biến và hàm cho tính năng lyrics đồng bộ
 let syncedLyrics = [];
@@ -17,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Khởi tạo dữ liệu bài hát
     songs.push({
-        id: 1,
+        id: window.songData.songId,
         title: window.songData.title,
         artist: window.songData.artist,
         audioUrl: window.songData.fileUrl,
@@ -29,6 +30,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Tự động phát khi trang tải xong
     playAudio();
+
+    // Tải danh sách bài hát liên quan
+    loadRelatedSongs();
 
     // Xử lý tua nhạc
     const seekBar = document.getElementById('seekBar');
@@ -380,16 +384,76 @@ function updatePlayPauseButton() {
     icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
 }
 
-// Phát bài tiếp theo (không có hành động vì chỉ có 1 bài)
-function nextSong() {
-    // Giữ nguyên bài hiện tại vì đây là trang chi tiết 1 bài
-    console.log("Không có bài tiếp theo");
+// Hàm lấy danh sách bài hát liên quan
+async function loadRelatedSongs() {
+    try {
+        const response = await fetch(`/api/songs/related/${window.songData.songId}`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        console.log("Songs data:", data);
+        
+        if (data.success) {
+            relatedSongs = data.songs;
+            // Tìm vị trí của bài hát hiện tại trong danh sách
+            currentSongIndex = relatedSongs.findIndex(song => song.songId === parseInt(window.songData.songId));
+            console.log("Current song index:", currentSongIndex);
+            
+            // Cập nhật UI để hiển thị tổng số bài hát
+            updateSongCounter();
+        }
+    } catch (error) {
+        console.error('Lỗi khi tải danh sách bài hát:', error);
+    }
 }
 
-// Phát bài trước (không có hành động vì chỉ có 1 bài)
-function previousSong() {
-    // Giữ nguyên bài hiện tại vì đây là trang chi tiết 1 bài
-    console.log("Không có bài trước");
+// Hàm cập nhật số thứ tự bài hát
+function updateSongCounter() {
+    const songCounter = document.getElementById('songCounter');
+    if (songCounter && relatedSongs.length > 0) {
+        songCounter.textContent = `Bài ${currentSongIndex + 1}/${relatedSongs.length}`;
+    }
+}
+
+// Hàm chuyển đến bài hát tiếp theo
+window.nextSong = function() {
+    console.log("Next song called. Songs length:", relatedSongs.length);
+    if (relatedSongs.length > 0) {
+        // Nếu đang phát bài hát trong album và chưa hết album
+        if (window.songData.albumId && currentSongIndex < relatedSongs.length - 1 && 
+            relatedSongs[currentSongIndex + 1].albumId === window.songData.albumId) {
+            currentSongIndex++;
+        } else {
+            // Nếu đã hết album hoặc không trong album, chuyển sang bài tiếp theo trong danh sách
+            currentSongIndex = (currentSongIndex + 1) % relatedSongs.length;
+        }
+        const nextSong = relatedSongs[currentSongIndex];
+        console.log("Moving to next song:", nextSong);
+        window.location.href = `/Songs/Details/${nextSong.songId}`;
+    } else {
+        console.log("No songs available");
+    }
+}
+
+// Hàm chuyển về bài hát trước đó
+window.previousSong = function() {
+    console.log("Previous song called. Songs length:", relatedSongs.length);
+    if (relatedSongs.length > 0) {
+        // Nếu đang phát bài hát trong album và không phải bài đầu tiên của album
+        if (window.songData.albumId && currentSongIndex > 0 && 
+            relatedSongs[currentSongIndex - 1].albumId === window.songData.albumId) {
+            currentSongIndex--;
+        } else {
+            // Nếu đã hết album hoặc không trong album, chuyển về bài trước trong danh sách
+            currentSongIndex = (currentSongIndex - 1 + relatedSongs.length) % relatedSongs.length;
+        }
+        const prevSong = relatedSongs[currentSongIndex];
+        console.log("Moving to previous song:", prevSong);
+        window.location.href = `/Songs/Details/${prevSong.songId}`;
+    } else {
+        console.log("No songs available");
+    }
 }
 
 // Xử lý tắt/bật âm thanh
@@ -926,6 +990,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Khởi tạo audio player
     initAudioPlayer();
+
+    // Gọi hàm tải danh sách bài hát liên quan khi trang được tải
+    loadRelatedSongs();
 });
 
 // Thêm hàm kiểm tra file khi trang tải xong
