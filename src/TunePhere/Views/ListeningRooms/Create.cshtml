@@ -5,6 +5,7 @@
 }
 
 <link rel="stylesheet" href="~/css/listeningRoom.css" />
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 <div class="listening-room">
     <nav aria-label="breadcrumb" class="mb-4">
@@ -48,7 +49,7 @@
                 <label asp-for="CurrentSongId" class="form-label">
                     <i class="fas fa-play me-1"></i>Bài Hát Hiện Tại
                 </label>
-                <select asp-for="CurrentSongId" class="form-control" required
+                <select asp-for="CurrentSongId" class="form-control song-select" required
                         asp-items="ViewBag.CurrentSongId">
                     <option value="">-- Chọn bài hát --</option>
                 </select>
@@ -79,6 +80,7 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
     <script>
         // Kích hoạt validation Bootstrap
@@ -96,5 +98,18 @@
                     }, false)
                 })
         })()
+
+        // Khởi tạo Select2 cho dropdown chọn bài hát
+        $(document).ready(function() {
+            $('.song-select').select2({
+                placeholder: "Tìm kiếm bài hát...",
+                allowClear: true,
+                language: {
+                    noResults: function() {
+                        return "Không tìm thấy bài hát";
+                    }
+                }
+            });
+        });
     </script>
 }
