@@ -244,6 +244,21 @@
             userIsAdmin: '@User.IsInRole("Admin")' === 'True',
             userIsOwner: '@(Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier))' === 'True'
         };
+        
+        // Thêm thông tin playlist nếu có
+        @if (ViewData["PlaylistSongs"] != null)
+        {
+            @:window.playlistData = {
+            @:    playlistId: '@ViewData["PlaylistId"]',
+            @:    playlistTitle: '@ViewData["PlaylistTitle"]',
+            @:    currentIndex: @(ViewData["CurrentIndex"] ?? -1),
+            @:    songs: @Html.Raw(ViewData["PlaylistSongs"])
+            @:};
+        }
+        else 
+        {
+            @:window.playlistData = null;
+        }
     </script>
     <script src="~/js/song-details.js"></script>
     <script src="@Url.Content("~/js/navigation.js")" asp-append-version="true"></script>
