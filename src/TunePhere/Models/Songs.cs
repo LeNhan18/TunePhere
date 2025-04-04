@@ -37,7 +37,10 @@ namespace TunePhere.Models
 
         [ForeignKey("ArtistId")]
         public int ArtistId { get; set; } // Khóa ngoại liên kết với Artist
-        
+        [Display(Name ="Số thứ tự")]
+        public int? TrackNumber { get; set; }
+
+
         public int PlayCount { get; set; } = 0; // Số lượt nghe
         public int LikeCount { get; set; } = 0;
         [NotMapped]

@@ -152,20 +152,29 @@
             songRow.innerHTML = `
                 <div class="spotify-song-number">${songsList.children.length + 1}</div>
                 <div class="spotify-song-info">
+                    <div class="spotify-song-title">
+                        <input type="text" name="Songs[${songsList.children.length}].Title" class="form-control" placeholder="Tên bài hát" required />
+                    </div>
+                    <div class="spotify-song-track-number">
+                        <input type="number" name="Songs[${songsList.children.length}].TrackNumber" class="form-control" placeholder="Số thứ tự" min="1" />
+                    </div>
                     <div class="spotify-song-file">
                         <input type="file" name="SongFiles" id="${fileId}" class="song-file spotify-file-input" accept="audio/*" required onchange="handleSongFile(this)" />
                         <label for="${fileId}" class="spotify-file-label">Chọn file nhạc</label>
                     </div>
-                    <div class="spotify-song-title">
-                        <input type="text" name="SongTitles" class="spotify-input" placeholder="Tên bài hát" required />
+                    <div class="spotify-song-image">
+                        <input type="file" name="ImageFiles" class="form-control" accept="image/*" onchange="handleImageFile(this)" />
+                        <label class="file-label">Chọn ảnh</label>
                     </div>
                 </div>
                 <div class="spotify-song-duration">
                     <span>0:00</span>
                 </div>
-                <button type="button" class="spotify-remove-button" onclick="removeSongRow(this)">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
+                <div class="spotify-song-actions">
+                    <button type="button" class="btn-remove-song" onclick="removeSong(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             `;
             songsList.appendChild(songRow);
             

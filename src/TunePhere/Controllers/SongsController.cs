@@ -535,6 +535,143 @@ namespace TunePhere.Controllers
             });
         }
 
+        [HttpGet("api/songs/related/{songId}")]
+        public async Task<IActionResult> GetRelatedSongs(int songId)
+        {
+            try
+            {
+                // Lấy bài hát hiện tại và thông tin album của nó
+                var currentSong = await _context.Songs
+                    .Include(s => s.Artists)
+                    .Include(s => s.Albums)
+                    .FirstOrDefaultAsync(s => s.SongId == songId);
+
+                if (currentSong == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bài hát" });
+                }
+
+                var allSongs = new List<object>();
+
+                // 1. Nếu bài hát nằm trong album, lấy tất cả bài hát trong album đó
+                if (currentSong.AlbumId.HasValue)
+                {
+                    var albumSongs = await _context.Songs
+                        .Include(s => s.Artists)
+                        .Where(s => s.AlbumId == currentSong.AlbumId)
+                        .OrderBy(s => s.TrackNumber) // Sắp xếp theo số thứ tự trong album
+                        .ThenBy(s => s.Title) // Nếu không có số thứ tự thì sắp xếp theo tên
+                        .Select(s => new
+                        {
+                            s.SongId,
+                            s.Title,
+                            ArtistName = s.Artists.ArtistName,
+                            s.ImageUrl,
+                            s.FileUrl,
+                            s.TrackNumber,
+                            RelevanceScore = 10.0
+                        })
+                        .ToListAsync();
+
+                    // Thêm tất cả bài hát trong album vào danh sách
+                    allSongs.AddRange(albumSongs);
+                }
+                else // Nếu không nằm trong album
+                {
+                    // 2. Lấy các bài hát cùng nghệ sĩ
+                    var artistSongs = await _context.Songs
+                        .Include(s => s.Artists)
+                        .Where(s => s.ArtistId == currentSong.ArtistId && s.SongId != songId)
+                        .OrderByDescending(s => s.PlayCount)
+                        .Select(s => new
+                        {
+                            s.SongId,
+                            s.Title,
+                            ArtistName = s.Artists.ArtistName,
+                            s.ImageUrl,
+                            s.FileUrl,
+                            s.TrackNumber,
+                            RelevanceScore = 8.0
+                        })
+                        .ToListAsync();
+
+                    allSongs.AddRange(artistSongs);
+
+                    // 3. Lấy các bài hát cùng thể loại
+                    var genreSongs = await _context.Songs
+                        .Include(s => s.Artists)
+                        .Where(s => s.Genre == currentSong.Genre 
+                                && s.SongId != songId 
+                                && s.ArtistId != currentSong.ArtistId)
+                        .OrderByDescending(s => s.PlayCount)
+                        .Take(10)
+                        .Select(s => new
+                        {
+                            s.SongId,
+                            s.Title,
+                            ArtistName = s.Artists.ArtistName,
+                            s.ImageUrl,
+                            s.FileUrl,
+                            s.TrackNumber,
+                            RelevanceScore = 5.0
+                        })
+                        .ToListAsync();
+
+                    allSongs.AddRange(genreSongs);
+
+                    // 4. Lấy các bài hát khác
+                    if (allSongs.Count < 20)
+                    {
+                        var otherSongs = await _context.Songs
+                            .Include(s => s.Artists)
+                            .Where(s => s.SongId != songId 
+                                    && s.ArtistId != currentSong.ArtistId 
+                                    && s.Genre != currentSong.Genre)
+                            .OrderByDescending(s => s.PlayCount)
+                            .Take(20 - allSongs.Count)
+                            .Select(s => new
+                            {
+                                s.SongId,
+                                s.Title,
+                                ArtistName = s.Artists.ArtistName,
+                                s.ImageUrl,
+                                s.FileUrl,
+                                s.TrackNumber,
+                                RelevanceScore = 1.0
+                            })
+                            .ToListAsync();
+
+                        allSongs.AddRange(otherSongs);
+                    }
+                }
+
+                // Thêm bài hát hiện tại vào đầu danh sách nếu không nằm trong album
+                if (!currentSong.AlbumId.HasValue)
+                {
+                    var currentSongData = new
+                    {
+                        currentSong.SongId,
+                        currentSong.Title,
+                        ArtistName = currentSong.Artists?.ArtistName,
+                        currentSong.ImageUrl,
+                        currentSong.FileUrl,
+                        currentSong.TrackNumber,
+                        RelevanceScore = double.MaxValue
+                    };
+
+                    var finalList = new List<object> { currentSongData };
+                    finalList.AddRange(allSongs);
+                    allSongs = finalList;
+                }
+
+                return Json(new { success = true, songs = allSongs });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
         private bool SongExists(int id)
         {
             return _context.Songs.Any(e => e.SongId == id);
