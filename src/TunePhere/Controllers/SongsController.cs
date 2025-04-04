@@ -481,44 +481,72 @@ namespace TunePhere.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var song = await _context.Songs
-                .Include(s => s.Artists)
-                .FirstOrDefaultAsync(m => m.SongId == id);
-
-            if (song == null)
+            try
             {
-                return NotFound();
-            }
+                var song = await _context.Songs
+                    .Include(s => s.Artists)
+                    .Include(s => s.Lyrics) // Thêm vào để lấy lyrics
+                    .FirstOrDefaultAsync(m => m.SongId == id);
 
-            // Kiểm tra quyền sở hữu
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null || song.Artists?.userId != user.Id)
-            {
-                return Forbid();
-            }
-
-            // Xóa file nhạc và ảnh bìa
-            if (!string.IsNullOrEmpty(song.FileUrl))
-            {
-                var audioPath = Path.Combine(_environment.WebRootPath, song.FileUrl.TrimStart('/'));
-                if (System.IO.File.Exists(audioPath))
+                if (song == null)
                 {
-                    System.IO.File.Delete(audioPath);
+                    return NotFound();
                 }
-            }
 
-            if (!string.IsNullOrEmpty(song.ImageUrl))
-            {
-                var imagePath = Path.Combine(_environment.WebRootPath, song.ImageUrl.TrimStart('/'));
-                if (System.IO.File.Exists(imagePath))
+                // Kiểm tra quyền sở hữu
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null || song.Artists?.userId != user.Id)
                 {
-                    System.IO.File.Delete(imagePath);
+                    return Forbid();
                 }
-            }
 
-            _context.Songs.Remove(song);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                // Xóa tất cả lyrics của bài hát trước
+                var lyrics = await _context.Lyrics.Where(l => l.SongId == id).ToListAsync();
+                if (lyrics.Any())
+                {
+                    _context.Lyrics.RemoveRange(lyrics);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Xóa tất cả UserFavoriteSongs liên quan đến bài hát
+                var userFavorites = await _context.UserFavoriteSongs.Where(f => f.SongId == id).ToListAsync();
+                if (userFavorites.Any())
+                {
+                    _context.UserFavoriteSongs.RemoveRange(userFavorites);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Xóa file nhạc và ảnh bìa
+                if (!string.IsNullOrEmpty(song.FileUrl))
+                {
+                    var audioPath = Path.Combine(_environment.WebRootPath, song.FileUrl.TrimStart('/'));
+                    if (System.IO.File.Exists(audioPath))
+                    {
+                        System.IO.File.Delete(audioPath);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(song.ImageUrl))
+                {
+                    var imagePath = Path.Combine(_environment.WebRootPath, song.ImageUrl.TrimStart('/'));
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        System.IO.File.Delete(imagePath);
+                    }
+                }
+
+                // Xóa bài hát
+                _context.Songs.Remove(song);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi và hiển thị thông báo
+                _logger.LogError(ex, "Lỗi khi xóa bài hát: {Message}", ex.Message);
+                TempData["Error"] = "Không thể xóa bài hát. Vui lòng thử lại sau.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         // POST: Songs/IncrementPlayCount/5
