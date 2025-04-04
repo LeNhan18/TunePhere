@@ -97,7 +97,7 @@ namespace TunePhere.Controllers
             }
         }
         // GET: Songs/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, int? playlistId, int? index)
         {
             if (id == null)
             {
@@ -130,6 +130,35 @@ namespace TunePhere.Controllers
                 var userId = _userManager.GetUserId(User);
                 ViewData["IsFavorited"] = await _context.UserFavoriteSongs
                     .AnyAsync(f => f.SongId == song.SongId && f.UserId == userId);
+            }
+
+            // Nếu có playlistId, lấy thông tin các bài hát trong playlist
+            if (playlistId.HasValue)
+            {
+                var playlist = await _context.Playlists
+                    .Include(p => p.PlaylistSongs)
+                    .ThenInclude(ps => ps.Song)
+                    .FirstOrDefaultAsync(p => p.PlaylistId == playlistId);
+
+                if (playlist != null)
+                {
+                    var playlistSongs = playlist.PlaylistSongs
+                        .Where(ps => ps.Song != null)
+                        .OrderBy(ps => ps.AddedAt)
+                        .Select(ps => new {
+                            id = ps.Song.SongId,
+                            title = ps.Song.Title,
+                            artist = ps.Song.Artists?.ArtistName ?? "Unknown Artist",
+                            fileUrl = ps.Song.FileUrl,
+                            imageUrl = ps.Song.ImageUrl
+                        })
+                        .ToList();
+
+                    ViewData["PlaylistId"] = playlistId;
+                    ViewData["PlaylistTitle"] = playlist.Title;
+                    ViewData["PlaylistSongs"] = System.Text.Json.JsonSerializer.Serialize(playlistSongs);
+                    ViewData["CurrentIndex"] = index ?? playlistSongs.FindIndex(s => s.id == id);
+                }
             }
 
             // Thêm headers để tránh cache
