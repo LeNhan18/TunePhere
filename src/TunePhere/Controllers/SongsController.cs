@@ -97,7 +97,8 @@ namespace TunePhere.Controllers
             }
         }
         // GET: Songs/Details/5
-        public async Task<IActionResult> Details(int? id, int? playlistId, int? index)
+        // GET: Songs/Details/5
+        public async Task<IActionResult> Details(int? id, int? playlistId, int? index, int? albumId)
         {
             if (id == null)
             {
@@ -158,6 +159,34 @@ namespace TunePhere.Controllers
                     ViewData["PlaylistTitle"] = playlist.Title;
                     ViewData["PlaylistSongs"] = System.Text.Json.JsonSerializer.Serialize(playlistSongs);
                     ViewData["CurrentIndex"] = index ?? playlistSongs.FindIndex(s => s.id == id);
+                }
+            }
+            // Nếu có albumId hoặc bài hát thuộc album, lấy thông tin các bài hát trong album
+            else if (albumId.HasValue || song.AlbumId.HasValue)
+            {
+                int targetAlbumId = albumId ?? song.AlbumId.Value;
+                var album = await _context.Albums
+                    .Include(a => a.Songs)
+                    .FirstOrDefaultAsync(a => a.AlbumId == targetAlbumId);
+
+                if (album != null && album.Songs.Any())
+                {
+                    var albumSongs = album.Songs
+                        .Where(s => s.IsActive)
+                        .OrderBy(s => s.UploadDate)
+                        .Select(s => new {
+                            id = s.SongId,
+                            title = s.Title,
+                            artist = s.Artists?.ArtistName ?? "Unknown Artist",
+                            fileUrl = s.FileUrl,
+                            imageUrl = s.ImageUrl
+                        })
+                        .ToList();
+
+                    ViewData["AlbumId"] = album.AlbumId;
+                    ViewData["AlbumTitle"] = album.AlbumName;
+                    ViewData["AlbumSongs"] = System.Text.Json.JsonSerializer.Serialize(albumSongs);
+                    ViewData["CurrentIndex"] = albumSongs.FindIndex(s => s.id == id);
                 }
             }
 

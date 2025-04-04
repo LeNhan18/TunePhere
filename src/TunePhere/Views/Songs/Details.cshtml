@@ -255,9 +255,20 @@
             @:    songs: @Html.Raw(ViewData["PlaylistSongs"])
             @:};
         }
-        else 
+        // Thêm thông tin album nếu có
+        else if (ViewData["AlbumSongs"] != null)
+        {
+            @:window.albumData = {
+            @:    albumId: '@ViewData["AlbumId"]',
+            @:    albumTitle: '@ViewData["AlbumTitle"]',
+            @:    currentIndex: @(ViewData["CurrentIndex"] ?? -1),
+            @:    songs: @Html.Raw(ViewData["AlbumSongs"])
+            @:};
+        }
+        else
         {
             @:window.playlistData = null;
+            @:window.albumData = null;
         }
     </script>
     <script src="~/js/song-details.js"></script>
