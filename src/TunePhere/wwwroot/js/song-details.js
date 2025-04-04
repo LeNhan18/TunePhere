@@ -380,134 +380,138 @@ function updatePlayPauseButton() {
     icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
 }
 
-// Cập nhật hàm phát bài tiếp theo
+// Thay thế hoàn toàn hàm nextSong
 function nextSong() {
-    console.log("Đang thử chuyển bài tiếp theo");
-    console.log("playlist data:", window.playlistData);
-    console.log("album data:", window.albumData);
-    console.log("favorites data:", window.favoritesData);
-    console.log("artist data:", window.artistData);
+    console.log("==== NEXT SONG ====");
     
-    // Nếu đến từ trang yêu thích, ưu tiên chuyển trong danh sách yêu thích
+    // Ưu tiên artist trước tất cả nếu fromArtist = true
+    if (window.artistData && window.artistData.songs && window.artistData.songs.length > 1 && window.artistData.fromArtist) {
+        let currentIndex = parseInt(window.artistData.currentIndex);
+        if (isNaN(currentIndex)) currentIndex = 0;
+        
+        let nextIndex = currentIndex + 1;
+        if (nextIndex >= window.artistData.songs.length) {
+            nextIndex = 0; // Quay lại bài đầu tiên
+        }
+        
+        console.log(`Artist navigation: Moving from index ${currentIndex} to ${nextIndex}`);
+        const nextSong = window.artistData.songs[nextIndex];
+        
+        // Thêm timestamp để tránh cache
+        window.location.href = `/Songs/Details/${nextSong.id}?artistId=${window.artistData.artistId}&fromArtist=true&index=${nextIndex}&t=${Date.now()}`;
+        return;
+    }
+    
+    // Giữ nguyên logic cho favorites, playlist, album
     if (window.favoritesData && window.favoritesData.songs && window.favoritesData.songs.length > 1) {
-        let nextIndex = window.favoritesData.currentIndex + 1;
-        // Nếu đã đến cuối danh sách yêu thích, quay lại bài đầu tiên
+        let nextIndex = parseInt(window.favoritesData.currentIndex) + 1;
         if (nextIndex >= window.favoritesData.songs.length) {
             nextIndex = 0;
         }
-
-        console.log("Chuyển đến bài hát yêu thích tiếp theo, index:", nextIndex);
-        // Chuyển đến bài hát tiếp theo
         navigateToSong(nextIndex, 'favorites');
         return;
     }
     
-    // Ưu tiên chuyển bài trong playlist nếu có
     if (window.playlistData && window.playlistData.songs && window.playlistData.songs.length > 1) {
-        let nextIndex = window.playlistData.currentIndex + 1;
-        // Nếu đã đến cuối playlist, quay lại bài đầu tiên
+        let nextIndex = parseInt(window.playlistData.currentIndex) + 1;
         if (nextIndex >= window.playlistData.songs.length) {
             nextIndex = 0;
         }
-
-        // Chuyển đến bài hát tiếp theo
         navigateToSong(nextIndex, 'playlist');
         return;
     }
-
-    // Nếu không có playlist nhưng có album, chuyển bài trong album
+    
     if (window.albumData && window.albumData.songs && window.albumData.songs.length > 1) {
-        let nextIndex = window.albumData.currentIndex + 1;
-        // Nếu đã đến cuối album, quay lại bài đầu tiên
+        let nextIndex = parseInt(window.albumData.currentIndex) + 1;
         if (nextIndex >= window.albumData.songs.length) {
             nextIndex = 0;
         }
-
-        // Chuyển đến bài hát tiếp theo
         navigateToSong(nextIndex, 'album');
         return;
     }
     
-    // Nếu không có playlist/album/favorites nhưng có artist, chuyển bài trong danh sách của nghệ sĩ
+    // Nếu không có điều kiện nào được thỏa mãn, thử chuyển theo nghệ sĩ
     if (window.artistData && window.artistData.songs && window.artistData.songs.length > 1) {
-        let nextIndex = window.artistData.currentIndex + 1;
-        // Nếu đã đến cuối danh sách bài hát của nghệ sĩ, quay lại bài đầu tiên
+        let currentIndex = parseInt(window.artistData.currentIndex);
+        if (isNaN(currentIndex)) currentIndex = 0;
+        
+        let nextIndex = currentIndex + 1;
         if (nextIndex >= window.artistData.songs.length) {
             nextIndex = 0;
         }
-
-        console.log("Chuyển đến bài hát tiếp theo của nghệ sĩ, index:", nextIndex);
-        // Chuyển đến bài hát tiếp theo
-        navigateToSong(nextIndex, 'artist');
-        return;
+        
+        console.log(`Fallback artist navigation: Moving from index ${currentIndex} to ${nextIndex}`);
+        const nextSong = window.artistData.songs[nextIndex];
+        
+        window.location.href = `/Songs/Details/${nextSong.id}?artistId=${window.artistData.artistId}&fromArtist=true&index=${nextIndex}&t=${Date.now()}`;
     }
-
-    console.log("Không có bài tiếp theo");
 }
 
-// Cập nhật hàm phát bài trước
+// Tương tự sửa hàm previousSong
 function previousSong() {
-    console.log("Đang thử chuyển bài trước đó");
-    console.log("playlist data:", window.playlistData);
-    console.log("album data:", window.albumData);
-    console.log("favorites data:", window.favoritesData);
-    console.log("artist data:", window.artistData);
+    console.log("==== PREVIOUS SONG ====");
     
-    // Nếu đến từ trang yêu thích, ưu tiên chuyển trong danh sách yêu thích
+    // Ưu tiên artist trước tất cả nếu fromArtist = true
+    if (window.artistData && window.artistData.songs && window.artistData.songs.length > 1 && window.artistData.fromArtist) {
+        let currentIndex = parseInt(window.artistData.currentIndex);
+        if (isNaN(currentIndex)) currentIndex = 0;
+        
+        let prevIndex = currentIndex - 1;
+        if (prevIndex < 0) {
+            prevIndex = window.artistData.songs.length - 1; // Quay lại bài cuối cùng
+        }
+        
+        console.log(`Artist navigation: Moving from index ${currentIndex} to ${prevIndex}`);
+        const prevSong = window.artistData.songs[prevIndex];
+        
+        // Thêm timestamp để tránh cache
+        window.location.href = `/Songs/Details/${prevSong.id}?artistId=${window.artistData.artistId}&fromArtist=true&index=${prevIndex}&t=${Date.now()}`;
+        return;
+    }
+    
+    // Giữ nguyên logic cho favorites, playlist, album
     if (window.favoritesData && window.favoritesData.songs && window.favoritesData.songs.length > 1) {
-        let prevIndex = window.favoritesData.currentIndex - 1;
-        // Nếu đã đến đầu danh sách yêu thích, chuyển đến bài cuối cùng
+        let prevIndex = parseInt(window.favoritesData.currentIndex) - 1;
         if (prevIndex < 0) {
             prevIndex = window.favoritesData.songs.length - 1;
         }
-
-        console.log("Chuyển đến bài hát yêu thích trước đó, index:", prevIndex);
-        // Chuyển đến bài hát trước
         navigateToSong(prevIndex, 'favorites');
         return;
     }
     
-    // Ưu tiên chuyển bài trong playlist nếu có
     if (window.playlistData && window.playlistData.songs && window.playlistData.songs.length > 1) {
-        let prevIndex = window.playlistData.currentIndex - 1;
-        // Nếu đã đến đầu playlist, chuyển đến bài cuối cùng
+        let prevIndex = parseInt(window.playlistData.currentIndex) - 1;
         if (prevIndex < 0) {
             prevIndex = window.playlistData.songs.length - 1;
         }
-
-        // Chuyển đến bài hát trước
         navigateToSong(prevIndex, 'playlist');
         return;
     }
-
-    // Nếu không có playlist nhưng có album, chuyển bài trong album
+    
     if (window.albumData && window.albumData.songs && window.albumData.songs.length > 1) {
-        let prevIndex = window.albumData.currentIndex - 1;
-        // Nếu đã đến đầu album, chuyển đến bài cuối cùng
+        let prevIndex = parseInt(window.albumData.currentIndex) - 1;
         if (prevIndex < 0) {
             prevIndex = window.albumData.songs.length - 1;
         }
-
-        // Chuyển đến bài hát trước
         navigateToSong(prevIndex, 'album');
         return;
     }
     
-    // Nếu không có playlist/album/favorites nhưng có artist, chuyển bài trong danh sách của nghệ sĩ
+    // Nếu không có điều kiện nào được thỏa mãn, thử chuyển theo nghệ sĩ
     if (window.artistData && window.artistData.songs && window.artistData.songs.length > 1) {
-        let prevIndex = window.artistData.currentIndex - 1;
-        // Nếu đã đến đầu danh sách bài hát của nghệ sĩ, chuyển đến bài cuối cùng
+        let currentIndex = parseInt(window.artistData.currentIndex);
+        if (isNaN(currentIndex)) currentIndex = 0;
+        
+        let prevIndex = currentIndex - 1;
         if (prevIndex < 0) {
             prevIndex = window.artistData.songs.length - 1;
         }
-
-        console.log("Chuyển đến bài hát trước đó của nghệ sĩ, index:", prevIndex);
-        // Chuyển đến bài hát trước
-        navigateToSong(prevIndex, 'artist');
-        return;
+        
+        console.log(`Fallback artist navigation: Moving from index ${currentIndex} to ${prevIndex}`);
+        const prevSong = window.artistData.songs[prevIndex];
+        
+        window.location.href = `/Songs/Details/${prevSong.id}?artistId=${window.artistData.artistId}&fromArtist=true&index=${prevIndex}&t=${Date.now()}`;
     }
-
-    console.log("Không có bài trước");
 }
 
 // Hàm điều hướng đến bài hát theo chỉ số
@@ -516,12 +520,13 @@ function navigateToSong(index, type = 'playlist') {
     let data;
     if (type === 'playlist') {
         data = window.playlistData;
+    } else if (type === 'artist') {
+        data = window.artistData;
+
     } else if (type === 'album') {
         data = window.albumData;
     } else if (type === 'favorites') {
         data = window.favoritesData;
-    } else if (type === 'artist') {
-        data = window.artistData;
     }
 
     if (!data || !data.songs || index < 0 || index >= data.songs.length) {
@@ -543,12 +548,12 @@ function navigateToSong(index, type = 'playlist') {
     let nextUrl = '';
     if (type === 'playlist') {
         nextUrl = `/Songs/Details/${song.id}?playlistId=${data.playlistId}&index=${index}`;
+    } else if (type === 'artist') {
+        nextUrl = `/Songs/Details/${song.id}?artistId=${data.artistId}&fromArtist=true&index=${index}`;
     } else if (type === 'album') {
         nextUrl = `/Songs/Details/${song.id}?albumId=${data.albumId}&index=${index}`;
     } else if (type === 'favorites') {
         nextUrl = `/Songs/Details/${song.id}?fromFavorites=true&index=${index}`;
-    } else if (type === 'artist') {
-        nextUrl = `/Songs/Details/${song.id}?artistId=${data.artistId}&fromArtist=true&index=${index}`;
     }
 
     // Lưu vị trí hiện tại vào sessionStorage
