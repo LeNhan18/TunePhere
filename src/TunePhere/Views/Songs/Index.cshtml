@@ -77,7 +77,7 @@
                                     <a asp-action="Edit" asp-route-id="@item.SongId" class="btn btn-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a asp-action="Details" asp-route-id="@item.SongId" class="btn btn-action">
+                                    <a asp-action="Details" asp-route-id="@item.SongId" asp-route-artistId="@item.ArtistId" asp-route-fromArtist="true" class="btn btn-action">
                                         <i class="fas fa-info-circle"></i>
                                     </a>
                                     <a asp-action="Delete" asp-route-id="@item.SongId" class="btn btn-action btn-delete">

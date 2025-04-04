@@ -52,7 +52,7 @@
                                     data-artist="@item.Song.Artists?.ArtistName">
                                     <th scope="row" class="text-muted">@index</th>
                                     <td>
-                                        <a href="@Url.Action("Details", "Songs", new { id = item.Song.SongId })" class="song-link">
+                                        <a href="@Url.Action("Details", "Songs", new { id = item.Song.SongId, fromFavorites = true, index = index-1 })" class="song-link">
                                         <div class="d-flex align-items-center">
                                             <div class="song-image-container me-3">
  
