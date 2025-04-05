@@ -244,6 +244,75 @@
             userIsAdmin: '@User.IsInRole("Admin")' === 'True',
             userIsOwner: '@(Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier))' === 'True'
         };
+        
+        // Debug thông tin
+        console.log("View data fromFavorites:", '@ViewData["FromFavorites"]');
+        console.log("View data FavoritesCurrentIndex:", '@ViewData["FavoritesCurrentIndex"]');
+        
+        // Thêm thông tin danh sách yêu thích nếu có
+        @if (ViewData["FavoritesSongs"] != null)
+        {
+            @:window.favoritesData = {
+            @:    currentIndex: @(ViewData["FavoritesCurrentIndex"] ?? -1),
+            @:    songs: @Html.Raw(ViewData["FavoritesSongs"]),
+            @:    fromFavorites: true
+            @:};
+            @:console.log("Favorites data loaded:", window.favoritesData);
+        }
+        else
+        {
+            @:window.favoritesData = null;
+            @:console.log("No favorites data available");
+        }
+        
+        // Thêm thông tin playlist nếu có
+        @if (ViewData["PlaylistSongs"] != null)
+        {
+            @:window.playlistData = {
+            @:    playlistId: '@ViewData["PlaylistId"]',
+            @:    playlistTitle: '@ViewData["PlaylistTitle"]',
+            @:    currentIndex: @(ViewData["CurrentIndex"] ?? -1),
+            @:    songs: @Html.Raw(ViewData["PlaylistSongs"])
+            @:};
+            @:console.log("Playlist data loaded:", window.playlistData);
+        }
+        else
+        {
+            @:window.playlistData = null;
+        }
+        
+        // Thêm thông tin album nếu có
+        @if (ViewData["AlbumSongs"] != null)
+        {
+            @:window.albumData = {
+            @:    albumId: '@ViewData["AlbumId"]',
+            @:    albumTitle: '@ViewData["AlbumTitle"]',
+            @:    currentIndex: @(ViewData["CurrentIndex"] ?? -1),
+            @:    songs: @Html.Raw(ViewData["AlbumSongs"])
+            @:};
+            @:console.log("Album data loaded:", window.albumData);
+        }
+        else
+        {
+            @:window.albumData = null;
+        }
+
+        // Thêm thông tin artist nếu có
+        @if (ViewData["ArtistSongs"] != null)
+        {
+            @:window.artistData = {
+            @:    artistId: '@ViewData["ArtistId"]',
+            @:    artistName: '@ViewData["ArtistName"]',
+            @:    currentIndex: @(ViewData["ArtistCurrentIndex"] ?? -1),
+            @:    songs: @Html.Raw(ViewData["ArtistSongs"]),
+            @:    fromArtist: @(((ViewData["FromArtist"] as bool?) ?? false) ? "true" : "false")
+            @:};
+            @:console.log("Artist data loaded:", window.artistData);
+        }
+        else
+        {
+            @:window.artistData = null;
+        }
     </script>
     <script src="~/js/song-details.js"></script>
     <script src="@Url.Content("~/js/navigation.js")" asp-append-version="true"></script>
