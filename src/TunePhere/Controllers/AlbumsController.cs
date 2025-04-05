@@ -428,30 +428,69 @@ namespace TunePhere.Controllers
         [Authorize(Roles = "Artist")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var album = await _context.Albums
-                .Include(a => a.Artists)
-                .Include(a => a.Songs)
-                .FirstOrDefaultAsync(m => m.AlbumId == id);
-
-            if (album == null)
-            {
-                return NotFound();
-            }
-
-            // Kiểm tra quyền sở hữu
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (album.Artists?.userId != userId)
-            {
-                return Unauthorized();
-            }
-
             try
             {
+                // Sử dụng transaction để đảm bảo tính nhất quán dữ liệu
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                
+                var album = await _context.Albums
+                    .Include(a => a.Artists)
+                    .Include(a => a.Songs)
+                    .FirstOrDefaultAsync(m => m.AlbumId == id);
+
+                if (album == null)
+                {
+                    return NotFound();
+                }
+
+                // Kiểm tra quyền sở hữu
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (album.Artists?.userId != userId)
+                {
+                    return Unauthorized();
+                }
+
                 // Xóa các bài hát và file bài hát
                 if (album.Songs != null && album.Songs.Any())
                 {
                     foreach (var song in album.Songs)
                     {
+                        // Xóa các bài hát khỏi playlists
+                        var playlistSongs = await _context.PlaylistSongs
+                            .Where(ps => ps.SongId == song.SongId)
+                            .ToListAsync();
+                        if (playlistSongs.Any())
+                        {
+                            _context.PlaylistSongs.RemoveRange(playlistSongs);
+                        }
+                        
+                        // Xóa các remixes liên quan đến bài hát
+                        var remixes = await _context.Remixes
+                            .Where(r => r.OriginalSongId == song.SongId)
+                            .ToListAsync();
+                        if (remixes.Any())
+                        {
+                            _context.Remixes.RemoveRange(remixes);
+                        }
+                        
+                        // Xóa lyrics của bài hát
+                        var lyrics = await _context.Lyrics
+                            .Where(l => l.SongId == song.SongId)
+                            .ToListAsync();
+                        if (lyrics.Any())
+                        {
+                            _context.Lyrics.RemoveRange(lyrics);
+                        }
+                        
+                        // Xóa các bài hát khỏi danh sách yêu thích
+                        var favoriteSongs = await _context.UserFavoriteSongs
+                            .Where(fs => fs.SongId == song.SongId)
+                            .ToListAsync();
+                        if (favoriteSongs.Any())
+                        {
+                            _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
+                        }
+                        
                         // Xóa file vật lý
                         if (!string.IsNullOrEmpty(song.FileUrl))
                         {
@@ -460,73 +499,15 @@ namespace TunePhere.Controllers
                             {
                                 System.IO.File.Delete(songPath);
                             }
-                        }
-                        
-                        // Xóa bài hát khỏi các playlist (nếu có)
-                        var playlistSongs = await _context.PlaylistSongs
-                            .Where(ps => ps.SongId == song.SongId)
-                            .ToListAsync();
-                        
-                        if (playlistSongs.Any())
-                        {
-                            _context.PlaylistSongs.RemoveRange(playlistSongs);
-                        }
-                        
-                        // Xóa các bài hát khỏi danh sách yêu thích (nếu có)
-                        var favoriteSongs = await _context.UserFavoriteSongs
-                            .Where(fs => fs.SongId == song.SongId)
-                            .ToListAsync();
-                        
-                        if (favoriteSongs.Any())
-                        {
-                            _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
-                        }
-                        
-                        // Xóa bài hát khỏi database
-                        _context.Songs.Remove(song);
-                    }
-                }
-                else
-                {
-                    // Trường hợp Songs không được load, tìm và xóa riêng
-                    var songsToDelete = await _context.Songs
-                        .Where(s => s.AlbumId == id)
-                        .ToListAsync();
-                        
-                    foreach (var song in songsToDelete)
-                    {
-                        // Xóa file vật lý
-                        if (!string.IsNullOrEmpty(song.FileUrl))
-                        {
-                            var songPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", song.FileUrl.TrimStart('/'));
-                            if (System.IO.File.Exists(songPath))
-                            {
-                                System.IO.File.Delete(songPath);
-                            }
-                        }
-                        
-                        // Xóa bài hát khỏi các playlist (nếu có)
-                        var playlistSongs = await _context.PlaylistSongs
-                            .Where(ps => ps.SongId == song.SongId)
-                            .ToListAsync();
-                        
-                        if (playlistSongs.Any())
-                        {
-                            _context.PlaylistSongs.RemoveRange(playlistSongs);
-                        }
-                        
-                        // Xóa các bài hát khỏi danh sách yêu thích (nếu có)
-                        var favoriteSongs = await _context.UserFavoriteSongs
-                            .Where(fs => fs.SongId == song.SongId)
-                            .ToListAsync();
-                        
-                        if (favoriteSongs.Any())
-                        {
-                            _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
                         }
                     }
                     
-                    _context.Songs.RemoveRange(songsToDelete);
+                    // Lưu các thay đổi về xóa các mối quan hệ trước
+                    await _context.SaveChangesAsync();
+                    
+                    // Sau đó mới xóa các bài hát
+                    _context.Songs.RemoveRange(album.Songs);
+                    await _context.SaveChangesAsync();
                 }
 
                 // Xóa ảnh album
@@ -543,6 +524,9 @@ namespace TunePhere.Controllers
                 _context.Albums.Remove(album);
                 await _context.SaveChangesAsync();
                 
+                // Hoàn thành transaction
+                await transaction.CommitAsync();
+                
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -550,7 +534,7 @@ namespace TunePhere.Controllers
                 // Log lỗi và hiển thị thông báo
                 Console.WriteLine($"Lỗi khi xóa album: {ex.Message}");
                 ModelState.AddModelError("", $"Có lỗi xảy ra khi xóa album: {ex.Message}");
-                return View(album);
+                return View("Delete", _context.Albums.Find(id));
             }
         }
 
@@ -688,56 +672,118 @@ namespace TunePhere.Controllers
         [Authorize(Roles = "Artist")]
         public async Task<IActionResult> DeleteSong(int songId)
         {
-            var song = await _context.Songs
-                .Include(s => s.Albums)
-                .ThenInclude(a => a.Artists)
-                .FirstOrDefaultAsync(s => s.SongId == songId);
-
-            if (song == null)
+            // Khai báo albumId ở ngoài khối try để có thể sử dụng trong khối catch
+            int? albumId = null;
+            
+            try
             {
-                return NotFound();
-            }
+                // Sử dụng transaction để đảm bảo tính nhất quán dữ liệu
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                
+                var song = await _context.Songs
+                    .Include(s => s.Albums)
+                    .ThenInclude(a => a.Artists)
+                    .FirstOrDefaultAsync(s => s.SongId == songId);
 
-            // Kiểm tra quyền sở hữu
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (song.Albums?.Artists?.userId != userId)
-            {
-                return Unauthorized();
-            }
-
-            var albumId = song.AlbumId;
-            var duration = song.Duration;
-
-            // Xóa file nhạc
-            if (!string.IsNullOrEmpty(song.FileUrl))
-            {
-                var audioPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", song.FileUrl.TrimStart('/'));
-                if (System.IO.File.Exists(audioPath))
+                if (song == null)
                 {
-                    System.IO.File.Delete(audioPath);
+                    return NotFound();
                 }
-            }
 
-            _context.Songs.Remove(song);
-
-            // Cập nhật thông tin album
-            if (albumId.HasValue)
-            {
-                var album = await _context.Albums.FindAsync(albumId.Value);
-                if (album != null)
+                // Kiểm tra quyền sở hữu
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (song.Albums?.Artists?.userId != userId)
                 {
-                    album.numberSongs = Math.Max(0, album.numberSongs - 1);
-                    album.Time = album.Time.Subtract(duration);
-                    if (album.Time < TimeSpan.Zero)
-                        album.Time = TimeSpan.Zero;
-                    
-                    _context.Update(album);
+                    return Unauthorized();
                 }
+
+                // Lưu albumId để sử dụng trong khối catch nếu cần
+                albumId = song.AlbumId;
+                var duration = song.Duration;
+
+                // Xóa các bài hát khỏi playlists
+                var playlistSongs = await _context.PlaylistSongs
+                    .Where(ps => ps.SongId == songId)
+                    .ToListAsync();
+                if (playlistSongs.Any())
+                {
+                    _context.PlaylistSongs.RemoveRange(playlistSongs);
+                }
+                
+                // Xóa các remixes liên quan đến bài hát
+                var remixes = await _context.Remixes
+                    .Where(r => r.OriginalSongId == songId)
+                    .ToListAsync();
+                if (remixes.Any())
+                {
+                    _context.Remixes.RemoveRange(remixes);
+                }
+                
+                // Xóa lyrics của bài hát
+                var lyrics = await _context.Lyrics
+                    .Where(l => l.SongId == songId)
+                    .ToListAsync();
+                if (lyrics.Any())
+                {
+                    _context.Lyrics.RemoveRange(lyrics);
+                }
+                
+                // Xóa các bài hát khỏi danh sách yêu thích
+                var favoriteSongs = await _context.UserFavoriteSongs
+                    .Where(fs => fs.SongId == songId)
+                    .ToListAsync();
+                if (favoriteSongs.Any())
+                {
+                    _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
+                }
+                
+                // Lưu các thay đổi về xóa các mối quan hệ trước
+                await _context.SaveChangesAsync();
+
+                // Xóa file nhạc
+                if (!string.IsNullOrEmpty(song.FileUrl))
+                {
+                    var audioPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", song.FileUrl.TrimStart('/'));
+                    if (System.IO.File.Exists(audioPath))
+                    {
+                        System.IO.File.Delete(audioPath);
+                    }
+                }
+
+                // Xóa bài hát
+                _context.Songs.Remove(song);
+
+                // Cập nhật thông tin album
+                if (albumId.HasValue)
+                {
+                    var album = await _context.Albums.FindAsync(albumId.Value);
+                    if (album != null)
+                    {
+                        album.numberSongs = Math.Max(0, album.numberSongs - 1);
+                        album.Time = album.Time.Subtract(duration);
+                        if (album.Time < TimeSpan.Zero)
+                            album.Time = TimeSpan.Zero;
+                        
+                        _context.Update(album);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                
+                // Hoàn thành transaction
+                await transaction.CommitAsync();
+
+                return RedirectToAction(nameof(Details), new { id = albumId });
             }
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Details), new { id = albumId });
+            catch (Exception ex)
+            {
+                // Log lỗi và hiển thị thông báo
+                Console.WriteLine($"Lỗi khi xóa bài hát: {ex.Message}");
+                TempData["Error"] = $"Có lỗi xảy ra khi xóa bài hát: {ex.Message}";
+                
+                // Sử dụng albumId đã được lưu trước đó
+                return RedirectToAction(nameof(Details), new { id = albumId });
+            }
         }
 
         // Thêm bài hát vào playlist

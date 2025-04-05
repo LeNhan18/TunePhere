@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = Model.Title;
+    int indexCount = 0;
 }
 
 @section Styles {
@@ -78,7 +79,7 @@
                 {
                     <div class="song-row">
                         <div class="col-number">
-                 
+                            @(indexCount + 1)
                         </div>
                         <div class="col-title">
                             <div class="song-info">
@@ -102,7 +103,7 @@
                                         <button class="play-btn" onclick="playSong(this.parentElement)">
                                             <i class="fa-solid fa-play"></i>
                                         </button>
-                                        <a href="@Url.Action("Details", "Songs", new { id = playlistSong.Song?.SongId })" 
+                                        <a href="@Url.Action("Details", "Songs", new { id = playlistSong.Song?.SongId, playlistId = Model.PlaylistId, index = indexCount })" 
                                            class="song-link">
                                             @(playlistSong.Song?.Title ?? "Không có tiêu đề")
                                         </a>
@@ -143,6 +144,8 @@
                             }
                         </div>
                     </div>
+                    
+                    indexCount++;
                 }
             </div>
         }
