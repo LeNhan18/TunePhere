@@ -471,6 +471,32 @@ namespace TunePhere.Migrations
                     b.ToTable("Lyrics");
                 });
 
+            modelBuilder.Entity("TunePhere.Models.PlayHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("PlayedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SongId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SongId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PlayHistories");
+                });
+
             modelBuilder.Entity("TunePhere.Models.Playlist", b =>
                 {
                     b.Property<int>("PlaylistId")
@@ -894,6 +920,24 @@ namespace TunePhere.Migrations
                         .IsRequired();
 
                     b.Navigation("Song");
+                });
+
+            modelBuilder.Entity("TunePhere.Models.PlayHistory", b =>
+                {
+                    b.HasOne("TunePhere.Models.Song", "Song")
+                        .WithMany()
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TunePhere.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Song");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TunePhere.Models.Playlist", b =>

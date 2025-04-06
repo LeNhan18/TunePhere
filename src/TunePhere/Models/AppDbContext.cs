@@ -17,6 +17,7 @@ namespace TunePhere.Models
         public DbSet<Remix> Remixes { get; set; }
         public DbSet<UserPreference> UserPreferences { get; set; }
         public DbSet<PlaylistSong> PlaylistSongs { get; set; }
+        public DbSet<PlayHistory> PlayHistories { get; set; }
 
         public DbSet<Artists> Artists { get; set; }
         public DbSet<Album> Albums { get; set; }
@@ -29,6 +30,19 @@ namespace TunePhere.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Cấu hình PlayHistory
+            modelBuilder.Entity<PlayHistory>()
+                .HasOne(ph => ph.Song)
+                .WithMany()
+                .HasForeignKey(ph => ph.SongId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PlayHistory>()
+                .HasOne(ph => ph.User)
+                .WithMany()
+                .HasForeignKey(ph => ph.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             // Cấu hình ListeningRoomParticipant
             modelBuilder.Entity<ListeningRoomParticipant>(entity =>
