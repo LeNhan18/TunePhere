@@ -80,14 +80,14 @@ namespace TunePhere.Controllers
                         return View(artistSongs);
                     }
                 }
-                
+
                 // Nếu không phải nghệ sĩ hoặc không đăng nhập, hiển thị tất cả bài hát
                 var allSongs = await _context.Songs
                     .Include(s => s.Artists)
                     .OrderByDescending(s => s.PlayCount)
                     .Take(50)  // Giới hạn số lượng bài hát hiển thị
                     .ToListAsync();
-                    
+
                 ViewBag.Title = "Bài hát nổi bật";
                 return View(allSongs);
             }
@@ -125,13 +125,13 @@ namespace TunePhere.Controllers
 
             // Xác định nguồn điều hướng từ context_type hoặc tham số
             bool isFromArtist = fromArtist ?? (context_type == "artist");
-            
+
             // LUÔN lấy dữ liệu bài hát của nghệ sĩ trong mọi trường hợp
             int targetArtistId = artistId ?? song.ArtistId;
-            
+
             if (targetArtistId > 0)
             {
-                try 
+                try
                 {
                     // Lấy danh sách bài hát của nghệ sĩ
                     var artistSongs = await _context.Songs
@@ -176,7 +176,7 @@ namespace TunePhere.Controllers
                 var userId = _userManager.GetUserId(User);
                 ViewData["IsFavorited"] = await _context.UserFavoriteSongs
                     .AnyAsync(f => f.SongId == song.SongId && f.UserId == userId);
-                
+
                 // Nếu yêu cầu xem từ danh sách yêu thích HOẶC không có playlist/album, lấy danh sách bài hát yêu thích
                 if (fromFavorites == true)
                 {
@@ -201,7 +201,7 @@ namespace TunePhere.Controllers
 
                         // Tìm vị trí của bài hát hiện tại trong danh sách yêu thích
                         var currentIndex = index.HasValue ? index.Value : favoriteSongs.FindIndex(s => s.id == id);
-                        
+
                         ViewData["FavoritesSongs"] = System.Text.Json.JsonSerializer.Serialize(favoriteSongs);
                         ViewData["FavoritesCurrentIndex"] = currentIndex;
                         ViewData["FromFavorites"] = true;
@@ -338,11 +338,11 @@ namespace TunePhere.Controllers
                     ModelState.AddModelError("audioFile", "File âm thanh không hợp lệ");
                     return View(song);
                 }
-                
+
                 // Mở rộng danh sách định dạng được hỗ trợ
                 var allowedAudioExtensions = new[] { ".mp3", ".m4a", ".wav", ".ogg", ".aac", ".flac" };
                 var audioExtension = Path.GetExtension(audioFile.FileName).ToLowerInvariant();
-                
+
                 if (!allowedAudioExtensions.Contains(audioExtension))
                 {
                     ModelState.AddModelError("audioFile", "Định dạng file không được hỗ trợ. Hỗ trợ: mp3, m4a, wav, ogg, aac, flac");
@@ -359,17 +359,17 @@ namespace TunePhere.Controllers
                 var audioFileName = Guid.NewGuid().ToString();
                 var fullAudioFileName = audioFileName + audioExtension;
                 var audioPath = Path.Combine(songUploadPath, fullAudioFileName);
-                
+
                 using (var stream = new FileStream(audioPath, FileMode.Create))
                 {
                     await audioFile.CopyToAsync(stream);
                 }
-                
+
                 // Lưu định dạng file để có thể kiểm tra sau này
                 // Thêm thuộc tính mới vào bảng Songs nếu cần
                 song.FileUrl = "/uploads/songs/" + fullAudioFileName;
                 song.FileType = audioExtension; // Giả sử bạn đã thêm trường này vào model
-                
+
                 // Get audio duration using TagLib
                 using (var tagFile = TagLib.File.Create(audioPath))
                 {
@@ -531,7 +531,7 @@ namespace TunePhere.Controllers
             {
                 // Sử dụng transaction để đảm bảo tính nhất quán
                 using var transaction = await _context.Database.BeginTransactionAsync();
-                
+
                 var song = await _context.Songs
                     .Include(s => s.Artists)
                     .Include(s => s.Lyrics)
@@ -611,10 +611,10 @@ namespace TunePhere.Controllers
                 // Xóa bài hát
                 _context.Songs.Remove(song);
                 await _context.SaveChangesAsync();
-                
+
                 // Hoàn thành transaction
                 await transaction.CommitAsync();
-                
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -726,143 +726,6 @@ namespace TunePhere.Controllers
                 liked = isNowLiked,
                 likeCount = likeCount
             });
-        }
-
-        [HttpGet("api/songs/related/{songId}")]
-        public async Task<IActionResult> GetRelatedSongs(int songId)
-        {
-            try
-            {
-                // Lấy bài hát hiện tại và thông tin album của nó
-                var currentSong = await _context.Songs
-                    .Include(s => s.Artists)
-                    .Include(s => s.Albums)
-                    .FirstOrDefaultAsync(s => s.SongId == songId);
-
-                if (currentSong == null)
-                {
-                    return Json(new { success = false, message = "Không tìm thấy bài hát" });
-                }
-
-                var allSongs = new List<object>();
-
-                // 1. Nếu bài hát nằm trong album, lấy tất cả bài hát trong album đó
-                if (currentSong.AlbumId.HasValue)
-                {
-                    var albumSongs = await _context.Songs
-                        .Include(s => s.Artists)
-                        .Where(s => s.AlbumId == currentSong.AlbumId)
-                        .OrderBy(s => s.TrackNumber) // Sắp xếp theo số thứ tự trong album
-                        .ThenBy(s => s.Title) // Nếu không có số thứ tự thì sắp xếp theo tên
-                        .Select(s => new
-                        {
-                            s.SongId,
-                            s.Title,
-                            ArtistName = s.Artists.ArtistName,
-                            s.ImageUrl,
-                            s.FileUrl,
-                            s.TrackNumber,
-                            RelevanceScore = 10.0
-                        })
-                        .ToListAsync();
-
-                    // Thêm tất cả bài hát trong album vào danh sách
-                    allSongs.AddRange(albumSongs);
-                }
-                else // Nếu không nằm trong album
-                {
-                    // 2. Lấy các bài hát cùng nghệ sĩ
-                    var artistSongs = await _context.Songs
-                        .Include(s => s.Artists)
-                        .Where(s => s.ArtistId == currentSong.ArtistId && s.SongId != songId)
-                        .OrderByDescending(s => s.PlayCount)
-                        .Select(s => new
-                        {
-                            s.SongId,
-                            s.Title,
-                            ArtistName = s.Artists.ArtistName,
-                            s.ImageUrl,
-                            s.FileUrl,
-                            s.TrackNumber,
-                            RelevanceScore = 8.0
-                        })
-                        .ToListAsync();
-
-                    allSongs.AddRange(artistSongs);
-
-                    // 3. Lấy các bài hát cùng thể loại
-                    var genreSongs = await _context.Songs
-                        .Include(s => s.Artists)
-                        .Where(s => s.Genre == currentSong.Genre 
-                                && s.SongId != songId 
-                                && s.ArtistId != currentSong.ArtistId)
-                        .OrderByDescending(s => s.PlayCount)
-                        .Take(10)
-                        .Select(s => new
-                        {
-                            s.SongId,
-                            s.Title,
-                            ArtistName = s.Artists.ArtistName,
-                            s.ImageUrl,
-                            s.FileUrl,
-                            s.TrackNumber,
-                            RelevanceScore = 5.0
-                        })
-                        .ToListAsync();
-
-                    allSongs.AddRange(genreSongs);
-
-                    // 4. Lấy các bài hát khác
-                    if (allSongs.Count < 20)
-                    {
-                        var otherSongs = await _context.Songs
-                            .Include(s => s.Artists)
-                            .Where(s => s.SongId != songId 
-                                    && s.ArtistId != currentSong.ArtistId 
-                                    && s.Genre != currentSong.Genre)
-                            .OrderByDescending(s => s.PlayCount)
-                            .Take(20 - allSongs.Count)
-                            .Select(s => new
-                            {
-                                s.SongId,
-                                s.Title,
-                                ArtistName = s.Artists.ArtistName,
-                                s.ImageUrl,
-                                s.FileUrl,
-                                s.TrackNumber,
-                                RelevanceScore = 1.0
-                            })
-                            .ToListAsync();
-
-                        allSongs.AddRange(otherSongs);
-                    }
-                }
-
-                // Thêm bài hát hiện tại vào đầu danh sách nếu không nằm trong album
-                if (!currentSong.AlbumId.HasValue)
-                {
-                    var currentSongData = new
-                    {
-                        currentSong.SongId,
-                        currentSong.Title,
-                        ArtistName = currentSong.Artists?.ArtistName,
-                        currentSong.ImageUrl,
-                        currentSong.FileUrl,
-                        currentSong.TrackNumber,
-                        RelevanceScore = double.MaxValue
-                    };
-
-                    var finalList = new List<object> { currentSongData };
-                    finalList.AddRange(allSongs);
-                    allSongs = finalList;
-                }
-
-                return Json(new { success = true, songs = allSongs });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
-            }
         }
 
         private bool SongExists(int id)

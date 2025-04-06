@@ -1,9 +1,8 @@
 ﻿// Sử dụng biến toàn cục từ view
 let audioPlayer = document.getElementById('audioPlayer');
 let isPlaying = false;
-let songs = [];
-let relatedSongs = [];
 let currentSongIndex = 0;
+let songs = [];
 
 // Biến và hàm cho tính năng lyrics đồng bộ
 let syncedLyrics = [];
@@ -18,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Khởi tạo dữ liệu bài hát
     songs.push({
-        id: window.songData.songId,
+        id: 1,
         title: window.songData.title,
         artist: window.songData.artist,
         audioUrl: window.songData.fileUrl,
@@ -30,9 +29,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Tự động phát khi trang tải xong
     playAudio();
-
-    // Tải danh sách bài hát liên quan
-    loadRelatedSongs();
 
     // Xử lý tua nhạc
     const seekBar = document.getElementById('seekBar');
@@ -184,7 +180,7 @@ let vinylEffectActive = false;
 // Cập nhật hàm togglePlay() để đơn giản hóa và tránh phát lại từ đầu
 function togglePlay() {
     const audioPlayer = document.getElementById('audioPlayer');
-    
+
     try {
         if (audioPlayer.paused || audioPlayer.ended) {
             // Chỉ phát từ vị trí hiện tại, không khởi tạo lại
@@ -237,18 +233,18 @@ function toggleVinylEffect(active) {
 function playAudio() {
     const audioPlayer = document.getElementById('audioPlayer');
     const fileUrl = window.songData.fileUrl;
-    
+
     // Cập nhật trạng thái phát ngay khi bắt đầu phát
     isPlaying = true;
     updatePlayPauseButton();
-    
+
     // Kiểm tra xem audio đã được khởi tạo chưa
     if (!audioPlayer.src || audioPlayer.src !== encodeURI(fileUrl)) {
         console.log("Khởi tạo audio mới:", fileUrl);
-        
+
         // Mã hóa URL để xử lý ký tự đặc biệt và khoảng trắng
         const encodedUrl = encodeURI(fileUrl);
-        
+
         // Kiểm tra file có tồn tại không
         fetch(encodedUrl, { method: 'HEAD' })
             .then(response => {
@@ -259,11 +255,11 @@ function playAudio() {
                     updatePlayPauseButton();
                     return;
                 }
-                
+
                 // Thiết lập MIME type
                 const fileExtension = fileUrl.split('.').pop().toLowerCase();
                 let mimeType;
-                
+
                 switch (fileExtension) {
                     case 'mp3': mimeType = 'audio/mpeg'; break;
                     case 'm4a': mimeType = 'audio/mp4'; break;
@@ -273,7 +269,7 @@ function playAudio() {
                     case 'flac': mimeType = 'audio/flac'; break;
                     default: mimeType = 'audio/mpeg';
                 }
-                
+
                 // Kiểm tra hỗ trợ định dạng
                 const canPlayType = audioPlayer.canPlayType(mimeType);
                 if (canPlayType === '' || canPlayType === 'no') {
@@ -283,7 +279,7 @@ function playAudio() {
                     updatePlayPauseButton();
                     return;
                 }
-                
+
                 // Thiết lập audio source và phát
                 audioPlayer.src = encodedUrl;
                 audioPlayer.type = mimeType;
@@ -301,23 +297,23 @@ function playAudio() {
         console.log("Tiếp tục phát từ vị trí hiện tại");
         playWithErrorHandling();
     }
-    
+
     // Hàm giúp phát nhạc với xử lý lỗi
     function playWithErrorHandling() {
         const playPromise = audioPlayer.play();
-                
+
         if (playPromise !== undefined) {
             playPromise.then(() => {
                 console.log("Phát nhạc thành công");
                 toggleVinylEffect(true);
-                
+
                 // Chỉ tăng lượt nghe khi bắt đầu từ đầu
                 if (audioPlayer.currentTime < 1) {
                     incrementPlayCount(window.songData.songId);
                 }
             }).catch(error => {
                 console.error("Lỗi phát nhạc:", error.message);
-                
+
                 // Chi tiết hóa lỗi phát nhạc
                 let errorMsg = "Không thể phát bài hát. ";
                 if (error.name === 'NotSupportedError') {
@@ -327,7 +323,7 @@ function playAudio() {
                 } else {
                     errorMsg += error.message;
                 }
-                
+
                 alert(errorMsg);
                 isPlaying = false;
                 updatePlayPauseButton();
@@ -365,21 +361,21 @@ function incrementPlayCount(songId) {
 // Đảm bảo hàm updatePlayPauseButton làm việc chính xác
 function updatePlayPauseButton() {
     const button = document.getElementById('playPauseButton');
-    
+
     if (!button) {
         console.error('Không tìm thấy nút playPauseButton');
         return;
     }
-    
+
     const icon = button.querySelector('i');
-    
+
     if (!icon) {
         console.error('Không tìm thấy icon trong nút playPauseButton');
         return;
     }
-    
+
     console.log("Cập nhật trạng thái nút play/pause:", isPlaying ? "Đang phát" : "Đã dừng");
-    
+
     // Xóa và thêm class mới
     icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
 }
@@ -387,25 +383,25 @@ function updatePlayPauseButton() {
 // Thay thế hoàn toàn hàm nextSong
 function nextSong() {
     console.log("==== NEXT SONG ====");
-    
+
     // Ưu tiên artist trước tất cả nếu fromArtist = true
     if (window.artistData && window.artistData.songs && window.artistData.songs.length > 1 && window.artistData.fromArtist) {
         let currentIndex = parseInt(window.artistData.currentIndex);
         if (isNaN(currentIndex)) currentIndex = 0;
-        
+
         let nextIndex = currentIndex + 1;
         if (nextIndex >= window.artistData.songs.length) {
             nextIndex = 0; // Quay lại bài đầu tiên
         }
-        
+
         console.log(`Artist navigation: Moving from index ${currentIndex} to ${nextIndex}`);
         const nextSong = window.artistData.songs[nextIndex];
-        
+
         // Thêm timestamp để tránh cache
         window.location.href = `/Songs/Details/${nextSong.id}?artistId=${window.artistData.artistId}&fromArtist=true&index=${nextIndex}&t=${Date.now()}`;
         return;
     }
-    
+
     // Giữ nguyên logic cho favorites, playlist, album
     if (window.favoritesData && window.favoritesData.songs && window.favoritesData.songs.length > 1) {
         let nextIndex = parseInt(window.favoritesData.currentIndex) + 1;
@@ -415,7 +411,7 @@ function nextSong() {
         navigateToSong(nextIndex, 'favorites');
         return;
     }
-    
+
     if (window.playlistData && window.playlistData.songs && window.playlistData.songs.length > 1) {
         let nextIndex = parseInt(window.playlistData.currentIndex) + 1;
         if (nextIndex >= window.playlistData.songs.length) {
@@ -424,7 +420,7 @@ function nextSong() {
         navigateToSong(nextIndex, 'playlist');
         return;
     }
-    
+
     if (window.albumData && window.albumData.songs && window.albumData.songs.length > 1) {
         let nextIndex = parseInt(window.albumData.currentIndex) + 1;
         if (nextIndex >= window.albumData.songs.length) {
@@ -433,20 +429,20 @@ function nextSong() {
         navigateToSong(nextIndex, 'album');
         return;
     }
-    
+
     // Nếu không có điều kiện nào được thỏa mãn, thử chuyển theo nghệ sĩ
     if (window.artistData && window.artistData.songs && window.artistData.songs.length > 1) {
         let currentIndex = parseInt(window.artistData.currentIndex);
         if (isNaN(currentIndex)) currentIndex = 0;
-        
+
         let nextIndex = currentIndex + 1;
         if (nextIndex >= window.artistData.songs.length) {
             nextIndex = 0;
         }
-        
+
         console.log(`Fallback artist navigation: Moving from index ${currentIndex} to ${nextIndex}`);
         const nextSong = window.artistData.songs[nextIndex];
-        
+
         window.location.href = `/Songs/Details/${nextSong.id}?artistId=${window.artistData.artistId}&fromArtist=true&index=${nextIndex}&t=${Date.now()}`;
     }
 }
@@ -454,25 +450,25 @@ function nextSong() {
 // Tương tự sửa hàm previousSong
 function previousSong() {
     console.log("==== PREVIOUS SONG ====");
-    
+
     // Ưu tiên artist trước tất cả nếu fromArtist = true
     if (window.artistData && window.artistData.songs && window.artistData.songs.length > 1 && window.artistData.fromArtist) {
         let currentIndex = parseInt(window.artistData.currentIndex);
         if (isNaN(currentIndex)) currentIndex = 0;
-        
+
         let prevIndex = currentIndex - 1;
         if (prevIndex < 0) {
             prevIndex = window.artistData.songs.length - 1; // Quay lại bài cuối cùng
         }
-        
+
         console.log(`Artist navigation: Moving from index ${currentIndex} to ${prevIndex}`);
         const prevSong = window.artistData.songs[prevIndex];
-        
+
         // Thêm timestamp để tránh cache
         window.location.href = `/Songs/Details/${prevSong.id}?artistId=${window.artistData.artistId}&fromArtist=true&index=${prevIndex}&t=${Date.now()}`;
         return;
     }
-    
+
     // Giữ nguyên logic cho favorites, playlist, album
     if (window.favoritesData && window.favoritesData.songs && window.favoritesData.songs.length > 1) {
         let prevIndex = parseInt(window.favoritesData.currentIndex) - 1;
@@ -482,7 +478,7 @@ function previousSong() {
         navigateToSong(prevIndex, 'favorites');
         return;
     }
-    
+
     if (window.playlistData && window.playlistData.songs && window.playlistData.songs.length > 1) {
         let prevIndex = parseInt(window.playlistData.currentIndex) - 1;
         if (prevIndex < 0) {
@@ -491,7 +487,7 @@ function previousSong() {
         navigateToSong(prevIndex, 'playlist');
         return;
     }
-    
+
     if (window.albumData && window.albumData.songs && window.albumData.songs.length > 1) {
         let prevIndex = parseInt(window.albumData.currentIndex) - 1;
         if (prevIndex < 0) {
@@ -500,20 +496,20 @@ function previousSong() {
         navigateToSong(prevIndex, 'album');
         return;
     }
-    
+
     // Nếu không có điều kiện nào được thỏa mãn, thử chuyển theo nghệ sĩ
     if (window.artistData && window.artistData.songs && window.artistData.songs.length > 1) {
         let currentIndex = parseInt(window.artistData.currentIndex);
         if (isNaN(currentIndex)) currentIndex = 0;
-        
+
         let prevIndex = currentIndex - 1;
         if (prevIndex < 0) {
             prevIndex = window.artistData.songs.length - 1;
         }
-        
+
         console.log(`Fallback artist navigation: Moving from index ${currentIndex} to ${prevIndex}`);
         const prevSong = window.artistData.songs[prevIndex];
-        
+
         window.location.href = `/Songs/Details/${prevSong.id}?artistId=${window.artistData.artistId}&fromArtist=true&index=${prevIndex}&t=${Date.now()}`;
     }
 }
@@ -1105,18 +1101,18 @@ document.head.insertAdjacentHTML('beforeend', `
 // Thêm hàm mới để kiểm tra và chuẩn bị file âm thanh khi trang vừa tải xong
 function initAudioPlayer() {
     const audioPlayer = document.getElementById('audioPlayer');
-    
+
     if (window.songData && window.songData.fileUrl) {
         try {
             // Thiết lập nguồn nhưng chưa phát
             audioPlayer.src = window.songData.fileUrl;
             audioPlayer.preload = 'auto';
-            
+
             // Xử lý lỗi
-            audioPlayer.onerror = function(e) {
+            audioPlayer.onerror = function (e) {
                 console.error('Lỗi khi tải file âm thanh:', e);
             };
-            
+
             // Load file nhưng chưa phát
             audioPlayer.load();
             console.log('Đã tải file âm thanh:', window.songData.fileUrl);
@@ -1129,21 +1125,18 @@ function initAudioPlayer() {
 }
 
 // Khởi tạo audio player khi trang được tải
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // ... existing code ...
-    
+
     // Khởi tạo audio player
     initAudioPlayer();
-
-    // Gọi hàm tải danh sách bài hát liên quan khi trang được tải
-    loadRelatedSongs();
 });
 
 // Thêm hàm kiểm tra file khi trang tải xong
 function validateAudioFile() {
     const fileUrl = window.songData.fileUrl;
     console.log("Kiểm tra file audio:", fileUrl);
-    
+
     fetch(fileUrl, { method: 'HEAD' })
         .then(response => {
             if (!response.ok) {
@@ -1170,7 +1163,7 @@ function validateAudioFile() {
 // Hàm trợ giúp lấy thông báo lỗi chi tiết
 function getAudioErrorMessage(error) {
     if (!error) return "Lỗi không xác định";
-    
+
     switch (error.code) {
         case MediaError.MEDIA_ERR_ABORTED:
             return "Phát nhạc bị hủy.";
@@ -1189,10 +1182,10 @@ function getAudioErrorMessage(error) {
 function debugAudioFile() {
     const fileUrl = window.songData.fileUrl;
     const encodedUrl = encodeURI(fileUrl);
-    
+
     console.log("Đường dẫn gốc:", fileUrl);
     console.log("Đường dẫn mã hóa:", encodedUrl);
-    
+
     // Tạo phần tử hiển thị thông tin debug
     const debugInfo = document.createElement('div');
     debugInfo.style.position = 'fixed';
@@ -1205,7 +1198,7 @@ function debugAudioFile() {
     debugInfo.style.zIndex = '9999';
     debugInfo.style.maxWidth = '80%';
     debugInfo.style.wordBreak = 'break-all';
-    
+
     debugInfo.innerHTML = `
         <h4>Thông tin debug:</h4>
         <p>File URL: ${fileUrl}</p>
@@ -1213,24 +1206,24 @@ function debugAudioFile() {
         <button id="testDirectUrl">Mở trực tiếp file</button>
         <button id="closeDebug">Đóng</button>
     `;
-    
+
     document.body.appendChild(debugInfo);
-    
+
     // Thêm sự kiện mở file trực tiếp
-    document.getElementById('testDirectUrl').addEventListener('click', function() {
+    document.getElementById('testDirectUrl').addEventListener('click', function () {
         window.open(encodedUrl, '_blank');
     });
-    
+
     // Thêm sự kiện đóng debug
-    document.getElementById('closeDebug').addEventListener('click', function() {
+    document.getElementById('closeDebug').addEventListener('click', function () {
         debugInfo.remove();
     });
 }
 
 // Khởi tạo audio player cải tiến
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // ... existing code ...
-    
+
     /* 
     // Xóa nút debug để kiểm tra file
     const playerControls = document.querySelector('.player-controls');
@@ -1243,17 +1236,17 @@ document.addEventListener('DOMContentLoaded', function() {
         playerControls.appendChild(debugButton);
     }
     */
-    
+
     // Xử lý lỗi audio chi tiết hơn
     const audioPlayer = document.getElementById('audioPlayer');
-    audioPlayer.addEventListener('error', function(e) {
+    audioPlayer.addEventListener('error', function (e) {
         const errorCode = e.target.error ? e.target.error.code : 'không xác định';
         console.error("Lỗi audio:", errorCode);
-        
+
         let errorMessage = "Lỗi không xác định";
         if (e.target.error) {
             switch (e.target.error.code) {
-                case MediaError.MEDIA_ERR_ABORTED: 
+                case MediaError.MEDIA_ERR_ABORTED:
                     errorMessage = "Phát nhạc bị hủy";
                     break;
                 case MediaError.MEDIA_ERR_NETWORK:
@@ -1267,7 +1260,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
             }
         }
-        
+
         alert("Lỗi phát nhạc: " + errorMessage);
         isPlaying = false;
         updatePlayPauseButton();
@@ -1275,9 +1268,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Thêm kiểm tra định dạng khi trang tải xong
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // ... existing code ...
-    
+
     // Phát hiện các định dạng được hỗ trợ
     const audioPlayer = document.getElementById('audioPlayer');
     const supportedFormats = {
@@ -1288,16 +1281,16 @@ document.addEventListener('DOMContentLoaded', function() {
         aac: audioPlayer.canPlayType('audio/aac'),
         flac: audioPlayer.canPlayType('audio/flac')
     };
-    
+
     console.log("Các định dạng hỗ trợ:", supportedFormats);
-    
+
     // Kiểm tra nhanh định dạng file hiện tại
     const fileUrl = window.songData.fileUrl;
     const fileExtension = fileUrl.split('.').pop().toLowerCase();
-    
+
     if (fileExtension && supportedFormats[fileExtension] === '') {
         console.warn("Trình duyệt không hỗ trợ định dạng file:", fileExtension);
-        
+
         // Hiển thị cảnh báo cho người dùng
         const warningEl = document.createElement('div');
         warningEl.className = 'alert alert-warning';
