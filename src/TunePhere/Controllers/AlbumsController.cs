@@ -54,7 +54,7 @@ namespace TunePhere.Controllers
                     .Where(a => a.Artists.userId == currentUserId)
                     .OrderByDescending(a => a.ReleaseDate)
                     .ToListAsync();
-                
+
                 ViewBag.MyAlbums = myAlbums;
             }
 
@@ -109,7 +109,7 @@ namespace TunePhere.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Artist")]
-        public async Task<IActionResult> Create([Bind("AlbumName,AlbumDescription,ReleaseDate")] Album album, 
+        public async Task<IActionResult> Create([Bind("AlbumName,AlbumDescription,ReleaseDate")] Album album,
             IFormFile ImageFile, List<IFormFile> SongFiles, List<string> SongTitles)
         {
             if (ModelState.IsValid)
@@ -119,7 +119,7 @@ namespace TunePhere.Controllers
                     // Lấy ArtistId từ user hiện tại
                     string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                     var artist = await _context.Artists.FirstOrDefaultAsync(a => a.userId == userId);
-                    
+
                     if (artist == null)
                     {
                         ModelState.AddModelError("", "Không tìm thấy thông tin nghệ sĩ");
@@ -171,7 +171,7 @@ namespace TunePhere.Controllers
                                 // Kiểm tra định dạng file
                                 var allowedAudioExtensions = new[] { ".mp3", ".m4a", ".wav", ".ogg", ".aac", ".flac" };
                                 var audioExtension = Path.GetExtension(songFile.FileName).ToLowerInvariant();
-                                
+
                                 if (!allowedAudioExtensions.Contains(audioExtension))
                                 {
                                     ModelState.AddModelError("", $"File {songFile.FileName} có định dạng không được hỗ trợ. Hỗ trợ: mp3, m4a, wav, ogg, aac, flac");
@@ -432,7 +432,7 @@ namespace TunePhere.Controllers
             {
                 // Sử dụng transaction để đảm bảo tính nhất quán dữ liệu
                 using var transaction = await _context.Database.BeginTransactionAsync();
-                
+
                 var album = await _context.Albums
                     .Include(a => a.Artists)
                     .Include(a => a.Songs)
@@ -463,7 +463,7 @@ namespace TunePhere.Controllers
                         {
                             _context.PlaylistSongs.RemoveRange(playlistSongs);
                         }
-                        
+
                         // Xóa các remixes liên quan đến bài hát
                         var remixes = await _context.Remixes
                             .Where(r => r.OriginalSongId == song.SongId)
@@ -472,7 +472,7 @@ namespace TunePhere.Controllers
                         {
                             _context.Remixes.RemoveRange(remixes);
                         }
-                        
+
                         // Xóa lyrics của bài hát
                         var lyrics = await _context.Lyrics
                             .Where(l => l.SongId == song.SongId)
@@ -481,7 +481,7 @@ namespace TunePhere.Controllers
                         {
                             _context.Lyrics.RemoveRange(lyrics);
                         }
-                        
+
                         // Xóa các bài hát khỏi danh sách yêu thích
                         var favoriteSongs = await _context.UserFavoriteSongs
                             .Where(fs => fs.SongId == song.SongId)
@@ -490,7 +490,7 @@ namespace TunePhere.Controllers
                         {
                             _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
                         }
-                        
+
                         // Xóa file vật lý
                         if (!string.IsNullOrEmpty(song.FileUrl))
                         {
@@ -501,10 +501,10 @@ namespace TunePhere.Controllers
                             }
                         }
                     }
-                    
+
                     // Lưu các thay đổi về xóa các mối quan hệ trước
                     await _context.SaveChangesAsync();
-                    
+
                     // Sau đó mới xóa các bài hát
                     _context.Songs.RemoveRange(album.Songs);
                     await _context.SaveChangesAsync();
@@ -523,10 +523,10 @@ namespace TunePhere.Controllers
                 // Xóa album
                 _context.Albums.Remove(album);
                 await _context.SaveChangesAsync();
-                
+
                 // Hoàn thành transaction
                 await transaction.CommitAsync();
-                
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -570,7 +570,7 @@ namespace TunePhere.Controllers
             // Mở rộng danh sách định dạng được hỗ trợ
             var allowedAudioExtensions = new[] { ".mp3", ".m4a", ".wav", ".ogg", ".aac", ".flac" };
             var audioExtension = Path.GetExtension(AudioFile.FileName).ToLowerInvariant();
-            
+
             if (!allowedAudioExtensions.Contains(audioExtension))
             {
                 TempData["Error"] = "Định dạng file không được hỗ trợ. Hỗ trợ: mp3, m4a, wav, ogg, aac, flac";
@@ -674,12 +674,12 @@ namespace TunePhere.Controllers
         {
             // Khai báo albumId ở ngoài khối try để có thể sử dụng trong khối catch
             int? albumId = null;
-            
+
             try
             {
                 // Sử dụng transaction để đảm bảo tính nhất quán dữ liệu
                 using var transaction = await _context.Database.BeginTransactionAsync();
-                
+
                 var song = await _context.Songs
                     .Include(s => s.Albums)
                     .ThenInclude(a => a.Artists)
@@ -709,7 +709,7 @@ namespace TunePhere.Controllers
                 {
                     _context.PlaylistSongs.RemoveRange(playlistSongs);
                 }
-                
+
                 // Xóa các remixes liên quan đến bài hát
                 var remixes = await _context.Remixes
                     .Where(r => r.OriginalSongId == songId)
@@ -718,7 +718,7 @@ namespace TunePhere.Controllers
                 {
                     _context.Remixes.RemoveRange(remixes);
                 }
-                
+
                 // Xóa lyrics của bài hát
                 var lyrics = await _context.Lyrics
                     .Where(l => l.SongId == songId)
@@ -727,7 +727,7 @@ namespace TunePhere.Controllers
                 {
                     _context.Lyrics.RemoveRange(lyrics);
                 }
-                
+
                 // Xóa các bài hát khỏi danh sách yêu thích
                 var favoriteSongs = await _context.UserFavoriteSongs
                     .Where(fs => fs.SongId == songId)
@@ -736,7 +736,7 @@ namespace TunePhere.Controllers
                 {
                     _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
                 }
-                
+
                 // Lưu các thay đổi về xóa các mối quan hệ trước
                 await _context.SaveChangesAsync();
 
@@ -763,13 +763,13 @@ namespace TunePhere.Controllers
                         album.Time = album.Time.Subtract(duration);
                         if (album.Time < TimeSpan.Zero)
                             album.Time = TimeSpan.Zero;
-                        
+
                         _context.Update(album);
                     }
                 }
 
                 await _context.SaveChangesAsync();
-                
+
                 // Hoàn thành transaction
                 await transaction.CommitAsync();
 
@@ -780,7 +780,7 @@ namespace TunePhere.Controllers
                 // Log lỗi và hiển thị thông báo
                 Console.WriteLine($"Lỗi khi xóa bài hát: {ex.Message}");
                 TempData["Error"] = $"Có lỗi xảy ra khi xóa bài hát: {ex.Message}";
-                
+
                 // Sử dụng albumId đã được lưu trước đó
                 return RedirectToAction(nameof(Details), new { id = albumId });
             }
@@ -850,7 +850,7 @@ namespace TunePhere.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var playlists = await _context.Playlists
                 .Where(p => p.UserId == userId)
-                .Select(p => new { id = p.PlaylistId, name = p.Title})
+                .Select(p => new { id = p.PlaylistId, name = p.Title })
                 .ToListAsync();
 
             return Json(playlists);
@@ -862,4 +862,3 @@ namespace TunePhere.Controllers
         }
     }
 }
-
