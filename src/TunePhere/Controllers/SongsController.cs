@@ -80,14 +80,14 @@ namespace TunePhere.Controllers
                         return View(artistSongs);
                     }
                 }
-                
+
                 // Nếu không phải nghệ sĩ hoặc không đăng nhập, hiển thị tất cả bài hát
                 var allSongs = await _context.Songs
                     .Include(s => s.Artists)
                     .OrderByDescending(s => s.PlayCount)
                     .Take(50)  // Giới hạn số lượng bài hát hiển thị
                     .ToListAsync();
-                    
+
                 ViewBag.Title = "Bài hát nổi bật";
                 return View(allSongs);
             }
@@ -125,13 +125,13 @@ namespace TunePhere.Controllers
 
             // Xác định nguồn điều hướng từ context_type hoặc tham số
             bool isFromArtist = fromArtist ?? (context_type == "artist");
-            
+
             // LUÔN lấy dữ liệu bài hát của nghệ sĩ trong mọi trường hợp
             int targetArtistId = artistId ?? song.ArtistId;
-            
+
             if (targetArtistId > 0)
             {
-                try 
+                try
                 {
                     // Lấy danh sách bài hát của nghệ sĩ
                     var artistSongs = await _context.Songs
@@ -176,7 +176,7 @@ namespace TunePhere.Controllers
                 var userId = _userManager.GetUserId(User);
                 ViewData["IsFavorited"] = await _context.UserFavoriteSongs
                     .AnyAsync(f => f.SongId == song.SongId && f.UserId == userId);
-                
+
                 // Nếu yêu cầu xem từ danh sách yêu thích HOẶC không có playlist/album, lấy danh sách bài hát yêu thích
                 if (fromFavorites == true)
                 {
@@ -201,7 +201,7 @@ namespace TunePhere.Controllers
 
                         // Tìm vị trí của bài hát hiện tại trong danh sách yêu thích
                         var currentIndex = index.HasValue ? index.Value : favoriteSongs.FindIndex(s => s.id == id);
-                        
+
                         ViewData["FavoritesSongs"] = System.Text.Json.JsonSerializer.Serialize(favoriteSongs);
                         ViewData["FavoritesCurrentIndex"] = currentIndex;
                         ViewData["FromFavorites"] = true;
@@ -338,11 +338,11 @@ namespace TunePhere.Controllers
                     ModelState.AddModelError("audioFile", "File âm thanh không hợp lệ");
                     return View(song);
                 }
-                
+
                 // Mở rộng danh sách định dạng được hỗ trợ
                 var allowedAudioExtensions = new[] { ".mp3", ".m4a", ".wav", ".ogg", ".aac", ".flac" };
                 var audioExtension = Path.GetExtension(audioFile.FileName).ToLowerInvariant();
-                
+
                 if (!allowedAudioExtensions.Contains(audioExtension))
                 {
                     ModelState.AddModelError("audioFile", "Định dạng file không được hỗ trợ. Hỗ trợ: mp3, m4a, wav, ogg, aac, flac");
@@ -359,17 +359,17 @@ namespace TunePhere.Controllers
                 var audioFileName = Guid.NewGuid().ToString();
                 var fullAudioFileName = audioFileName + audioExtension;
                 var audioPath = Path.Combine(songUploadPath, fullAudioFileName);
-                
+
                 using (var stream = new FileStream(audioPath, FileMode.Create))
                 {
                     await audioFile.CopyToAsync(stream);
                 }
-                
+
                 // Lưu định dạng file để có thể kiểm tra sau này
                 // Thêm thuộc tính mới vào bảng Songs nếu cần
                 song.FileUrl = "/uploads/songs/" + fullAudioFileName;
                 song.FileType = audioExtension; // Giả sử bạn đã thêm trường này vào model
-                
+
                 // Get audio duration using TagLib
                 using (var tagFile = TagLib.File.Create(audioPath))
                 {
@@ -531,7 +531,7 @@ namespace TunePhere.Controllers
             {
                 // Sử dụng transaction để đảm bảo tính nhất quán
                 using var transaction = await _context.Database.BeginTransactionAsync();
-                
+
                 var song = await _context.Songs
                     .Include(s => s.Artists)
                     .Include(s => s.Lyrics)
@@ -611,10 +611,10 @@ namespace TunePhere.Controllers
                 // Xóa bài hát
                 _context.Songs.Remove(song);
                 await _context.SaveChangesAsync();
-                
+
                 // Hoàn thành transaction
                 await transaction.CommitAsync();
-                
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
