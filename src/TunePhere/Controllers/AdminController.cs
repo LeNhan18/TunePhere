@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using TunePhere.Models;
+using TunePhere.Repository.IMPRepository;
 
 namespace TunePhere.Controllers
 {
@@ -12,11 +13,86 @@ namespace TunePhere.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ISongRepository _songRepository;
+        private readonly IPlaylistRepository _playlistRepository;
 
-        public AdminController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
+        public AdminController(
+            UserManager<AppUser> userManager, 
+            RoleManager<IdentityRole> roleManager,
+            ISongRepository songRepository,
+            IPlaylistRepository playlistRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _songRepository = songRepository;
+            _playlistRepository = playlistRepository;
+        }
+
+        // GET: /Admin
+        public async Task<IActionResult> Index()
+        {
+            try
+            {
+                if (_songRepository == null || _playlistRepository == null)
+                {
+                    ViewBag.Error = "One or more repositories are null";
+                    return View();
+                }
+
+                // Thống kê tổng quan
+                var userCount = await _userManager.Users.CountAsync();
+                ViewBag.TotalUsers = userCount;
+
+                var songs = await _songRepository.GetAllAsync();
+                var songsList = songs?.ToList() ?? new List<Song>();
+                ViewBag.TotalSongs = songsList.Count;
+
+                var playlists = await _playlistRepository.GetAllAsync();
+                var playlistsList = playlists?.ToList() ?? new List<Playlist>();
+                ViewBag.TotalPlaylists = playlistsList.Count;
+
+                // Tính tổng lượt nghe từ PlayCount của tất cả bài hát
+                ViewBag.TotalPlays = songsList.Sum(s => s.PlayCount);
+
+                // Top bài hát dựa trên PlayCount
+                var topSongs = songsList
+                    .OrderByDescending(s => s.PlayCount)
+                    .Take(5)
+                    .Select(s => new { Title = s.Title, PlayCount = s.PlayCount })
+                    .ToList();
+
+                ViewBag.TopSongs = topSongs;
+
+                // Thống kê lượt nghe theo tháng (6 tháng gần nhất)
+                var last6Months = Enumerable.Range(0, 6)
+                    .Select(i => DateTime.Now.AddMonths(-i))
+                    .OrderBy(d => d)
+                    .ToList();
+
+                var playCounts = new List<int>();
+                var months = new List<string>();
+
+                foreach (var month in last6Months)
+                {
+                    // Tính tổng lượt nghe của các bài hát được upload trong tháng
+                    var monthlyPlays = songsList
+                        .Where(s => s.UploadDate.Month == month.Month && s.UploadDate.Year == month.Year)
+                        .Sum(s => s.PlayCount);
+                        
+                    playCounts.Add(monthlyPlays);
+                    months.Add(month.ToString("MM/yyyy"));
+                }
+
+                ViewBag.PlayCounts = playCounts;
+                ViewBag.Months = months;
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = $"Có lỗi xảy ra khi tải dữ liệu dashboard: {ex.Message}";
+                return View();
+            }
         }
 
         // Chỉ truy cập được endpoint này nếu chưa có tài khoản admin
@@ -80,8 +156,8 @@ namespace TunePhere.Controllers
             return View();
         }
 
-        // Các action khác dành cho admin...
-        public async Task<IActionResult> Index()
+        // GET: /Admin/Users
+        public async Task<IActionResult> Users()
         {
             var users = await _userManager.Users.ToListAsync();
             return View(users);
