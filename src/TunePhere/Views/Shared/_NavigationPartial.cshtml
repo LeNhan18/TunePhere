@@ -53,6 +53,7 @@
         {
             var user = await UserManager.GetUserAsync(User);
             var isArtist = user != null ? await UserManager.IsInRoleAsync(user, "Artist") : false;
+            var admin = user != null ? await UserManager.IsInRoleAsync(user, "Administrator") : false;
 
             <div class="user-menu-container">
                 <div class="user-menu-button">
@@ -122,6 +123,12 @@
                             </a>
 
                             <hr>
+                        }
+                        else if (admin){
+                            <a href="/Admin/index" class="@(ViewContext.RouteData.Values["Action"]?.ToString() == "Dashboard" ? "active" : "")">
+                                <i class="fas fa-chart-line"></i>
+                                Bảng điều khiển
+                            </a>
                         }
                         else
                         {
