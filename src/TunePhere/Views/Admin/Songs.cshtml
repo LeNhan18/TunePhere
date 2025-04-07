@@ -1,0 +1,343 @@
+@model IEnumerable<TunePhere.Models.Song>
+@{
+    ViewData["Title"] = "Quản lý bài hát";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Quản lý bài hát</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-music me-1"></i>
+                Danh sách bài hát
+            </div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSongModal">
+                <i class="fas fa-plus me-1"></i> Thêm bài hát
+            </button>
+        </div>
+        <div class="card-body">
+            <table id="songsTable" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Ảnh</th>
+                        <th>Tên bài hát</th>
+                        <th>Nghệ sĩ</th>
+                        <th>Thể loại</th>
+                        <th>Thời lượng</th>
+                        <th>Lượt nghe</th>
+                        <th>Ngày tạo</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var song in Model)
+                    {
+                        <tr>
+                            <td>
+                                <img src="@song.ImageUrl" alt="@song.Title" class="song-thumbnail" style="width: 50px; height: 50px; object-fit: cover;" />
+                            </td>
+                            <td>@song.Title</td>
+                            <td>@(song.Artists?.ArtistName ?? "Chưa có")</td>
+                            <td>@song.Genre</td>
+                            <td>@song.Duration.ToString(@"mm\:ss")</td>
+                            <td>@song.PlayCount</td>
+                            <td>@song.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @if (song.IsActive)
+                                {
+                                    <span class="badge bg-success">Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Ẩn</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="previewSong(@song.SongId)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-warning btn-sm" onclick="editSong(@song.SongId)">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteSong(@song.SongId)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm bài hát -->
+<div class="modal fade" id="addSongModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm bài hát mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="CreateSong" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tên bài hát</label>
+                                <input type="text" class="form-control" name="title" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Thể loại</label>
+                                <input type="text" class="form-control" name="genre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Nghệ sĩ</label>
+                                <select class="form-select" name="artistId" required>
+                                    <option value="">Chọn nghệ sĩ</option>
+                                    @foreach (var artist in ViewBag.Artists)
+                                    {
+                                        <option value="@artist.ArtistId">@artist.ArtistName</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Link video (tùy chọn)</label>
+                                <input type="url" class="form-control" name="videoUrl">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">File nhạc</label>
+                                <input type="file" class="form-control" name="audioFile" accept="audio/*" required>
+                                <div id="audioPreview" class="mt-2"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Ảnh bìa</label>
+                                <input type="file" class="form-control" name="image" accept="image/*" required>
+                                <div id="imagePreview" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm bài hát</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chỉnh sửa bài hát -->
+<div class="modal fade" id="editSongModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh sửa bài hát</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="EditSong" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="id" id="editSongId">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tên bài hát</label>
+                                <input type="text" class="form-control" name="title" id="editTitle" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Thể loại</label>
+                                <input type="text" class="form-control" name="genre" id="editGenre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Nghệ sĩ</label>
+                                <select class="form-select" name="artistId" id="editArtistId" required>
+                                    <option value="">Chọn nghệ sĩ</option>
+                                    @foreach (var artist in ViewBag.Artists)
+                                    {
+                                        <option value="@artist.ArtistId">@artist.ArtistName</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Link video (tùy chọn)</label>
+                                <input type="url" class="form-control" name="videoUrl" id="editVideoUrl">
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="isActive" id="editIsActive">
+                                    <label class="form-check-label">Hiển thị bài hát</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">File nhạc mới (để trống nếu không thay đổi)</label>
+                                <input type="file" class="form-control" name="audioFile" accept="audio/*">
+                                <div id="editAudioPreview" class="mt-2"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Ảnh bìa mới (để trống nếu không thay đổi)</label>
+                                <input type="file" class="form-control" name="image" accept="image/*">
+                                <div id="editImagePreview" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xem trước bài hát -->
+<div class="modal fade" id="previewSongModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xem chi tiết bài hát</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <img id="previewImage" src="" alt="" class="img-fluid rounded mb-3">
+                    </div>
+                    <div class="col-md-8">
+                        <h4 id="previewTitle"></h4>
+                        <p class="text-muted" id="previewArtist"></p>
+                        <p id="previewGenre"></p>
+                        <p id="previewDuration"></p>
+                        <audio id="previewAudio" controls class="w-100 mb-3"></audio>
+                        <div id="previewVideoContainer" class="d-none">
+                            <p><strong>Video:</strong> <a id="previewVideoUrl" href="" target="_blank"></a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Khởi tạo DataTable
+            $('#songsTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json',
+                },
+                order: [[6, 'desc']], // Sắp xếp theo ngày tạo mới nhất
+                columnDefs: [
+                    { orderable: false, targets: [0, 8] } // Không cho phép sắp xếp cột ảnh và thao tác
+                ]
+            });
+
+            // Preview ảnh khi upload
+            $('input[name="image"]').change(function() {
+                const file = this.files[0];
+                const preview = $(this).siblings('div');
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.html(`<img src="${e.target.result}" class="img-thumbnail" style="height: 100px;">`);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Preview audio khi upload
+            $('input[name="audioFile"]').change(function() {
+                const file = this.files[0];
+                const preview = $(this).siblings('div');
+                if (file) {
+                    preview.html(`<audio controls><source src="${URL.createObjectURL(file)}" type="${file.type}"></audio>`);
+                }
+            });
+        });
+
+        // Hàm xem trước bài hát
+        function previewSong(id) {
+            $.get('/Admin/GetSong/' + id, function(response) {
+                if (response.success) {
+                    $('#previewTitle').text(response.title);
+                    $('#previewArtist').text(response.artistName);
+                    $('#previewGenre').text('Thể loại: ' + response.genre);
+                    $('#previewDuration').text('Thời lượng: ' + response.duration);
+                    $('#previewImage').attr('src', response.imageUrl);
+                    $('#previewAudio').attr('src', response.fileUrl);
+                    
+                    if (response.videoUrl) {
+                        $('#previewVideoContainer').removeClass('d-none');
+                        $('#previewVideoUrl').attr('href', response.videoUrl).text(response.videoUrl);
+                    } else {
+                        $('#previewVideoContainer').addClass('d-none');
+                    }
+                    
+                    $('#previewSongModal').modal('show');
+                }
+            });
+        }
+
+        // Hàm chỉnh sửa bài hát
+        function editSong(id) {
+            $.get('/Admin/GetSong/' + id, function(response) {
+                if (response.success) {
+                    $('#editSongId').val(response.id);
+                    $('#editTitle').val(response.title);
+                    $('#editGenre').val(response.genre);
+                    $('#editArtistId').val(response.artistId);
+                    $('#editVideoUrl').val(response.videoUrl);
+                    $('#editIsActive').prop('checked', response.isActive);
+                    
+                    // Hiển thị preview
+                    $('#editImagePreview').html(`<img src="${response.imageUrl}" class="img-thumbnail" style="height: 100px;">`);
+                    $('#editAudioPreview').html(`<audio controls><source src="${response.fileUrl}"></audio>`);
+                    
+                    $('#editSongModal').modal('show');
+                }
+            });
+        }
+
+        // Hàm xóa bài hát
+        function deleteSong(id) {
+            if (confirm('Bạn có chắc chắn muốn xóa bài hát này?')) {
+                $.post('/Admin/DeleteSong/' + id, function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert(response.message || 'Có lỗi xảy ra khi xóa bài hát');
+                    }
+                });
+            }
+        }
+
+        // Hiển thị thông báo
+        @if (TempData["Success"] != null)
+        {
+            <text>
+            $(document).ready(function() {
+                toastr.success('@TempData["Success"]');
+            });
+            </text>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <text>
+            $(document).ready(function() {
+                toastr.error('@TempData["Error"]');
+            });
+            </text>
+        }
+    </script>
+} 
