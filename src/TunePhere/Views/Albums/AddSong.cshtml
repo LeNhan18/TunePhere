@@ -66,9 +66,9 @@
         font-size: 1rem;
     }
 
-    .btn-submit:hover {
-        background: #7b2cbf;
-    }
+        .btn-submit:hover {
+            background: #7b2cbf;
+        }
 
     .btn-cancel {
         background: transparent;
@@ -84,9 +84,9 @@
         display: inline-block;
     }
 
-    .btn-cancel:hover {
-        border-color: white;
-    }
+        .btn-cancel:hover {
+            border-color: white;
+        }
 
     .button-group {
         display: flex;
@@ -100,7 +100,7 @@
     <div class="form-container">
         <form asp-action="AddSong" method="post" enctype="multipart/form-data">
             <input type="hidden" name="albumId" value="@albumId">
-            
+
             <div class="form-group">
                 <label for="Title">Tên bài hát</label>
                 <input type="text" id="Title" name="Title" required>
