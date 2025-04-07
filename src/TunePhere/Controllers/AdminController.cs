@@ -279,10 +279,116 @@ namespace TunePhere.Controllers
         }
 
         // GET: /Admin/Users
+        [HttpGet]
         public async Task<IActionResult> Users()
         {
             var users = await _userManager.Users.ToListAsync();
             return View(users);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUser(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return Json(new { success = false });
+            }
+
+            return Json(new { 
+                success = true,
+                id = user.Id,
+                fullName = user.FullName,
+                email = user.Email
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateUser(string fullName, string email, string password)
+        {
+            try
+            {
+                var user = new AppUser
+                {
+                    UserName = email,
+                    Email = email,
+                    FullName = fullName,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                var result = await _userManager.CreateAsync(user, password);
+                if (result.Succeeded)
+                {
+                    TempData["Success"] = "Thêm người dùng thành công";
+                    return RedirectToAction(nameof(Users));
+                }
+
+                TempData["Error"] = string.Join(", ", result.Errors.Select(e => e.Description));
+                return RedirectToAction(nameof(Users));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Có lỗi xảy ra khi thêm người dùng";
+                return RedirectToAction(nameof(Users));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditUser(string id, string fullName, string email)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null)
+                {
+                    TempData["Error"] = "Không tìm thấy người dùng";
+                    return RedirectToAction(nameof(Users));
+                }
+
+                user.FullName = fullName;
+                user.Email = email;
+                user.UserName = email;
+
+                var result = await _userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    TempData["Success"] = "Cập nhật thông tin thành công";
+                    return RedirectToAction(nameof(Users));
+                }
+
+                TempData["Error"] = string.Join(", ", result.Errors.Select(e => e.Description));
+                return RedirectToAction(nameof(Users));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật thông tin";
+                return RedirectToAction(nameof(Users));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy người dùng" });
+                }
+
+                var result = await _userManager.DeleteAsync(user);
+                if (result.Succeeded)
+                {
+                    return Json(new { success = true });
+                }
+
+                return Json(new { success = false, message = string.Join(", ", result.Errors.Select(e => e.Description)) });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa người dùng" });
+            }
         }
     }
 
