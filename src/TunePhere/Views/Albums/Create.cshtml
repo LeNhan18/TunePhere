@@ -58,8 +58,8 @@
 
                     <div class="spotify-form-group">
                         <label asp-for="AlbumDescription" class="spotify-label">Mô tả</label>
-                        <textarea asp-for="AlbumDescription" class="spotify-textarea" rows="3" 
-                                placeholder="Mô tả ngắn về album của bạn..."></textarea>
+                        <textarea asp-for="AlbumDescription" class="spotify-textarea" rows="3"
+                                  placeholder="Mô tả ngắn về album của bạn..."></textarea>
                         <span asp-validation-for="AlbumDescription" class="spotify-error"></span>
                     </div>
 
@@ -126,7 +126,7 @@
             // Xử lý upload ảnh album (cần thiết vì không có thuộc tính for/id)
             const albumCover = document.querySelector('.spotify-album-cover');
             const imageInput = document.getElementById('ImageFile');
-            
+
             albumCover.addEventListener('click', function() {
                 imageInput.click();
             });
@@ -152,35 +152,26 @@
             songRow.innerHTML = `
                 <div class="spotify-song-number">${songsList.children.length + 1}</div>
                 <div class="spotify-song-info">
-                    <div class="spotify-song-title">
-                        <input type="text" name="Songs[${songsList.children.length}].Title" class="form-control" placeholder="Tên bài hát" required />
-                    </div>
-                    <div class="spotify-song-track-number">
-                        <input type="number" name="Songs[${songsList.children.length}].TrackNumber" class="form-control" placeholder="Số thứ tự" min="1" />
-                    </div>
                     <div class="spotify-song-file">
                         <input type="file" name="SongFiles" id="${fileId}" class="song-file spotify-file-input" accept="audio/*" required onchange="handleSongFile(this)" />
                         <label for="${fileId}" class="spotify-file-label">Chọn file nhạc</label>
                     </div>
-                    <div class="spotify-song-image">
-                        <input type="file" name="ImageFiles" class="form-control" accept="image/*" onchange="handleImageFile(this)" />
-                        <label class="file-label">Chọn ảnh</label>
+                    <div class="spotify-song-title">
+                        <input type="text" name="SongTitles" class="spotify-input" placeholder="Tên bài hát" required />
                     </div>
                 </div>
                 <div class="spotify-song-duration">
                     <span>0:00</span>
                 </div>
-                <div class="spotify-song-actions">
-                    <button type="button" class="btn-remove-song" onclick="removeSong(this)">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+                <button type="button" class="spotify-remove-button" onclick="removeSongRow(this)">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
             `;
             songsList.appendChild(songRow);
-            
+
             // Bỏ event listener thêm vào để tránh trigger click hai lần
             // Label đã có thuộc tính for kết nối với input
-            
+
             songCount++;
             updateSongCount();
             updateTrackNumbers();
@@ -207,11 +198,11 @@
                 if (!titleInput.value) {
                     titleInput.value = fileName;
                 }
-                
+
                 const fileLabel = input.nextElementSibling;
                 fileLabel.textContent = file.name;
                 fileLabel.classList.add('file-selected');
-                
+
                 const audio = new Audio(URL.createObjectURL(file));
                 audio.onloadedmetadata = function() {
                     const duration = Math.round(audio.duration);
@@ -239,7 +230,7 @@
 
             const totalMinutes = Math.floor(totalSeconds / 60);
             const remainingSeconds = totalSeconds % 60;
-            document.getElementById('totalDuration').textContent = 
+            document.getElementById('totalDuration').textContent =
                 `${totalMinutes}:${remainingSeconds.toString().padStart(2, '0')}`;
             document.getElementById('totalTime').value = totalMinutes;
         }
