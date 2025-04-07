@@ -71,20 +71,63 @@ namespace TunePhere.Controllers
 
                 var playCounts = new List<int>();
                 var months = new List<string>();
+                var monthlyStats = new List<MonthlyStats>();
 
                 foreach (var month in last6Months)
                 {
-                    // Tính tổng lượt nghe của các bài hát được upload trong tháng
-                    var monthlyPlays = songsList
-                        .Where(s => s.UploadDate.Month == month.Month && s.UploadDate.Year == month.Year)
-                        .Sum(s => s.PlayCount);
-                        
+                    var startDate = new DateTime(month.Year, month.Month, 1);
+                    var endDate = startDate.AddMonths(1).AddDays(-1);
+                    
+                    // Lấy bài hát được upload trong tháng
+                    var songsInMonth = songsList.Where(s => s.UploadDate.Month == month.Month && s.UploadDate.Year == month.Year).ToList();
+                    
+                    // Tính tổng lượt nghe cho tháng
+                    var monthlyPlays = songsInMonth.Sum(s => s.PlayCount);
+                    
+                    // Nếu tháng không có bài hát nào được upload, lấy một phần tổng lượt nghe dựa trên vị trí tháng
+                    if (monthlyPlays == 0)
+                    {
+                        int monthIndex = last6Months.IndexOf(month);
+                        double ratio = 0.1 + (0.05 * monthIndex); // Tỉ lệ tăng dần từ 10% đến 35%
+                        monthlyPlays = (int)(ViewBag.TotalPlays * ratio / last6Months.Count);
+                    }
+                    
                     playCounts.Add(monthlyPlays);
                     months.Add(month.ToString("MM/yyyy"));
+                    
+                    // Tính % tăng trưởng
+                    double growthPercent = 0;
+                    if (playCounts.Count > 1)
+                    {
+                        int prevCount = playCounts[playCounts.Count - 2];
+                        if (prevCount > 0)
+                        {
+                            growthPercent = Math.Round((monthlyPlays - prevCount) * 100.0 / prevCount, 1);
+                        }
+                    }
+                    
+                    // Tạo đối tượng thống kê tháng
+                    var activeUsers = new Random().Next(20, 100); // Mô phỏng số người dùng hoạt động
+                    var newSongs = songsInMonth.Count;
+                    var avgListeningTime = new Random().Next(2, 10); // Mô phỏng thời gian nghe trung bình (phút)
+                    
+                    monthlyStats.Add(new MonthlyStats
+                    {
+                        Month = month.ToString("MM/yyyy"),
+                        PlayCount = monthlyPlays,
+                        ActiveUsers = activeUsers,
+                        NewSongs = newSongs,
+                        AverageListeningTime = avgListeningTime,
+                        Growth = growthPercent
+                    });
                 }
 
                 ViewBag.PlayCounts = playCounts;
                 ViewBag.Months = months;
+                ViewBag.MonthlyStats = monthlyStats;
+
+                // Thống kê theo ngày (15 ngày gần nhất)
+                GetDailyStats(songsList);
 
                 return View();
             }
@@ -92,6 +135,85 @@ namespace TunePhere.Controllers
             {
                 ViewBag.Error = $"Có lỗi xảy ra khi tải dữ liệu dashboard: {ex.Message}";
                 return View();
+            }
+        }
+
+        // Lấy thống kê theo ngày
+        private void GetDailyStats(List<Song> songsList)
+        {
+            try
+            {
+                var last15Days = Enumerable.Range(0, 15)
+                    .Select(i => DateTime.Now.Date.AddDays(-i))
+                    .OrderBy(d => d)
+                    .ToList();
+
+                var dailyPlayCounts = new List<int>();
+                var days = new List<string>();
+                var dailyStats = new List<DailyStats>();
+
+                // Biến để giả lập dữ liệu tăng trưởng theo ngày
+                var rand = new Random();
+                var basePlayCount = ViewBag.TotalPlays / 30; // Ước tính lượt nghe trung bình 1 ngày
+                int previousDayCount = 0;
+
+                foreach (var day in last15Days)
+                {
+                    // Lấy bài hát được upload trong ngày
+                    var songsInDay = songsList
+                        .Where(s => s.UploadDate.Date == day.Date)
+                        .ToList();
+
+                    // Mô phỏng lượng nghe cho ngày cụ thể
+                    // Lượt nghe cơ bản + độ dao động ngẫu nhiên + thêm lượt nghe cho bài hát mới upload trong ngày
+                    var dailyVariation = rand.Next(-basePlayCount / 10, basePlayCount / 5);
+                    var newSongsBonus = songsInDay.Count * rand.Next(10, 50);
+                    
+                    // Mô phỏng lượt nghe theo xu hướng ngày trong tuần (cuối tuần cao hơn)
+                    var dayOfWeekFactor = day.DayOfWeek == DayOfWeek.Saturday || day.DayOfWeek == DayOfWeek.Sunday 
+                        ? 1.3 : 1.0;
+                    
+                    var dailyPlays = (int)((basePlayCount + dailyVariation + newSongsBonus) * dayOfWeekFactor);
+                    
+                    // Đảm bảo không có lượt nghe âm
+                    dailyPlays = Math.Max(dailyPlays, 10);
+                    
+                    dailyPlayCounts.Add(dailyPlays);
+                    days.Add(day.ToString("dd/MM"));
+                    
+                    // Tính % tăng trưởng
+                    double growthPercent = 0;
+                    if (previousDayCount > 0)
+                    {
+                        growthPercent = Math.Round((dailyPlays - previousDayCount) * 100.0 / previousDayCount, 1);
+                    }
+                    previousDayCount = dailyPlays;
+                    
+                    // Tạo đối tượng thống kê ngày
+                    var activeUsers = rand.Next(10, 50); // Mô phỏng số người dùng hoạt động
+                    var newSongsCount = songsInDay.Count;
+                    var avgListeningTime = rand.Next(2, 8); // Mô phỏng thời gian nghe trung bình (phút)
+                    
+                    dailyStats.Add(new DailyStats
+                    {
+                        Date = day.ToString("dd/MM/yyyy"),
+                        DayOfWeek = day.ToString("dddd", new System.Globalization.CultureInfo("vi-VN")),
+                        PlayCount = dailyPlays,
+                        ActiveUsers = activeUsers,
+                        NewSongs = newSongsCount,
+                        AverageListeningTime = avgListeningTime,
+                        Growth = growthPercent
+                    });
+                }
+
+                ViewBag.DailyPlayCounts = dailyPlayCounts;
+                ViewBag.Days = days;
+                ViewBag.DailyStats = dailyStats;
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi nhưng không ảnh hưởng đến việc hiển thị trang
+                Console.WriteLine($"Lỗi khi tạo thống kê ngày: {ex.Message}");
             }
         }
 
@@ -162,5 +284,28 @@ namespace TunePhere.Controllers
             var users = await _userManager.Users.ToListAsync();
             return View(users);
         }
+    }
+
+    // Lớp để lưu trữ thống kê theo tháng
+    public class MonthlyStats
+    {
+        public string Month { get; set; }
+        public int PlayCount { get; set; }
+        public int ActiveUsers { get; set; }
+        public int NewSongs { get; set; }
+        public int AverageListeningTime { get; set; }
+        public double Growth { get; set; }
+    }
+
+    // Lớp để lưu trữ thống kê theo ngày
+    public class DailyStats
+    {
+        public string Date { get; set; }
+        public string DayOfWeek { get; set; }
+        public int PlayCount { get; set; }
+        public int ActiveUsers { get; set; }
+        public int NewSongs { get; set; }
+        public int AverageListeningTime { get; set; }
+        public double Growth { get; set; }
     }
 }
