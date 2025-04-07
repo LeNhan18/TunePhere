@@ -68,6 +68,18 @@
                         <input asp-for="ReleaseDate" type="date" class="spotify-input" required />
                         <span asp-validation-for="ReleaseDate" class="spotify-error"></span>
                     </div>
+
+                    <div class="spotify-form-group">
+                        <label asp-for="ArtistId" class="spotify-label">Nghệ sĩ</label>
+                        <select asp-for="ArtistId" class="spotify-select" required>
+                            <option value="">Chọn nghệ sĩ</option>
+                            @foreach (var artist in ViewBag.Artists)
+                            {
+                                <option value="@artist.ArtistId">@artist.ArtistName</option>
+                            }
+                        </select>
+                        <span asp-validation-for="ArtistId" class="spotify-error"></span>
+                    </div>
                 </div>
             </div>
 

@@ -56,6 +56,7 @@ builder.Services.AddScoped<IListeningRoomRepository, EFListeningRoomRepository>(
 builder.Services.AddScoped<IListeningRoomParticipantRepository, EFListeningRoomParticipantRepository>();
 builder.Services.AddScoped<IChatMessageRepository, EFChatMessageRepository>();
 builder.Services.AddScoped<IPlayHistoryRepository, EFPlayHistoryRepository>();
+builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
 
 builder.Services.AddSignalR();
 

@@ -5,6 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using TunePhere.Models;
 using TunePhere.Repository.IMPRepository;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace TunePhere.Controllers
 {
@@ -15,20 +21,27 @@ namespace TunePhere.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ISongRepository _songRepository;
         private readonly IPlaylistRepository _playlistRepository;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IArtistRepository _artistRepository;
 
         public AdminController(
             UserManager<AppUser> userManager, 
             RoleManager<IdentityRole> roleManager,
             ISongRepository songRepository,
-            IPlaylistRepository playlistRepository)
+            IPlaylistRepository playlistRepository,
+            IWebHostEnvironment webHostEnvironment,
+            IArtistRepository artistRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _songRepository = songRepository;
             _playlistRepository = playlistRepository;
+            _webHostEnvironment = webHostEnvironment;
+            _artistRepository = artistRepository;
         }
 
         // GET: /Admin
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             try
@@ -63,77 +76,15 @@ namespace TunePhere.Controllers
 
                 ViewBag.TopSongs = topSongs;
 
-                // Thống kê lượt nghe theo tháng (6 tháng gần nhất)
-                var last6Months = Enumerable.Range(0, 6)
-                    .Select(i => DateTime.Now.AddMonths(-i))
-                    .OrderBy(d => d)
-                    .ToList();
-
-                var playCounts = new List<int>();
-                var months = new List<string>();
-                var monthlyStats = new List<MonthlyStats>();
-
-                foreach (var month in last6Months)
-                {
-                    var startDate = new DateTime(month.Year, month.Month, 1);
-                    var endDate = startDate.AddMonths(1).AddDays(-1);
-                    
-                    // Lấy bài hát được upload trong tháng
-                    var songsInMonth = songsList.Where(s => s.UploadDate.Month == month.Month && s.UploadDate.Year == month.Year).ToList();
-                    
-                    // Tính tổng lượt nghe cho tháng
-                    var monthlyPlays = songsInMonth.Sum(s => s.PlayCount);
-                    
-                    // Nếu tháng không có bài hát nào được upload, lấy một phần tổng lượt nghe dựa trên vị trí tháng
-                    if (monthlyPlays == 0)
-                    {
-                        int monthIndex = last6Months.IndexOf(month);
-                        double ratio = 0.1 + (0.05 * monthIndex); // Tỉ lệ tăng dần từ 10% đến 35%
-                        monthlyPlays = (int)(ViewBag.TotalPlays * ratio / last6Months.Count);
-                    }
-                    
-                    playCounts.Add(monthlyPlays);
-                    months.Add(month.ToString("MM/yyyy"));
-                    
-                    // Tính % tăng trưởng
-                    double growthPercent = 0;
-                    if (playCounts.Count > 1)
-                    {
-                        int prevCount = playCounts[playCounts.Count - 2];
-                        if (prevCount > 0)
-                        {
-                            growthPercent = Math.Round((monthlyPlays - prevCount) * 100.0 / prevCount, 1);
-                        }
-                    }
-                    
-                    // Tạo đối tượng thống kê tháng
-                    var activeUsers = new Random().Next(20, 100); // Mô phỏng số người dùng hoạt động
-                    var newSongs = songsInMonth.Count;
-                    var avgListeningTime = new Random().Next(2, 10); // Mô phỏng thời gian nghe trung bình (phút)
-                    
-                    monthlyStats.Add(new MonthlyStats
-                    {
-                        Month = month.ToString("MM/yyyy"),
-                        PlayCount = monthlyPlays,
-                        ActiveUsers = activeUsers,
-                        NewSongs = newSongs,
-                        AverageListeningTime = avgListeningTime,
-                        Growth = growthPercent
-                    });
-                }
-
-                ViewBag.PlayCounts = playCounts;
-                ViewBag.Months = months;
-                ViewBag.MonthlyStats = monthlyStats;
-
-                // Thống kê theo ngày (15 ngày gần nhất)
+                // Thống kê theo tháng và ngày
+                GetMonthlyStats(songsList);
                 GetDailyStats(songsList);
 
                 return View();
             }
-            catch (Exception ex)
+            catch (Exception error)
             {
-                ViewBag.Error = $"Có lỗi xảy ra khi tải dữ liệu dashboard: {ex.Message}";
+                ViewBag.Error = $"Có lỗi xảy ra khi tải dữ liệu dashboard: {error.Message}";
                 return View();
             }
         }
@@ -210,10 +161,75 @@ namespace TunePhere.Controllers
                 ViewBag.Days = days;
                 ViewBag.DailyStats = dailyStats;
             }
-            catch (Exception ex)
+            catch (Exception error)
             {
-                // Log lỗi nhưng không ảnh hưởng đến việc hiển thị trang
-                Console.WriteLine($"Lỗi khi tạo thống kê ngày: {ex.Message}");
+                Console.WriteLine($"Lỗi khi tạo thống kê ngày: {error.Message}");
+            }
+        }
+
+        private void GetMonthlyStats(List<Song> songsList)
+        {
+            try
+            {
+                var last6Months = Enumerable.Range(0, 6)
+                    .Select(i => DateTime.Now.AddMonths(-i))
+                    .OrderBy(d => d)
+                    .ToList();
+
+                var playCounts = new List<int>();
+                var months = new List<string>();
+                var monthlyStats = new List<MonthlyStats>();
+
+                foreach (var month in last6Months)
+                {
+                    var startDate = new DateTime(month.Year, month.Month, 1);
+                    var endDate = startDate.AddMonths(1).AddDays(-1);
+                    
+                    var songsInMonth = songsList.Where(s => s.UploadDate.Month == month.Month && s.UploadDate.Year == month.Year).ToList();
+                    var monthlyPlays = songsInMonth.Sum(s => s.PlayCount);
+                    
+                    if (monthlyPlays == 0)
+                    {
+                        int monthIndex = last6Months.IndexOf(month);
+                        double ratio = 0.1 + (0.05 * monthIndex);
+                        monthlyPlays = (int)(ViewBag.TotalPlays * ratio / last6Months.Count);
+                    }
+                    
+                    playCounts.Add(monthlyPlays);
+                    months.Add(month.ToString("MM/yyyy"));
+                    
+                    var activeUsers = new Random().Next(20, 100);
+                    var newSongs = songsInMonth.Count;
+                    var avgListeningTime = new Random().Next(2, 10);
+                    
+                    double growthPercent = 0;
+                    if (playCounts.Count > 1)
+                    {
+                        int prevCount = playCounts[playCounts.Count - 2];
+                        if (prevCount > 0)
+                        {
+                            growthPercent = Math.Round((monthlyPlays - prevCount) * 100.0 / prevCount, 1);
+                        }
+                    }
+                    
+                    monthlyStats.Add(new MonthlyStats
+                    {
+                        Month = month.ToString("MM/yyyy"),
+                        PlayCount = monthlyPlays,
+                        ActiveUsers = activeUsers,
+                        NewSongs = newSongs,
+                        AverageListeningTime = avgListeningTime,
+                        Growth = growthPercent
+                    });
+                }
+
+                ViewBag.PlayCounts = playCounts;
+                ViewBag.Months = months;
+                ViewBag.MonthlyStats = monthlyStats;
+            }
+            catch (Exception error)
+            {
+                Console.WriteLine($"Lỗi khi tạo thống kê tháng: {error.Message}");
             }
         }
 
@@ -389,6 +405,224 @@ namespace TunePhere.Controllers
             {
                 return Json(new { success = false, message = "Có lỗi xảy ra khi xóa người dùng" });
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Songs()
+        {
+            var songs = await _songRepository.GetAllAsync();
+            ViewBag.Artists = await _artistRepository.GetAllAsync();
+            return View(songs);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetSong(int id)
+        {
+            var song = await _songRepository.GetByIdAsync(id);
+            if (song == null)
+            {
+                return Json(new { success = false });
+            }
+
+            var artist = await _artistRepository.GetByIdAsync(song.ArtistId);
+
+            return Json(new
+            {
+                success = true,
+                id = song.SongId,
+                title = song.Title,
+                genre = song.Genre,
+                duration = song.Duration,
+                imageUrl = song.ImageUrl,
+                fileUrl = song.FileUrl,
+                artistId = song.ArtistId,
+                artistName = artist?.ArtistName ?? "Không xác định",
+                isActive = song.IsActive,
+                videoUrl = song.VideoUrl
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetArtists()
+        {
+            try
+            {
+                var artists = await _artistRepository.GetAllAsync();
+                return Json(new { success = true, data = artists.Select(a => new { 
+                    id = a.ArtistId,
+                    name = a.ArtistName,
+                    imageUrl = a.ImageUrl,
+                    coverImageUrl = a.CoverImageUrl,
+                    bio = a.Bio,
+                    followersCount = a.GetFollowersCount()
+                })});
+            }
+            catch (Exception error)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải danh sách nghệ sĩ" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateSong(
+            string title,
+            string genre,
+            int artistId,
+            IFormFile audioFile,
+            IFormFile image,
+            string? videoUrl = null)
+        {
+            try
+            {
+                // Xử lý upload ảnh
+                string imageUrl = await UploadFile(image, "images/songs");
+                
+                // Xử lý upload audio
+                string fileUrl = await UploadFile(audioFile, "audio");
+
+                // Lấy thời lượng của file audio
+                TimeSpan duration = GetAudioDuration(audioFile);
+
+                var song = new Song
+                {
+                    Title = title,
+                    Genre = genre,
+                    Duration = duration,
+                    FileUrl = fileUrl,
+                    ImageUrl = imageUrl,
+                    ArtistId = artistId,
+                    VideoUrl = videoUrl,
+                    FileType = Path.GetExtension(audioFile.FileName),
+                    IsActive = true
+                };
+
+                await _songRepository.AddAsync(song);
+                TempData["Success"] = "Thêm bài hát thành công";
+                return RedirectToAction(nameof(Songs));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Có lỗi xảy ra khi thêm bài hát: " + ex.Message;
+                return RedirectToAction(nameof(Songs));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditSong(
+            int id,
+            string title,
+            string genre,
+            int artistId,
+            bool isActive,
+            string? videoUrl,
+            IFormFile? audioFile,
+            IFormFile? image)
+        {
+            try
+            {
+                var song = await _songRepository.GetByIdAsync(id);
+                if (song == null)
+                {
+                    TempData["Error"] = "Không tìm thấy bài hát";
+                    return RedirectToAction(nameof(Songs));
+                }
+
+                // Cập nhật thông tin cơ bản
+                song.Title = title;
+                song.Genre = genre;
+                song.ArtistId = artistId;
+                song.IsActive = isActive;
+                song.VideoUrl = videoUrl;
+                song.UpdatedAt = DateTime.Now;
+
+                // Xử lý upload ảnh mới nếu có
+                if (image != null)
+                {
+                    DeleteFile(song.ImageUrl);
+                    song.ImageUrl = await UploadFile(image, "images/songs");
+                }
+
+                // Xử lý upload audio mới nếu có
+                if (audioFile != null)
+                {
+                    DeleteFile(song.FileUrl);
+                    song.FileUrl = await UploadFile(audioFile, "audio");
+                    song.Duration = GetAudioDuration(audioFile);
+                    song.FileType = Path.GetExtension(audioFile.FileName);
+                }
+
+                await _songRepository.UpdateAsync(song);
+                TempData["Success"] = "Cập nhật bài hát thành công";
+                return RedirectToAction(nameof(Songs));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật bài hát: " + ex.Message;
+                return RedirectToAction(nameof(Songs));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteSong(int id)
+        {
+            try
+            {
+                var song = await _songRepository.GetByIdAsync(id);
+                if (song == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bài hát" });
+                }
+
+                // Xóa file ảnh và audio
+                DeleteFile(song.ImageUrl);
+                DeleteFile(song.FileUrl);
+
+                await _songRepository.DeleteAsync(id);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa bài hát: " + ex.Message });
+            }
+        }
+
+        private async Task<string> UploadFile(IFormFile file, string folder)
+        {
+            if (file == null || file.Length == 0)
+                throw new ArgumentException("File không hợp lệ");
+
+            string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, folder);
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            string uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+
+            return $"/{folder}/{uniqueFileName}";
+        }
+
+        private void DeleteFile(string fileUrl)
+        {
+            if (string.IsNullOrEmpty(fileUrl))
+                return;
+
+            string filePath = Path.Combine(_webHostEnvironment.WebRootPath, fileUrl.TrimStart('/'));
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+            }
+        }
+
+        private TimeSpan GetAudioDuration(IFormFile audioFile)
+        {
+            // TODO: Implement audio duration detection
+            // Tạm thời return giá trị mặc định
+            return TimeSpan.FromMinutes(3);
         }
     }
 
