@@ -38,7 +38,7 @@
             @foreach (var room in Model)
             {
                 <div class="room-card">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex">
                         <h3>@room.Title</h3>
                         <span class="room-status @(room.IsActive ? "status-active" : "status-inactive")">
                             @(room.IsActive ? "Đang Hoạt Động" : "Không Hoạt Động")

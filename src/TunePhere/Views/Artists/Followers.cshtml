@@ -3,123 +3,61 @@
     ViewData["Title"] = "Người theo dõi";
 }
 
-<div class="followers-page">
-    <div class="page-header">
-        <h2>Người theo dõi của @Model.ArtistName</h2>
-        <p>@Model.GetFollowersCount() người theo dõi</p>
+<link rel="stylesheet" href="~/css/follower.css" />
+
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="create-header position-relative" style="height: 200px;">
+        <div class="position-absolute w-100 h-100" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(13, 13, 13, 0.9));">
+            <div class="h-100 d-flex align-items-center justify-content-center">
+                <div class="text-center">
+                    <span class="header-label mb-2">NGƯỜI THEO DÕI</span>
+                    <h1 class="display-5 fw-bold text-white text-shadow text-glow mt-5">Người Theo Dõi @Model.ArtistName</h1>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="followers-list">
-        @if (Model.Followers != null && Model.Followers.Any())
-        {
-            @foreach (var follower in Model.Followers.OrderByDescending(f => f.FollowedAt))
-            {
-                <div class="follower-item">
-                    <div class="follower-avatar">
-                        @if (!string.IsNullOrEmpty(follower.User?.ImageUrl))
+    <div class="container mt-4">
+        <div class="followers-container">
+            <div class="row">
+                <div class="col-md-10 mx-auto">
+                    <div class="followers-count">
+                        @Model.GetFollowersCount() người theo dõi
+                    </div>
+
+                    <div class="followers-list mt-4">
+                        @if (Model.Followers != null && Model.Followers.Any())
                         {
-                            <img src="@follower.User.ImageUrl" alt="@follower.User.UserName" />
+                            @foreach (var follower in Model.Followers.OrderByDescending(f => f.FollowedAt))
+                            {
+                                <div class="follower-item">
+                                    <div class="follower-avatar">
+                                        @if (!string.IsNullOrEmpty(follower.User?.ImageUrl))
+                                        {
+                                            <img src="@follower.User.ImageUrl" alt="@follower.User.UserName" />
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-user-circle"></i>
+                                        }
+                                    </div>
+                                    <div class="follower-info">
+                                        <h3>@follower.User?.FullName</h3>
+                                        <p>Theo dõi từ @follower.FollowedAt.ToString("dd/MM/yyyy")</p>
+                                    </div>
+                                </div>
+                            }
                         }
                         else
                         {
-                            <i class="fas fa-user-circle"></i>
+                            <div class="no-followers">
+                                <p><i class="fas fa-users me-2"></i>Chưa có người theo dõi nào.</p>
+                            </div>
                         }
                     </div>
-                    <div class="follower-info">
-                        <h3>@follower.User?.FullName</h3>
-                        <p>Theo dõi từ @follower.FollowedAt.ToString("dd/MM/yyyy")</p>
-                    </div>
                 </div>
-            }
-        }
-        else
-        {
-            <div class="no-followers">
-                <p>Chưa có người theo dõi nào.</p>
             </div>
-        }
+        </div>
     </div>
 </div>
-
-@section Styles {
-    <style>
-        .followers-page {
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .page-header {
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .page-header h2 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .followers-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .follower-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background: #1a1a1a;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .follower-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        .follower-avatar {
-            width: 60px;
-            height: 60px;
-            margin-right: 20px;
-            border-radius: 50%;
-            overflow: hidden;
-            background: #2a2a2a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .follower-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .follower-avatar i {
-            font-size: 30px;
-            color: #666;
-        }
-
-        .follower-info h3 {
-            font-size: 18px;
-            margin-bottom: 5px;
-            color: #fff;
-        }
-
-        .follower-info p {
-            font-size: 14px;
-            color: #888;
-            margin: 0;
-        }
-
-        .no-followers {
-            text-align: center;
-            padding: 40px;
-            background: #1a1a1a;
-            border-radius: 10px;
-            color: #888;
-        }
-    </style>
-} 

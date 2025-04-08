@@ -373,7 +373,7 @@ body {
 }
 
 .add-lyric-button:hover {
-    background-color: #1ed760;
+    background-color: #5a3c93;
 }
 
 .add-lyric-button i {
@@ -391,7 +391,7 @@ body {
 }
 
     .add-lyric-button.edit-mode:hover {
-        background-color: #1ed760;
+        background-color: #5a3c93;
     }
 
 /* Song info section */
@@ -565,8 +565,8 @@ body {
 }
 
     .btn-success:hover {
-        background-color: #1ed760;
-        border-color: #1ed760;
+        background-color: #5a3c93;
+        border-color: #5a3c93;
     }
 
 /* Cải thiện styles cho lyrics đồng bộ */

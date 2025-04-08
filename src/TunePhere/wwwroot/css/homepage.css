@@ -1,8 +1,8 @@
 ﻿:root {
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
-    --primary-color: #8B5CF6; /* Thay từ #1DB954 */
-    --primary-dark: #7C3AED; /* Thay từ #1AA34A */
+    --primary-color: #754da3;
+    --primary-dark: #50187e;
     --background-color: #121212;
     --background-lighter: #181818;
     --background-elevated: #282828;
@@ -311,12 +311,12 @@ html, body {
 }
 
 .btn-secondary {
-    background-color: var(--primary-color); /* #8B5CF6 */
+    background-color: #1DB954; /* Màu xanh giống Spotify */
     border: none;
 }
 
     .btn-secondary:hover {
-        background-color: var(--primary-dark); /* #7C3AED */
+        background-color: #1AA34A; /* Màu xanh đậm hơn khi hover */
     }
 
 body {
@@ -519,7 +519,7 @@ body {
 
     .play-button:hover {
         transform: scale(1.1);
-        background: var(--primary-color); /* #8B5CF6 */
+        background: #5a3c93;
     }
 
     .play-button i {
@@ -641,7 +641,7 @@ body {
 }
 
 .video-btn:hover {
-    background: var(--primary-color); /* #8B5CF6 */
+    background: #5a3c93;
     transform: scale(1.1) !important;
 }
 
@@ -663,7 +663,7 @@ body {
         content: '';
         width: 4px;
         height: 24px;
-        background: var(--primary-color); /* #8B5CF6 */
+        background: #5a3c93;
         border-radius: 2px;
         display: inline-block;
     }
@@ -728,7 +728,7 @@ body {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: var(--primary-color); /* #8B5CF6 */
+    background: #5a3c93;
     border: none;
     color: black;
     font-size: 20px;

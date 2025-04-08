@@ -1,0 +1,112 @@
+﻿/* Giao diện chung */
+body, .container-fluid, .card {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+/* Tiêu đề */
+h1.h3 {
+    color: #00b0ff;
+}
+
+/* Bảng */
+.table {
+    background-color: #1e1e2f;
+    color: #ffffff;
+    border-color: #2c2c3e;
+}
+
+    .table thead {
+        background-color: #2a2a40;
+        color: #ffffff;
+    }
+
+    .table tbody tr:hover {
+        background-color: #2c2c3e;
+    }
+
+/* Nút */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.btn-outline-info {
+    border-color: #00b0ff;
+    color: #00b0ff;
+}
+
+    .btn-outline-info:hover {
+        background-color: #00b0ff;
+        color: #000;
+    }
+
+.btn-outline-danger {
+    border-color: #ff5252;
+    color: #ff5252;
+}
+
+    .btn-outline-danger:hover {
+        background-color: #ff5252;
+        color: #000;
+    }
+
+.btn-success {
+    background-color: #00c853;
+    border: none;
+}
+
+    .btn-success:hover {
+        background-color: #00e676;
+        color: #000;
+    }
+
+/* Badge trạng thái */
+.badge {
+    font-size: 0.85rem;
+    padding: 0.5em 0.75em;
+    border-radius: 20px;
+}
+
+    .badge.bg-success {
+        background-color: #00e676;
+        color: #000;
+    }
+
+    .badge.bg-warning {
+        background-color: #ffeb3b;
+        color: #000;
+    }
+
+/* Modal */
+.modal-content {
+    background-color: #1f1f2f;
+    color: #fff;
+    border-radius: 10px;
+    border: 1px solid #2c2c3e;
+}
+
+.modal-header {
+    border-bottom: 1px solid #2c2c3e;
+}
+
+.modal-footer {
+    border-top: 1px solid #2c2c3e;
+}
+
+.btn-close {
+    filter: invert(1);
+}
+
+/* DataTables custom */
+.dataTables_wrapper .dataTables_filter input {
+    background-color: #2a2a40;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    background-color: #2a2a40;
+    border: 1px solid #444;
+    color: #fff;
+}

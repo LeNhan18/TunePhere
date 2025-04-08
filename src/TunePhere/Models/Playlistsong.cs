@@ -7,19 +7,21 @@ namespace TunePhere.Models
     public class PlaylistSong
     {
         [Key]
-        public int Id { get; set; } // Khóa chính (để tránh lỗi khi tạo bảng)
+        public int PlaylistSongId { get; set; }
 
         [Required]
-        public int PlaylistId { get; set; } // Khóa ngoại liên kết với Playlist
+        public int PlaylistId { get; set; }
+
+        [Required]
+        public int SongId { get; set; }
+
+        public int Order { get; set; }
 
         [ForeignKey("PlaylistId")]
-        public Playlist? Playlist { get; set; } // Quan hệ với Playlist
-
-        [Required]
-        public int SongId { get; set; } // Khóa ngoại liên kết với Song
+        public virtual Playlist Playlist { get; set; }
 
         [ForeignKey("SongId")]
-        public Song? Song { get; set; } // Quan hệ với Song
+        public virtual Song Song { get; set; }
 
         [Required]
         public string? AddedByUserId { get; set; } // Người thêm bài hát

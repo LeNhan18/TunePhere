@@ -75,16 +75,19 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div>  
     </div>
 
     <div class="profile-content">
         <div class="profile-section">
             <div class="section-header">
                 <h2>Giới thiệu</h2>
-                <button class="edit-btn" onclick="location.href='@Url.Action("Edit", "Artists")'">
-                    <i class="fas fa-edit"></i> Chỉnh sửa
-                </button>
+                @if (User.Identity.IsAuthenticated && User.FindFirstValue(ClaimTypes.NameIdentifier) == Model.userId)
+                {
+                    <button class="edit-btn" onclick="location.href='@Url.Action("Edit", "Artists")'">
+                        <i class="fas fa-edit"></i> Chỉnh sửa
+                    </button>
+                }
             </div>
             <p class="artist-bio">@Model.Bio</p>
         </div>
@@ -92,7 +95,7 @@
         <div class="profile-section">
             <div class="section-header">
                 <h2>Album mới nhất</h2>
-                <a href="@Url.Action("Index", "Albums")" class="view-all">Xem tất cả</a>
+                <a href="@Url.Action("Index", "Albums", new { artistId = Model.ArtistId })" class="view-all">Xem tất cả</a>
             </div>
             <div class="albums-grid">
                 @foreach (var album in Model.Albums.OrderByDescending(a => a.ReleaseDate).Take(4))
@@ -141,7 +144,7 @@
         <div class="profile-section">
             <div class="section-header">
                 <h2>Nghệ sĩ tương tự</h2>
-                <a href="@Url.Action("Index", "Artists")" class="view-all">Xem tất cả</a>
+                <a href="@Url.Action("SimilarArtists", "Artists", new { id = Model.ArtistId })" class="view-all">Xem tất cả</a>
             </div>
             <div class="artists-grid">
                 @foreach (var artist in ViewBag.SimilarArtists)

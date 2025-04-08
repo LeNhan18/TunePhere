@@ -34,7 +34,7 @@
 }
 
     .nav-icon.home-icon:hover {
-        color: #1ed760; /* Màu xanh Spotify khi hover */
+        color: #5a3c93;
     }
 
 /* Thanh tìm kiếm */
@@ -345,7 +345,7 @@
 
         .nav-menu a:hover {
             background: #282828;
-            color: #1DB954;
+            color: #5a3c93;
             transform: translateX(5px);
         }
 
@@ -354,11 +354,11 @@
         width: 20px;
         text-align: center;
         font-size: 1.1em;
-        color: #b3b3b3;
+        color: #5a3c93;
     }
 
     .nav-menu a:hover i {
-        color: #1DB954;
+        color: #5a3c93;
     }
 
     .nav-menu hr {
@@ -385,7 +385,7 @@
 
     .logout-button:hover {
         background: #282828;
-        color: #1DB954;
+        color: #5a3c93;
         transform: translateX(5px);
     }
 
@@ -398,7 +398,7 @@
     }
 
     .logout-button:hover i {
-        color: #1DB954;
+        color: #5a3c93;
     }
 
 .search-container {

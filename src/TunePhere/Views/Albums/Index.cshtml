@@ -1,192 +1,74 @@
 ﻿@model IEnumerable<TunePhere.Models.Album>
-
 @{
-    ViewData["Title"] = "Albums";
+    ViewData["Title"] = $"Album của {ViewBag.Artist.ArtistName}";
 }
-
-<link rel="stylesheet" href="~/css/albums.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-<!-- CSS cho context menu -->
-<style>
-    .context-menu {
-        display: none;
-        position: absolute;
-        background-color: #282828;
-        border: none;
-        border-radius: 4px;
-        box-shadow: 0 16px 24px rgba(0,0,0,0.3), 0 6px 8px rgba(0,0,0,0.2);
-        z-index: 1000;
-        min-width: 180px;
-        padding: 4px 0;
-    }
-
-    .context-menu ul {
-        list-style: none;
-        margin: 0;
-        padding: 4px 0;
-    }
-
-    .context-menu li {
-        padding: 10px 15px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background-color 0.2s;
-        color: #ffffff;
-        display: flex;
-        align-items: center;
-    }
-
-    .context-menu li:hover {
-        background-color: #3e3e3e;
-    }
-
-    .album-item {
-        position: relative;
-    }
-
-    .context-menu li i {
-        margin-right: 10px;
-        width: 16px;
-        text-align: center;
-        color: #b3b3b3;
-    }
-
-    .context-menu li:hover i {
-        color: #ffffff;
-    }
-</style>
-
-<div class="spotify-albums-container">
-    <div class="spotify-header">
-        <h1 class="page-title">Albums</h1>
+<link rel="stylesheet" href="~/css/albums.css"/>
+<div class="container-fluid p-0">
+    <!-- Header với ảnh nghệ sĩ -->
+    <div class="artist-header position-relative" style="height: 400px;">
+        <div class="position-absolute w-100 h-100" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(13, 13, 13, 0.9)), url('@ViewBag.Artist.CoverImageUrl') no-repeat center center; background-size: cover; filter: brightness(1.2) contrast(1.1);">
+        </div>
+        <div class="position-absolute bottom-0 text-white p-5">
+            <span class="artist-label mb-2">ALBUM</span>
+            <h1 class="display-4 fw-bold text-shadow text-glow">@ViewBag.Artist.ArtistName</h1>
+            <p class="lead opacity-90">@Model.Count() album</p>
+        </div>
     </div>
 
-    @if (ViewBag.IsArtist && ViewBag.MyAlbums != null)
-    {
-        <section class="my-albums-section">
-            <div class="section-header">
-                <h2>Album của tôi</h2>
-                <a href="@Url.Action("Create")" class="spotify-button">
-                    <i class="fas fa-plus"></i>
-                    Tạo album mới
+    <div class="container mt-5">
+        <!-- Back button và Create button -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="@Url.Action("Profile", "Artists", new { id = ViewBag.Artist.ArtistId })" class="btn-back">
+                <i class="fas fa-arrow-left me-2"></i>Quay lại trang nghệ sĩ
+            </a>
+            @if (User.Identity.IsAuthenticated && User.IsInRole("Artist") && ViewBag.IsOwner)
+            {
+                <a href="@Url.Action("Create", "Albums")" class="btn-create">
+                    <i class="fas fa-plus-circle me-2"></i>Tạo album mới
                 </a>
-            </div>
-            <div class="spotify-grid">
-                @foreach (var album in ViewBag.MyAlbums)
+            }
+        </div>
+
+        <!-- Albums Grid -->
+        <div class="albums-container">
+            <div class="albums-grid">
+                @foreach (var album in Model)
                 {
-                    <div class="spotify-card album-item" data-album-id="@album.AlbumId" oncontextmenu="showContextMenu(event, @album.AlbumId); return false;">
-                        <div class="spotify-card-img-container">
+                    <div class="album-card" oncontextmenu="return showContextMenu(event, @album.AlbumId)">
+                        <div class="album-image-container">
                             <img src="@(string.IsNullOrEmpty(album.ImageUrl) ? "/images/default-album.jpg" : album.ImageUrl)" alt="@album.AlbumName" />
-                            <div class="spotify-card-play">
-                                <a href="@Url.Action("Details", new { id = album.AlbumId })" class="spotify-play-button">
+                            <div class="album-overlay">
+                                <a href="@Url.Action("Details", new { id = album.AlbumId })" class="play-btn">
                                     <i class="fas fa-play"></i>
                                 </a>
                             </div>
                         </div>
-                        <div class="spotify-card-info">
-                            <a href="@Url.Action("Details", new { id = album.AlbumId })" class="spotify-card-title">@album.AlbumName</a>
-                            <p class="spotify-card-description">
-                                @album.numberSongs bài hát • @album.Time.ToString(@"mm\:ss")
+                        <div class="album-info">
+                            <h3 class="album-title">@album.AlbumName</h3>
+                            <div class="album-meta">
+                                <span><i class="fas fa-music"></i> @album.numberSongs bài hát</span>
+                                <span><i class="fas fa-clock"></i> @album.Time.ToString(@"mm\:ss")</span>
+                            </div>
+                            <p class="album-date">
+                                @(DateTime.TryParse(album.ReleaseDate, out DateTime date) ? date.ToString("dd/MM/yyyy") : "")
                             </p>
                         </div>
                     </div>
                 }
             </div>
-        </section>
-    }
-
-    <section class="featured-albums-section">
-        <div class="section-header">
-            <h2>Album nổi bật</h2>
-            <a href="#" class="spotify-link">Xem tất cả</a>
         </div>
-        <div class="spotify-grid">
-            @foreach (var album in Model.Take(5))
-            {
-                <div class="spotify-card">
-                    <div class="spotify-card-img-container">
-                        <img src="@(string.IsNullOrEmpty(album.ImageUrl) ? "/images/default-album.jpg" : album.ImageUrl)" alt="@album.AlbumName" />
-                        <div class="spotify-card-play">
-                            <a href="@Url.Action("Details", new { id = album.AlbumId })" class="spotify-play-button">
-                                <i class="fas fa-play"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="spotify-card-info">
-                        <a href="@Url.Action("Details", new { id = album.AlbumId })" class="spotify-card-title">@album.AlbumName</a>
-                        <p class="spotify-card-description">
-                            <a href="@Url.Action("Profile", "Artists", new { id = album.Artists?.ArtistId })" class="spotify-card-subtitle">@album.Artists?.ArtistName</a>
-                        </p>
-                    </div>
-                </div>
-            }
-        </div>
-    </section>
-
-    <section class="all-albums-section">
-        <div class="section-header">
-            <h2>Tất cả Album</h2>
-        </div>
-        <div class="spotify-grid">
-            @foreach (var album in Model)
-            {
-                <div class="spotify-card">
-                    <div class="spotify-card-img-container">
-                        <img src="@(string.IsNullOrEmpty(album.ImageUrl) ? "/images/default-album.jpg" : album.ImageUrl)" alt="@album.AlbumName" />
-                        <div class="spotify-card-play">
-                            <a href="@Url.Action("Details", new { id = album.AlbumId })" class="spotify-play-button">
-                                <i class="fas fa-play"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="spotify-card-info">
-                        <a href="@Url.Action("Details", new { id = album.AlbumId })" class="spotify-card-title">@album.AlbumName</a>
-                        <p class="spotify-card-description">
-                            <a href="@Url.Action("Profile", "Artists", new { id = album.Artists?.ArtistId })" class="spotify-card-subtitle">@album.Artists?.ArtistName</a>
-                        </p>
-                    </div>
-                </div>
-            }
-        </div>
-    </section>
-
-    <section class="popular-artists-section">
-        <div class="section-header">
-            <h2>Nghệ sĩ phổ biến</h2>
-            <a href="@Url.Action("Index", "Artists")" class="spotify-link">Xem tất cả</a>
-        </div>
-        <div class="spotify-grid artists-grid">
-            @if (ViewBag.PopularArtists != null)
-            {
-                foreach (var artist in ViewBag.PopularArtists)
-                {
-                    <div class="spotify-card artist-card">
-                        <div class="spotify-card-img-container artist-img">
-                            <img src="@(string.IsNullOrEmpty(artist.ImageUrl) ? "/images/default-artist.jpg" : artist.ImageUrl)" alt="@artist.ArtistName" />
-                            <div class="spotify-card-play">
-                                <a href="@Url.Action("Profile", "Artists", new { id = artist.ArtistId })" class="spotify-play-button">
-                                    <i class="fas fa-play"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="spotify-card-info">
-                            <a href="@Url.Action("Profile", "Artists", new { id = artist.ArtistId })" class="spotify-card-title">@artist.ArtistName</a>
-                            <p class="spotify-card-description">Nghệ sĩ • @artist.Songs?.Count bài hát</p>
-                        </div>
-                    </div>
-                }
-            }
-        </div>
-    </section>
+    </div>
 </div>
 
 <!-- Context Menu -->
 <div id="albumContextMenu" class="context-menu">
     <ul>
-        <li onclick="handleMenuClick('details')"><i class="fas fa-info-circle"></i>Chi tiết album</li>
-        <li onclick="handleMenuClick('edit')"><i class="fas fa-edit"></i>Chỉnh sửa album</li>
-        <li onclick="handleMenuClick('delete')"><i class="fas fa-trash"></i>Xóa album</li>
+        <li onclick="handleMenuClick('details')"><i class="fas fa-info-circle"></i> Chi tiết album</li>
+        @if (ViewBag.IsOwner)
+        {
+            <li onclick="handleMenuClick('edit')"><i class="fas fa-edit"></i> Chỉnh sửa album</li>
+            <li onclick="handleMenuClick('delete')"><i class="fas fa-trash"></i> Xóa album</li>
+        }
     </ul>
 </div>
 
@@ -197,29 +79,22 @@
         // Hàm hiển thị context menu khi chuột phải
         function showContextMenu(event, albumId) {
             event.preventDefault();
-            event.stopPropagation();
-            
+
             selectedAlbumId = albumId;
-            console.log("Album được chọn:", selectedAlbumId);
-            
+
             const contextMenu = document.getElementById('albumContextMenu');
-            
+
             // Hiển thị context menu tại vị trí chuột
             contextMenu.style.display = 'block';
             contextMenu.style.left = event.pageX + 'px';
             contextMenu.style.top = event.pageY + 'px';
-            
+
             return false;
         }
 
         // Hàm xử lý khi chọn một mục trong menu
         function handleMenuClick(action) {
-            if (!selectedAlbumId) {
-                console.error("Không có album nào được chọn");
-                return;
-            }
-            
-            console.log("Thực hiện hành động:", action, "cho album:", selectedAlbumId);
+            if (!selectedAlbumId) return;
 
             switch(action) {
                 case 'details':
@@ -232,13 +107,16 @@
                     window.location.href = `/Albums/Delete/${selectedAlbumId}`;
                     break;
             }
+
+            // Ẩn context menu sau khi chọn
+            document.getElementById('albumContextMenu').style.display = 'none';
         }
 
         // Ẩn context menu khi click ra ngoài
         document.addEventListener('click', function() {
             document.getElementById('albumContextMenu').style.display = 'none';
         });
-        
+
         // Ẩn context menu khi nhấn Escape
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {

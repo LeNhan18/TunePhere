@@ -3,7 +3,7 @@
     background: linear-gradient(135deg, #0a0612 0%, #1a1025 100%);
     min-height: 100vh;
     color: white;
-    padding: 30px;
+    padding: 80px;
 }
 
 .room-header {
@@ -25,16 +25,19 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 2;
 }
 
 .room-status {
-    padding: 8px 20px;
+    padding: 6px 12px;
     border-radius: 25px;
-    font-size: 0.9rem;
+    font-size: 0.7rem;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 1px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    display: inline-block;
+    margin-left: 20px;
 }
 
 .status-active {
@@ -83,23 +86,31 @@
 
 .room-actions {
     display: flex;
-    gap: 15px;
+    gap: 10px;
+    margin-top: 15px;
 }
 
 .btn-action {
-    padding: 12px 25px;
+    padding: 8px 15px;
     border-radius: 25px;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 7px;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    text-decoration: none !important;
+}
+
+.btn-action:hover, 
+.btn-action:focus, 
+.btn-action:active {
+    text-decoration: none !important;
 }
 
 .btn-join {
@@ -107,6 +118,7 @@
     color: white;
     position: relative;
     overflow: hidden;
+    text-decoration: none !important;
 }
 
 .btn-join:hover {
@@ -137,6 +149,7 @@
     position: relative;
     z-index: 1;
     overflow: hidden;
+    text-decoration: none !important;
 }
 
 .btn-details::before {
@@ -176,6 +189,7 @@
     backdrop-filter: blur(10px);
     border: 1px solid rgba(156, 39, 176, 0.1);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    position: relative;
 }
 
 .room-card:hover {
@@ -1528,4 +1542,9 @@ audio::-webkit-media-controls-time-remaining-display {
     .song-result-title {
         font-size: 0.9rem;
     }
+}
+
+/* Thêm style chung cho các link */
+a, a:hover, a:focus, a:active, a:visited {
+    text-decoration: none !important;
 }
