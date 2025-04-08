@@ -71,14 +71,16 @@
 
                     <div class="spotify-form-group">
                         <label asp-for="ArtistId" class="spotify-label">Nghệ sĩ</label>
-                        <select asp-for="ArtistId" class="spotify-select" required>
-                            <option value="">Chọn nghệ sĩ</option>
-                            @foreach (var artist in ViewBag.Artists)
-                            {
-                                <option value="@artist.ArtistId">@artist.ArtistName</option>
-                            }
-                        </select>
-                        <span asp-validation-for="ArtistId" class="spotify-error"></span>
+                        @if (ViewBag.Artists != null && ViewBag.Artists.Count > 0)
+                        {
+                            var artist = ViewBag.Artists[0];
+                            <input type="hidden" asp-for="ArtistId" value="@artist.ArtistId" />
+                            <input type="text" class="spotify-input" value="@artist.ArtistName" readonly />
+                        }
+                        else
+                        {
+                            <p class="spotify-error">Không tìm thấy thông tin nghệ sĩ</p>
+                        }
                     </div>
                 </div>
             </div>
