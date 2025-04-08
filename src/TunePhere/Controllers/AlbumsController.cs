@@ -23,48 +23,48 @@ namespace TunePhere.Controllers
 
         // GET: Albums
         public async Task<IActionResult> Index(int? artistId = null)
+{
+    if (artistId.HasValue)
+    {
+        // Lấy thông tin nghệ sĩ
+        var artist = await _context.Artists
+            .Include(a => a.Albums)
+                .ThenInclude(a => a.Songs)
+            .FirstOrDefaultAsync(a => a.ArtistId == artistId);
+
+        if (artist == null)
         {
-            if (artistId.HasValue)
-            {
-                // Lấy thông tin nghệ sĩ
-                var artist = await _context.Artists
-                    .Include(a => a.Albums)
-                        .ThenInclude(a => a.Songs)
-                    .FirstOrDefaultAsync(a => a.ArtistId == artistId);
-
-                if (artist == null)
-                {
-                    return NotFound();
-                }
-
-                // Lấy userId của người đang đăng nhập
-                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                // Kiểm tra xem người đang xem có phải là chủ sở hữu không
-                ViewBag.IsOwner = (currentUserId == artist.userId);
-                ViewBag.Artist = artist;
-
-                var albums = artist.Albums.OrderByDescending(a => a.ReleaseDate).ToList();
-                return View(albums);
-            }
-
-            // Logic cũ cho trang Albums tổng
-            var popularArtists = await _context.Artists
-                .Include(a => a.Songs)
-                .OrderByDescending(a => a.Songs.Count)
-                .Take(6)
-                .ToListAsync();
-            ViewBag.PopularArtists = popularArtists;
-
-            var allAlbums = await _context.Albums
-                .Include(a => a.Songs)
-                .Include(a => a.Artists)
-                .OrderByDescending(a => a.ReleaseDate)
-                .Take(10)
-                .ToListAsync();
-
-            return View(allAlbums);
+            return NotFound();
         }
+
+        // Lấy userId của người đang đăng nhập
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        
+        // Kiểm tra xem người đang xem có phải là chủ sở hữu không
+        ViewBag.IsOwner = (currentUserId == artist.userId);
+        ViewBag.Artist = artist;
+        
+        var albums = artist.Albums.OrderByDescending(a => a.ReleaseDate).ToList();
+        return View(albums);
+    }
+
+    // Logic cũ cho trang Albums tổng
+    var popularArtists = await _context.Artists
+        .Include(a => a.Songs)
+        .OrderByDescending(a => a.Songs.Count)
+        .Take(6)
+        .ToListAsync();
+    ViewBag.PopularArtists = popularArtists;
+
+    var allAlbums = await _context.Albums
+        .Include(a => a.Songs)
+        .Include(a => a.Artists)
+        .OrderByDescending(a => a.ReleaseDate)
+        .Take(10)
+        .ToListAsync();
+
+    return View(allAlbums);
+}
         // GET: Albums/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -314,7 +314,7 @@ namespace TunePhere.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Artist")]
-        public async Task<IActionResult> Edit(int id, [Bind("AlbumId,AlbumName,AlbumDescription,ReleaseDate")] Album album, IFormFile AlbumImage)
+        public async Task<IActionResult> Edit(int id, [Bind("AlbumId,AlbumName,AlbumDescription,ReleaseDate,ArtistId,ImageUrl,numberSongs,Time")] Album album, IFormFile? AlbumImage)
         {
             if (id != album.AlbumId)
             {
@@ -347,18 +347,15 @@ namespace TunePhere.Controllers
                     existingAlbum.AlbumDescription = album.AlbumDescription;
                     existingAlbum.ReleaseDate = album.ReleaseDate;
 
-                    // Biến để lưu URL ảnh mới nếu có
-                    string newImageUrl = existingAlbum.ImageUrl;
-
-                    // Xử lý upload ảnh mới nếu có
+                    // Chỉ cập nhật ảnh nếu có ảnh mới được chọn
                     if (AlbumImage != null && AlbumImage.Length > 0)
                     {
                         var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "albums");
                         if (!Directory.Exists(uploadsFolder))
                             Directory.CreateDirectory(uploadsFolder);
 
-                        // Xóa ảnh cũ nếu có
-                        if (!string.IsNullOrEmpty(existingAlbum.ImageUrl))
+                        // Xóa ảnh cũ nếu có và khác với ảnh mặc định
+                        if (!string.IsNullOrEmpty(existingAlbum.ImageUrl) && !existingAlbum.ImageUrl.Contains("album-placeholder.jpg"))
                         {
                             var oldImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", existingAlbum.ImageUrl.TrimStart('/'));
                             if (System.IO.File.Exists(oldImagePath))
@@ -375,34 +372,28 @@ namespace TunePhere.Controllers
                             await AlbumImage.CopyToAsync(fileStream);
                         }
 
-                        newImageUrl = $"/uploads/albums/{uniqueFileName}";
-                        existingAlbum.ImageUrl = newImageUrl;
+                        existingAlbum.ImageUrl = $"/uploads/albums/{uniqueFileName}";
 
                         // Cập nhật ImageUrl cho tất cả các bài hát trong album
-                        if (existingAlbum.Songs != null && existingAlbum.Songs.Any())
+                        if (existingAlbum.Songs != null)
                         {
                             foreach (var song in existingAlbum.Songs)
                             {
-                                song.ImageUrl = newImageUrl;
-                            }
-                        }
-                        else
-                        {
-                            // Nếu Songs không được load, tìm và cập nhật riêng
-                            var songsToUpdate = await _context.Songs
-                                .Where(s => s.AlbumId == id)
-                                .ToListAsync();
-
-                            foreach (var song in songsToUpdate)
-                            {
-                                song.ImageUrl = newImageUrl;
+                                song.ImageUrl = existingAlbum.ImageUrl;
                                 _context.Update(song);
                             }
                         }
                     }
+                    // Nếu không có ảnh mới, giữ nguyên ảnh cũ
+                    else
+                    {
+                        existingAlbum.ImageUrl = album.ImageUrl;
+                    }
 
                     _context.Update(existingAlbum);
                     await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(Index), new { artistId = existingAlbum.ArtistId });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -415,7 +406,6 @@ namespace TunePhere.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(album);
         }
@@ -468,6 +458,9 @@ namespace TunePhere.Controllers
                 {
                     return NotFound();
                 }
+
+                // Lưu artistId trước khi xóa album
+                var artistId = album.ArtistId;
 
                 // Kiểm tra quyền sở hữu
                 string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -553,14 +546,15 @@ namespace TunePhere.Controllers
                 // Hoàn thành transaction
                 await transaction.CommitAsync();
 
-                return RedirectToAction(nameof(Index));
+                // Chuyển hướng về trang Index với artistId
+                return RedirectToAction(nameof(Index), new { artistId = artistId });
             }
             catch (Exception ex)
             {
                 // Log lỗi và hiển thị thông báo
                 Console.WriteLine($"Lỗi khi xóa album: {ex.Message}");
                 ModelState.AddModelError("", $"Có lỗi xảy ra khi xóa album: {ex.Message}");
-                return View("Delete", _context.Albums.Find(id));
+                return View("Delete", await _context.Albums.FindAsync(id));
             }
         }
 
