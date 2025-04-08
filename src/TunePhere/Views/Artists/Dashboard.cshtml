@@ -6,11 +6,11 @@
 
 <link rel="stylesheet" href="~/css/dashboard.css">
 
-<div class="artist-dashboard dark-theme">
+<div class="artist-dashboard">
     <div class="dashboard-header">
         <div class="artist-info">
-            <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/default-avatar.jpg" : Model.ImageUrl)" 
-                 alt="@Model.ArtistName" 
+            <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/default-avatar.jpg" : Model.ImageUrl)"
+                 alt="@Model.ArtistName"
                  class="artist-avatar">
             <div class="artist-details">
                 <h1>@Model.ArtistName</h1>
@@ -18,19 +18,15 @@
             </div>
         </div>
         <div class="dashboard-actions">
-            <button id="followArtistBtn" class="action-button follow-button" onclick="toggleFollow(@Model.ArtistId)">
-                <i class="fas fa-heart"></i>
-                <span>Theo dõi</span>
-            </button>
-            <button class="action-button primary-button glow-effect" onclick="location.href='@Url.Action("Create", "Songs")'">
+            <button class="action-button primary-button" onclick="location.href='@Url.Action("Create", "Songs")'">
                 <i class="fas fa-plus"></i>
                 Tải bài hát lên
             </button>
-            <button class="action-button secondary-button neon-border" onclick="location.href='@Url.Action("Create", "Albums")'">
+            <button class="action-button secondary-button" onclick="location.href='@Url.Action("Create", "Albums")'">
                 <i class="fas fa-compact-disc"></i>
                 Tạo album mới
             </button>
-            <button class="action-button secondary-button neon-border" onclick="location.href='@Url.Action("Edit", "Artists", new { id = Model.ArtistId })'">
+            <button class="action-button secondary-button" onclick="location.href='@Url.Action("Edit", "Artists")'">
                 <i class="fas fa-edit"></i>
                 Chỉnh sửa thông tin
             </button>
@@ -38,28 +34,28 @@
     </div>
 
     <div class="dashboard-stats">
-        <div class="stat-card glass-effect">
+        <div class="stat-card">
             <i class="fas fa-music neon-icon"></i>
             <div class="stat-info">
                 <h3>Bài hát</h3>
                 <p class="neon-text">@Model.Songs.Count()</p>
             </div>
         </div>
-        <div class="stat-card glass-effect">
+        <div class="stat-card">
             <i class="fas fa-compact-disc neon-icon"></i>
             <div class="stat-info">
                 <h3>Album</h3>
                 <p class="neon-text">@Model.Albums.Count()</p>
             </div>
         </div>
-        <div class="stat-card glass-effect">
+        <div class="stat-card">
             <i class="fas fa-heart neon-icon"></i>
             <div class="stat-info">
                 <h3>Lượt thích</h3>
                 <p class="neon-text">@Model.Songs.Sum(s => s.LikeCount)</p>
             </div>
         </div>
-        <div class="stat-card glass-effect">
+        <div class="stat-card">
             <i class="fas fa-play neon-icon"></i>
             <div class="stat-info">
                 <h3>Lượt nghe</h3>
@@ -68,421 +64,53 @@
         </div>
     </div>
 
-    <div class="content-section glass-effect">
+    <div class="content-section">
         <h2 class="section-title">Bài hát mới nhất</h2>
         <div class="songs-list">
             @foreach (var song in Model.Songs.OrderByDescending(s => s.UploadDate).Take(5))
             {
-                <div class="song-item glass-effect">
+                <div class="song-item">
                     <div class="song-cover">
                         <img src="@song.ImageUrl" alt="@song.Title" />
                     </div>
                     <div class="song-info">
-                        <h5 class="song-title neon-text">@song.Title</h5>
+                        <h5 class="song-title">@song.Title</h5>
                         <div class="song-meta">
-                            <span class="song-genre neon-badge">@song.Genre</span>
-                            <span class="song-duration">@song.Duration.ToString(@"mm\:ss")</span>
+                            <span>@song.Genre</span>
+                            <span>•</span>
+                            <span>@song.Duration.ToString(@"mm\:ss")</span>
                         </div>
                     </div>
                     <div class="song-stats">
-                        <span><i class="fas fa-play neon-icon"></i> @song.PlayCount</span>
-                        <span><i class="fas fa-heart neon-icon"></i> @song.LikeCount</span>
+                        <span><i class="fas fa-play"></i> @song.PlayCount</span>
+                        <span><i class="fas fa-heart"></i> @song.LikeCount</span>
                     </div>
                 </div>
             }
         </div>
     </div>
 
-    <div class="content-section glass-effect">
+    <div class="content-section">
         <h2 class="section-title">Album của bạn</h2>
         <div class="songs-list">
             @foreach (var album in Model.Albums.OrderByDescending(a => a.ReleaseDate).Take(5))
             {
-                <div class="song-item glass-effect">
+                <div class="song-item">
                     <div class="song-cover">
                         <img src="@album.ImageUrl" alt="@album.AlbumName" />
                     </div>
                     <div class="song-info">
-                        <h5 class="song-title neon-text">@album.AlbumName</h5>
+                        <h5 class="song-title">@album.AlbumName</h5>
                         <div class="song-meta">
-                            <span class="song-genre neon-badge">@album.Songs.Count() bài hát</span>
+                            <span>@album.Songs.Count() bài hát</span>
                         </div>
                     </div>
                     <div class="song-stats">
-                        <span><i class="fas fa-play neon-icon"></i> @album.Songs.Sum(s => s.PlayCount)</span>
-                        <span><i class="fas fa-heart neon-icon"></i> @album.Songs.Sum(s => s.LikeCount)</span>
+                        <span><i class="fas fa-play"></i> @album.Songs.Sum(s => s.PlayCount)</span>
+                        <span><i class="fas fa-heart"></i> @album.Songs.Sum(s => s.LikeCount)</span>
                     </div>
                 </div>
             }
         </div>
     </div>
 </div>
-
-<script>
-let isFollowing = false;
-
-function toggleFollow(artistId) {
-    const followBtn = document.getElementById('followArtistBtn');
-    const icon = followBtn.querySelector('i');
-    const text = followBtn.querySelector('span');
-    
-    if (!isFollowing) {
-        // Theo dõi nghệ sĩ
-        fetch(`/Artists/Follow/${artistId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                isFollowing = true;
-                followBtn.classList.add('following');
-                icon.classList.remove('fa-heart');
-                icon.classList.add('fa-heart-broken');
-                text.textContent = 'Đang theo dõi';
-                
-                // Hiệu ứng thành công
-                followBtn.style.background = 'linear-gradient(45deg, #4f46e5, #6366f1)';
-                followBtn.style.color = '#c7d2fe';
-            }
-        });
-    } else {
-        // Hủy theo dõi
-        fetch(`/Artists/Unfollow/${artistId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                isFollowing = false;
-                followBtn.classList.remove('following');
-                icon.classList.remove('fa-heart-broken');
-                icon.classList.add('fa-heart');
-                text.textContent = 'Theo dõi';
-                
-                // Trở về style ban đầu
-                followBtn.style.background = 'rgba(17, 24, 39, 0.7)';
-                followBtn.style.color = '#818cf8';
-            }
-        });
-    }
-}
-</script>
-
-<style>
-    .artist-dashboard {
-        padding: 30px;
-        background: #f8f9fa;
-        min-height: calc(100vh - 60px);
-    }
-
-    .dashboard-header {
-        background: white;
-        border-radius: 15px;
-        padding: 30px;
-        margin-bottom: 30px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .artist-info {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
-
-    .artist-avatar {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        overflow: hidden;
-    }
-
-    .artist-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .artist-avatar i {
-        font-size: 100px;
-        color: #ddd;
-    }
-
-    .artist-details h1 {
-        margin: 0;
-        color: #333;
-        font-size: 24px;
-    }
-
-    .bio {
-        color: #666;
-        margin: 10px 0 0;
-    }
-
-    .quick-actions {
-        display: flex;
-        gap: 10px;
-    }
-
-    .action-button {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 20px;
-        border-radius: 8px;
-        background: #2575fc;
-        color: white;
-        text-decoration: none;
-        transition: all 0.3s ease;
-    }
-
-    .action-button:hover {
-        background: #1a5dbb;
-        transform: translateY(-2px);
-    }
-
-    .dashboard-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-
-    .stat-card {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .stat-card i {
-        font-size: 24px;
-        color: #2575fc;
-    }
-
-    .stat-info h3 {
-        margin: 0;
-        font-size: 14px;
-        color: #666;
-    }
-
-    .stat-info p {
-        margin: 5px 0 0;
-        font-size: 24px;
-        font-weight: bold;
-        color: #333;
-    }
-
-    .dashboard-content {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 30px;
-    }
-
-    .content-section {
-        background: white;
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .content-section h2 {
-        margin: 0 0 20px;
-        color: #333;
-        font-size: 18px;
-    }
-
-    .albums-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 20px;
-    }
-
-    .album-card {
-        text-decoration: none;
-        color: inherit;
-    }
-
-    .album-cover {
-        aspect-ratio: 1;
-        border-radius: 10px;
-        overflow: hidden;
-        margin-bottom: 10px;
-    }
-
-    .album-cover img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .album-info h3 {
-        margin: 0;
-        font-size: 14px;
-        color: #333;
-    }
-
-    .album-info p {
-        margin: 5px 0 0;
-        font-size: 12px;
-        color: #666;
-    }
-
-    .songs-list {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .song-item {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 10px;
-        border-radius: 8px;
-        transition: background-color 0.2s;
-    }
-
-    .song-item:hover {
-        background: #f8f9fa;
-    }
-
-    .song-cover {
-        width: 50px;
-        height: 50px;
-        border-radius: 5px;
-        overflow: hidden;
-    }
-
-    .song-cover img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .song-info {
-        flex: 1;
-    }
-
-    .song-info h5 {
-        margin: 0;
-        font-size: 14px;
-        color: #333;
-    }
-
-    .song-info p {
-        margin: 5px 0 0;
-        font-size: 12px;
-        color: #666;
-    }
-
-    .song-stats {
-        display: flex;
-        gap: 15px;
-    }
-
-    .song-stats span {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 12px;
-        color: #666;
-    }
-
-    /* Style mới cho menu điều hướng */
-    .nav-menu {
-        background: linear-gradient(145deg, #ffffff, #f0f0f0);
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 5px 5px 15px #d1d1d1, -5px -5px 15px #ffffff;
-        width: 250px;
-    }
-
-    .nav-menu a {
-        display: flex;
-        align-items: center;
-        padding: 12px 15px;
-        margin: 8px 0;
-        color: #333;
-        text-decoration: none;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-        font-weight: 500;
-    }
-
-    .nav-menu a:hover {
-        background: linear-gradient(145deg, #2575fc, #6a11cb);
-        color: white;
-        transform: translateX(10px);
-        box-shadow: 0 4px 15px rgba(37, 117, 252, 0.2);
-    }
-
-    .nav-menu i {
-        margin-right: 12px;
-        width: 20px;
-        text-align: center;
-        font-size: 1.1em;
-    }
-
-    .nav-menu a:hover i {
-        transform: scale(1.1);
-    }
-
-    /* Thêm đường phân cách */
-    .nav-menu hr {
-        border: none;
-        height: 1px;
-        background: linear-gradient(to right, transparent, #e0e0e0, transparent);
-        margin: 15px 0;
-    }
-
-    /* Hiệu ứng active cho menu item hiện tại */
-    .nav-menu a.active {
-        background: linear-gradient(145deg, #2575fc, #6a11cb);
-        color: white;
-        box-shadow: 0 4px 15px rgba(37, 117, 252, 0.2);
-    }
-
-    .follow-button {
-        background: rgba(17, 24, 39, 0.7);
-        color: #818cf8;
-        border: 1px solid rgba(99, 102, 241, 0.2);
-        transition: all 0.3s ease;
-    }
-
-    .follow-button:hover {
-        background: rgba(67, 56, 202, 0.3);
-        border-color: rgba(99, 102, 241, 0.4);
-        transform: translateY(-2px);
-    }
-
-    .follow-button.following {
-        background: linear-gradient(45deg, #4f46e5, #6366f1);
-        color: #c7d2fe;
-        border: none;
-    }
-
-    .follow-button.following:hover {
-        background: linear-gradient(45deg, #6366f1, #4f46e5);
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
-    }
-
-    .follow-button i {
-        font-size: 16px;
-        margin-right: 8px;
-        transition: all 0.3s ease;
-    }
-
-    .follow-button:hover i {
-        transform: scale(1.2);
-    }
-</style> 
