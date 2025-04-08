@@ -1,17 +1,17 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TunePhere.Models;
-using TunePhere.Repository.IMPRepository;
 
-namespace TunePhere.Repository.EFRepository
+namespace TunePhere.Repository.IMPRepository
 {
-    public class EFPlaylistRepository : IPlaylistRepository
+    public class PlaylistRepository : IPlaylistRepository
     {
         private readonly AppDbContext _context;
 
-        public EFPlaylistRepository(AppDbContext context)
+        public PlaylistRepository(AppDbContext context)
         {
             _context = context;
         }
@@ -81,7 +81,6 @@ namespace TunePhere.Repository.EFRepository
         public async Task<IEnumerable<Playlist>> GetUserPlaylistsAsync(string userId)
         {
             return await _context.Playlists
-                .Include(p => p.User)
                 .Include(p => p.PlaylistSongs)
                     .ThenInclude(ps => ps.Song)
                 .Where(p => p.UserId == userId)
@@ -141,26 +140,5 @@ namespace TunePhere.Repository.EFRepository
 
             await _context.SaveChangesAsync();
         }
-
-        // Lấy playlist của người dùng theo username (giả sử Playlist.User có thuộc tính Username)
-        //public async Task<IEnumerable<Playlist>> GetUserPlaylistsAsync(string username)
-        //{
-        //    return await _context.Playlists
-        //        .Include(p => p.User)
-        //        .Where(p => p.User.UserName == username)
-        //        .ToListAsync();
-        //}
-        // Lấy playlist công khai
-        public async Task<IEnumerable<Playlist>> GetPublicPlaylistsAsync()
-        {
-            return await _context.Playlists
-                .Where(p => p.IsPublic)
-                .ToListAsync();
-        }
-        // Gợi ý playlist (ví dụ: sử dụng playlist công khai)
-        public async Task<IEnumerable<Playlist>> GetSuggestedPlaylistsAsync()
-        {
-            return await GetPublicPlaylistsAsync();
-        }
     }
-}
+} 
