@@ -29,7 +29,7 @@ namespace TunePhere.Controllers
         public async Task<IActionResult> Index()
         {
             var topSongs = await _songRepo.GetActiveSongsAsync();
-            var suggestedPlaylists = await _playlistRepo.GetSuggestedPlaylistsAsync();
+            var suggestedPlaylists = await _playlistRepo.GetAllAsync(); // Changed to GetAllAsync
             var trendingRemixes = await _remixRepo.GetTopRemixesAsync();
 
             // Lấy danh sách nghệ sĩ phổ biến dựa trên số lượng bài hát và lượt nghe

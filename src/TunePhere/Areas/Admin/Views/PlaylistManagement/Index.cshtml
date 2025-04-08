@@ -1,0 +1,74 @@
+@model IEnumerable<TunePhere.Models.Playlist>
+@{
+    ViewData["Title"] = "Quản lý Playlist";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Quản lý Playlist</h1>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Danh sách Playlist
+        </div>
+        <div class="card-body">
+            <table id="playlistTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên Playlist</th>
+                        <th>Người tạo</th>
+                        <th>Ngày tạo</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var playlist in Model)
+                    {
+                        <tr>
+                            <td>@playlist.PlaylistId</td>
+                            <td>@playlist.Title</td>
+                            <td>@playlist.UserId</td>
+                            <td>@playlist.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (playlist.IsPublic)
+                                {
+                                    <span class="badge bg-success">Public</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Private</span>
+                                }
+                            </td>
+                            <td>
+                                <a href="@Url.Action("Details", new { id = playlist.PlaylistId })" class="btn btn-info btn-sm">
+                                    <i class="fas fa-info-circle"></i>
+                                </a>
+                                <button onclick="deletePlaylist(@playlist.PlaylistId)" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#playlistTable').DataTable();
+        });
+
+        function deletePlaylist(id) {
+            if (confirm('Bạn có chắc chắn muốn xóa playlist này?')) {
+                $.post('/Admin/PlaylistManagement/Delete/' + id, function () {
+                    location.reload();
+                });
+            }
+        }
+    </script>
+}

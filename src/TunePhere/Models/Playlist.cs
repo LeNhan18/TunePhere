@@ -30,5 +30,7 @@ namespace TunePhere.Models
         {
             PlaylistSongs = new HashSet<PlaylistSong>();
         }
+
+        public string? Description { get; set; }
     }
 }
