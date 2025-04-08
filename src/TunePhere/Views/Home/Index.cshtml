@@ -223,11 +223,11 @@
             <div class="music-grid">
                 @foreach (var album in ViewBag.PopularAlbums)
                 {
-                    <div class="music-card">
+                    <div class="music-card" onclick="location.href='@Url.Action("Details", "Albums", new { id = album.AlbumId })'">
                         <div class="card-img-container">
                             <img src="@(string.IsNullOrEmpty(album.ImageUrl) ? "/images/album-placeholder.jpg" : album.ImageUrl)" alt="@album.AlbumName">
                             <div class="play-overlay">
-                                <button class="play-btn" onclick="location.href='@Url.Action("Details", "Albums", new { id = album.AlbumId })'">
+                                <button class="play-btn">
                                     <i class="fas fa-play"></i>
                                 </button>
                             </div>
@@ -237,29 +237,7 @@
                     </div>
                 }
             </div>
-        </section>
-
-        <!-- Bảng xếp hạng nổi bật -->
-        <section class="music-section">
-            <h2 class="section-title">Bảng xếp hạng nổi bật</h2>
-            <div class="music-grid">
-                @for (int i = 0; i < 8; i++)
-                {
-                    <div class="chart-card">
-                        <div class="card-img-container">
-                            <img src="/images/chart-placeholder.jpg" alt="Bảng xếp hạng">
-                            <div class="play-overlay">
-                                <button class="play-btn">
-                                    <i class="fas fa-play"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <h3 class="chart-title">Top 50 Việt Nam</h3>
-                        <p class="chart-desc">Cập nhật hàng tuần</p>
-                    </div>
-                }
-            </div>
-        </section>
+        </section>  
     </div>
 </div>
 
