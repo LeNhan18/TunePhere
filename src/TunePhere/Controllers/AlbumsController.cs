@@ -100,8 +100,21 @@ namespace TunePhere.Controllers
 
         // GET: Albums/Create
         [Authorize(Roles = "Artist")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            // Lấy thông tin nghệ sĩ hiện tại
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var artist = await _context.Artists
+                .FirstOrDefaultAsync(a => a.userId == userId);
+
+            if (artist == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Đưa thông tin nghệ sĩ vào ViewBag
+            ViewBag.Artists = new List<Artists> { artist };
+
             return View();
         }
 
@@ -109,14 +122,14 @@ namespace TunePhere.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Artist")]
-        public async Task<IActionResult> Create([Bind("AlbumName,AlbumDescription,ReleaseDate")] Album album,
-            IFormFile ImageFile, List<IFormFile> SongFiles, List<string> SongTitles)
+        public async Task<IActionResult> Create([Bind("AlbumName,AlbumDescription,ReleaseDate,ArtistId")] Album album,
+    IFormFile ImageFile, List<IFormFile> SongFiles, List<string> SongTitles)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Lấy ArtistId từ user hiện tại
+                    // Kiểm tra quyền sở hữu
                     string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                     var artist = await _context.Artists.FirstOrDefaultAsync(a => a.userId == userId);
 
@@ -126,14 +139,18 @@ namespace TunePhere.Controllers
                         return View(album);
                     }
 
-                    album.ArtistId = artist.ArtistId;
+                    // Đảm bảo ArtistId khớp với nghệ sĩ hiện tại
+                    if (album.ArtistId != artist.ArtistId)
+                    {
+                        ModelState.AddModelError("", "Không có quyền tạo album cho nghệ sĩ khác");
+                        return View(album);
+                    }
 
                     // Xử lý upload ảnh album
                     if (ImageFile != null && ImageFile.Length > 0)
                     {
                         var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "albums");
-                        if (!Directory.Exists(uploadsFolder))
-                            Directory.CreateDirectory(uploadsFolder);
+                        Directory.CreateDirectory(uploadsFolder);
 
                         var uniqueFileName = $"{Guid.NewGuid()}_{ImageFile.FileName}";
                         var filePath = Path.Combine(uploadsFolder, uniqueFileName);
@@ -252,6 +269,11 @@ namespace TunePhere.Controllers
                     ModelState.AddModelError("", $"Có lỗi xảy ra: {ex.Message}");
                 }
             }
+
+            // Nếu có lỗi, cần khởi tạo lại ViewBag.Artists
+            string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentArtist = await _context.Artists.FirstOrDefaultAsync(a => a.userId == currentUserId);
+            ViewBag.Artists = new List<Artists> { currentArtist };
 
             return View(album);
         }
