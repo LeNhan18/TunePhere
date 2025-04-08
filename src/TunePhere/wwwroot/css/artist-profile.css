@@ -365,10 +365,10 @@ a, a:hover, a:focus, a:active, a:visited {
     justify-content: center;
 }
 
-.play-btn:hover {
-    transform: scale(1.1);
-    background: #1ed760;
-}
+    .play-btn:hover {
+        transform: scale(1.1);
+        background: #5a3c93;
+    }
 
 .album-info h3 {
     font-size: 16px;
@@ -551,10 +551,10 @@ a, a:hover, a:focus, a:active, a:visited {
     transition: all 0.3s ease;
 }
 
-.follow-btn:hover {
-    transform: scale(1.05);
-    background: #1ed760;
-}
+    .follow-btn:hover {
+        transform: scale(1.05);
+        background: #5a3c93;
+    }
 
 .follow-btn.following {
     background: transparent;

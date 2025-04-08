@@ -1,59 +1,80 @@
 ﻿@model TunePhere.Models.Album
 
 @{
-    ViewData["Title"] = "Delete";
-
+    ViewData["Title"] = "Xóa Album";
     Layout = "_Layout";
 }
 
-<h1>Delete</h1>
+<link rel="stylesheet" href="~/css/album-delete.css" />
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Album</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AlbumName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AlbumName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AlbumDescription)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AlbumDescription)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageUrl)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageUrl)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ReleaseDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ReleaseDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.numberSongs)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.numberSongs)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Time)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Time)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="AlbumId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="create-header position-relative" style="height: 200px;">
+        <div class="position-absolute w-100 h-100" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(13, 13, 13, 0.9));">
+            <div class="h-100 d-flex align-items-center justify-content-center">
+                <div class="text-center">
+                    <span class="header-label mb-2">XÁC NHẬN XÓA</span>
+                    <h1 class="display-5 fw-bold text-white text-shadow text-glow mt-5">Xóa Album Của Bạn</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <div class="delete-form-container">
+            <div class="row">
+                <div class="col-md-10 mx-auto">
+                    <div class="album-details">
+                        <h4 class="mb-4">Bạn có chắc chắn muốn xóa album này?</h4>
+                        
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <img src="@Model.ImageUrl" alt="@Model.AlbumName" class="album-image" />
+                        }
+                        
+                        <div class="album-info">
+                            <dt>Tên Album</dt>
+                            <dd>@Model.AlbumName</dd>
+                        </div>
+                        
+                        <div class="album-info">
+                            <dt>Mô tả</dt>
+                            <dd>@(string.IsNullOrEmpty(Model.AlbumDescription) ? "Không có mô tả" : Model.AlbumDescription)</dd>
+                        </div>
+                        
+                        <div class="album-info">
+                            <dt>Ngày phát hành</dt>
+                            <dd>@(string.IsNullOrEmpty(Model.ReleaseDate) ? "Chưa cập nhật" : Model.ReleaseDate)</dd>
+                        </div>
+                        
+                        <div class="album-info">
+                            <dt>Số lượng bài hát</dt>
+                            <dd>@Model.numberSongs</dd>
+                        </div>
+                        
+                        <div class="album-info">
+                            <dt>Thời lượng</dt>
+                            <dd>@Model.Time</dd>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <p class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Lưu ý: Khi xóa album, tất cả bài hát trong album sẽ bị xóa khỏi hệ thống.</p>
+                        </div>
+                    </div>
+                    
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="AlbumId" />
+                        <div class="button-container">
+                            <button type="submit" class="btn-delete">
+                                <i class="fas fa-trash-alt me-2"></i>Xóa album
+                            </button>
+                            <a href="@Url.Action("Index", "Albums", new { artistId = Model.ArtistId })" class="btn-cancel">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

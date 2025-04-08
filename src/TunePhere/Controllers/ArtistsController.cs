@@ -478,5 +478,39 @@ namespace TunePhere.Controllers
 
             return View(allFollowing);
         }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> SimilarArtists(int id)
+        {
+            var artist = await _context.Artists
+                .Include(a => a.Songs)
+                .FirstOrDefaultAsync(a => a.ArtistId == id);
+
+            if (artist == null)
+            {
+                return NotFound();
+            }
+
+            // Sử dụng cùng logic với trang Profile để đảm bảo luôn có kết quả
+            var similarArtistsQuery = await _context.Artists
+                .Include(a => a.Songs)
+                .Where(a => a.ArtistId != artist.ArtistId) // Loại trừ nghệ sĩ hiện tại
+                .Select(a => new
+                {
+                    Artist = a,
+                    PlayCount = a.Songs.Sum(s => s.PlayCount)
+                })
+                .OrderByDescending(x => x.PlayCount) // Sắp xếp theo lượt nghe
+                .Take(8) // Lấy nhiều hơn (8 thay vì 4)
+                .ToListAsync();
+
+            var similarArtists = similarArtistsQuery.Select(x => x.Artist).ToList();
+            var artistPlayCounts = similarArtistsQuery.ToDictionary(x => x.Artist.ArtistId, x => x.PlayCount);
+
+            ViewBag.ArtistPlayCounts = artistPlayCounts;
+            ViewBag.OriginalArtist = artist;
+
+            return View(similarArtists);
+        }
     }
 }

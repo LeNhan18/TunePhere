@@ -39,7 +39,7 @@ namespace TunePhere.Controllers
                 .Include(p => p.AddedByUser)
                 .Include(p => p.Playlist)
                 .Include(p => p.Song)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.PlaylistSongId == id);
             if (playlistSong == null)
             {
                 return NotFound();
@@ -102,7 +102,7 @@ namespace TunePhere.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,PlaylistId,SongId,AddedByUserId,AddedAt,VoteCount")] PlaylistSong playlistSong)
         {
-            if (id != playlistSong.Id)
+            if (id != playlistSong.PlaylistSongId)
             {
                 return NotFound();
             }
@@ -116,7 +116,7 @@ namespace TunePhere.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PlaylistSongExists(playlistSong.Id))
+                    if (!PlaylistSongExists(playlistSong.PlaylistSongId))
                     {
                         return NotFound();
                     }
@@ -145,7 +145,7 @@ namespace TunePhere.Controllers
                 .Include(p => p.AddedByUser)
                 .Include(p => p.Playlist)
                 .Include(p => p.Song)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.PlaylistSongId == id);
             if (playlistSong == null)
             {
                 return NotFound();
@@ -265,7 +265,7 @@ namespace TunePhere.Controllers
 
         private bool PlaylistSongExists(int id)
         {
-            return _context.PlaylistSongs.Any(e => e.Id == id);
+            return _context.PlaylistSongs.Any(e => e.PlaylistSongId == id);
         }
     }
 }
