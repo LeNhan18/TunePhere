@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TunePhere.Models
 {
@@ -33,6 +34,10 @@ namespace TunePhere.Models
         // Favorite Songs
         public virtual ICollection<UserFavoriteSong> FavoriteSongs { get; set; }
 
+        // Computed property for followed artists
+        [NotMapped]
+        public virtual ICollection<Artists> FollowedArtists { get; set; }
+
         public AppUser()
         {
             ListeningRooms = new HashSet<ListeningRoom>();
@@ -43,6 +48,7 @@ namespace TunePhere.Models
             Following = new HashSet<UserFollower>();
             ArtistFollowing = new HashSet<ArtistFollower>();
             FavoriteSongs = new HashSet<UserFavoriteSong>();
+            FollowedArtists = new HashSet<Artists>();
         }
 
         // Helper methods to get counts
@@ -69,6 +75,11 @@ namespace TunePhere.Models
         public int GetFavoriteSongsCount()
         {
             return FavoriteSongs?.Count ?? 0;
+        }
+
+        public int GetFollowedArtistsCount()
+        {
+            return ArtistFollowing?.Count ?? 0;
         }
     }
 }
