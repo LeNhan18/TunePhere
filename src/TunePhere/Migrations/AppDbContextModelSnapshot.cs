@@ -385,7 +385,6 @@ namespace TunePhere.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatorId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("CurrentSongId")
@@ -889,8 +888,7 @@ namespace TunePhere.Migrations
                     b.HasOne("TunePhere.Models.AppUser", "Creator")
                         .WithMany("ListeningRooms")
                         .HasForeignKey("CreatorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("TunePhere.Models.Song", "CurrentSong")
                         .WithMany()
