@@ -474,43 +474,57 @@ namespace TunePhere.Controllers
                 {
                     foreach (var song in album.Songs)
                     {
-                        // Xóa các bài hát khỏi playlists
+                        // 1. Xóa lịch sử nghe nhạc
+                        var playHistories = await _context.PlayHistories
+                            .Where(ph => ph.SongId == song.SongId)
+                            .ToListAsync();
+                        if (playHistories.Any())
+                        {
+                            _context.PlayHistories.RemoveRange(playHistories);
+                            await _context.SaveChangesAsync();
+                        }
+
+                        // 2. Xóa các bài hát khỏi playlists
                         var playlistSongs = await _context.PlaylistSongs
                             .Where(ps => ps.SongId == song.SongId)
                             .ToListAsync();
                         if (playlistSongs.Any())
                         {
                             _context.PlaylistSongs.RemoveRange(playlistSongs);
+                            await _context.SaveChangesAsync();
                         }
 
-                        // Xóa các remixes liên quan đến bài hát
+                        // 3. Xóa các remixes liên quan đến bài hát
                         var remixes = await _context.Remixes
                             .Where(r => r.OriginalSongId == song.SongId)
                             .ToListAsync();
                         if (remixes.Any())
                         {
                             _context.Remixes.RemoveRange(remixes);
+                            await _context.SaveChangesAsync();
                         }
 
-                        // Xóa lyrics của bài hát
+                        // 4. Xóa lyrics của bài hát
                         var lyrics = await _context.Lyrics
                             .Where(l => l.SongId == song.SongId)
                             .ToListAsync();
                         if (lyrics.Any())
                         {
                             _context.Lyrics.RemoveRange(lyrics);
+                            await _context.SaveChangesAsync();
                         }
 
-                        // Xóa các bài hát khỏi danh sách yêu thích
+                        // 5. Xóa các bài hát khỏi danh sách yêu thích
                         var favoriteSongs = await _context.UserFavoriteSongs
                             .Where(fs => fs.SongId == song.SongId)
                             .ToListAsync();
                         if (favoriteSongs.Any())
                         {
                             _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
+                            await _context.SaveChangesAsync();
                         }
 
-                        // Xóa file vật lý
+                        // 6. Xóa file nhạc
                         if (!string.IsNullOrEmpty(song.FileUrl))
                         {
                             var songPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", song.FileUrl.TrimStart('/'));
@@ -521,15 +535,12 @@ namespace TunePhere.Controllers
                         }
                     }
 
-                    // Lưu các thay đổi về xóa các mối quan hệ trước
-                    await _context.SaveChangesAsync();
-
-                    // Sau đó mới xóa các bài hát
+                    // 7. Xóa tất cả các bài hát
                     _context.Songs.RemoveRange(album.Songs);
                     await _context.SaveChangesAsync();
                 }
 
-                // Xóa ảnh album
+                // 8. Xóa ảnh album
                 if (!string.IsNullOrEmpty(album.ImageUrl))
                 {
                     var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", album.ImageUrl.TrimStart('/'));
@@ -539,7 +550,7 @@ namespace TunePhere.Controllers
                     }
                 }
 
-                // Xóa album
+                // 9. Xóa album
                 _context.Albums.Remove(album);
                 await _context.SaveChangesAsync();
 
