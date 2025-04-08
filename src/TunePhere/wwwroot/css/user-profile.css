@@ -918,11 +918,11 @@ html::-webkit-scrollbar {
     transition: all 0.3s;
 }
 
-.save-btn:hover {
-    background: #1ED760;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(29, 185, 84, 0.3);
-}
+    .save-btn:hover {
+        background: #5a3c93;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(29, 185, 84, 0.3);
+    }
 
 /* Responsive styles for modal */
 @media (max-width: 576px) {
