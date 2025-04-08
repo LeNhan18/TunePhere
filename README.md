@@ -7,8 +7,6 @@ TunePhere is an open source music listening platform team project developed by [
 ## 🚀 Clone Project
 
 To get the source code to your computer, run the following command in the terminal:
-
-```bash
 git clone https://github.com/LeNhan18/TunePhere.git
 
 ## 📊 RepoBeats Analytics
