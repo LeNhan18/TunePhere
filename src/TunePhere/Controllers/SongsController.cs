@@ -603,7 +603,7 @@ namespace TunePhere.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // 3. Xóa tất cả remixes liên quan đến bài hát (nếu có)
+                // 3. Xóa tất cả remixes liên quan đến bài hát
                 var remixes = await _context.Remixes
                     .Where(r => r.OriginalSongId == id)
                     .ToListAsync();
@@ -633,7 +633,39 @@ namespace TunePhere.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // Xóa file nhạc và ảnh bìa
+                // 6. Xóa tất cả ChatMessages liên quan đến phòng nghe nhạc có bài hát này
+                var listeningRooms = await _context.ListeningRooms
+                    .Where(lr => lr.CurrentSongId == id)
+                    .ToListAsync();
+                
+                foreach (var room in listeningRooms)
+                {
+                    // Xóa tất cả tin nhắn trong phòng
+                    var chatMessages = await _context.ChatMessages
+                        .Where(cm => cm.RoomId == room.RoomId)
+                        .ToListAsync();
+                    if (chatMessages.Any())
+                    {
+                        _context.ChatMessages.RemoveRange(chatMessages);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    // Xóa tất cả người tham gia phòng
+                    var participants = await _context.ListeningRoomParticipants
+                        .Where(p => p.RoomId == room.RoomId)
+                        .ToListAsync();
+                    if (participants.Any())
+                    {
+                        _context.ListeningRoomParticipants.RemoveRange(participants);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    // Xóa phòng nghe nhạc
+                    _context.ListeningRooms.Remove(room);
+                    await _context.SaveChangesAsync();
+                }
+
+                // 7. Xóa file nhạc và ảnh bìa
                 if (!string.IsNullOrEmpty(song.FileUrl))
                 {
                     var audioPath = Path.Combine(_environment.WebRootPath, song.FileUrl.TrimStart('/'));
@@ -652,7 +684,7 @@ namespace TunePhere.Controllers
                     }
                 }
 
-                // Xóa bài hát
+                // 8. Xóa bài hát
                 _context.Songs.Remove(song);
                 await _context.SaveChangesAsync();
 

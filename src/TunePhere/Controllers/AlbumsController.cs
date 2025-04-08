@@ -524,7 +524,39 @@ namespace TunePhere.Controllers
                             await _context.SaveChangesAsync();
                         }
 
-                        // 6. Xóa file nhạc
+                        // 6. Xóa các phòng nghe nhạc và tin nhắn chat liên quan
+                        var listeningRooms = await _context.ListeningRooms
+                            .Where(lr => lr.CurrentSongId == song.SongId)
+                            .ToListAsync();
+
+                        foreach (var room in listeningRooms)
+                        {
+                            // 6.1. Xóa tất cả tin nhắn chat trong phòng
+                            var chatMessages = await _context.ChatMessages
+                                .Where(cm => cm.RoomId == room.RoomId)
+                                .ToListAsync();
+                            if (chatMessages.Any())
+                            {
+                                _context.ChatMessages.RemoveRange(chatMessages);
+                                await _context.SaveChangesAsync();
+                            }
+
+                            // 6.2. Xóa tất cả người tham gia phòng
+                            var participants = await _context.ListeningRoomParticipants
+                                .Where(p => p.RoomId == room.RoomId)
+                                .ToListAsync();
+                            if (participants.Any())
+                            {
+                                _context.ListeningRoomParticipants.RemoveRange(participants);
+                                await _context.SaveChangesAsync();
+                            }
+
+                            // 6.3. Xóa phòng nghe nhạc
+                            _context.ListeningRooms.Remove(room);
+                            await _context.SaveChangesAsync();
+                        }
+
+                        // 7. Xóa file nhạc
                         if (!string.IsNullOrEmpty(song.FileUrl))
                         {
                             var songPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", song.FileUrl.TrimStart('/'));
@@ -535,12 +567,12 @@ namespace TunePhere.Controllers
                         }
                     }
 
-                    // 7. Xóa tất cả các bài hát
+                    // 8. Xóa tất cả các bài hát
                     _context.Songs.RemoveRange(album.Songs);
                     await _context.SaveChangesAsync();
                 }
 
-                // 8. Xóa ảnh album
+                // 9. Xóa ảnh album
                 if (!string.IsNullOrEmpty(album.ImageUrl))
                 {
                     var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", album.ImageUrl.TrimStart('/'));
@@ -550,7 +582,7 @@ namespace TunePhere.Controllers
                     }
                 }
 
-                // 9. Xóa album
+                // 10. Xóa album
                 _context.Albums.Remove(album);
                 await _context.SaveChangesAsync();
 
@@ -781,7 +813,39 @@ namespace TunePhere.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // Xóa file nhạc
+                // 6. Xóa các phòng nghe nhạc và tin nhắn chat liên quan
+                var listeningRooms = await _context.ListeningRooms
+                    .Where(lr => lr.CurrentSongId == songId)
+                    .ToListAsync();
+
+                foreach (var room in listeningRooms)
+                {
+                    // 6.1. Xóa tất cả tin nhắn chat trong phòng
+                    var chatMessages = await _context.ChatMessages
+                        .Where(cm => cm.RoomId == room.RoomId)
+                        .ToListAsync();
+                    if (chatMessages.Any())
+                    {
+                        _context.ChatMessages.RemoveRange(chatMessages);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    // 6.2. Xóa tất cả người tham gia phòng
+                    var participants = await _context.ListeningRoomParticipants
+                        .Where(p => p.RoomId == room.RoomId)
+                        .ToListAsync();
+                    if (participants.Any())
+                    {
+                        _context.ListeningRoomParticipants.RemoveRange(participants);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    // 6.3. Xóa phòng nghe nhạc
+                    _context.ListeningRooms.Remove(room);
+                    await _context.SaveChangesAsync();
+                }
+
+                // 7. Xóa file nhạc
                 if (!string.IsNullOrEmpty(song.FileUrl))
                 {
                     var audioPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", song.FileUrl.TrimStart('/'));
@@ -791,10 +855,10 @@ namespace TunePhere.Controllers
                     }
                 }
 
-                // Xóa bài hát
+                // 8. Xóa bài hát
                 _context.Songs.Remove(song);
 
-                // Cập nhật thông tin album
+                // 9. Cập nhật thông tin album
                 if (albumId.HasValue)
                 {
                     var album = await _context.Albums.FindAsync(albumId.Value);
