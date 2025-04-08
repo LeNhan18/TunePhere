@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
     audioPlayer.addEventListener('timeupdate', () => {
         const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
         seekBar.value = percent;
-        seekBar.style.background = `linear-gradient(to right, #1ed760 ${percent}%, #535353 ${percent}%)`;
+        seekBar.style.background = `linear-gradient(to right, #5a3c93 ${percent}%, #535353 ${percent}%)`;
 
         document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime);
         document.getElementById('duration').textContent = formatTime(audioPlayer.duration);
