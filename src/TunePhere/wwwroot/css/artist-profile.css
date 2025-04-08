@@ -22,20 +22,20 @@ a, a:hover, a:focus, a:active, a:visited {
     box-shadow: none !important;
 }
 
-/* Đặc biệt cho màu khi hover */
-.profile-section a:hover,
-.songs-list a:hover,
-.album-card:hover,
-.song-item:hover,
-.profile-section a:hover *,
-.songs-list a:hover *,
-.album-card:hover *,
-.song-item:hover * {
-    text-decoration: none !important;
-    color: var(--accent-color) !important;
-    border-bottom: none !important;
-    box-shadow: none !important;
-}
+    /* Đặc biệt cho màu khi hover */
+    .profile-section a:hover,
+    .songs-list a:hover,
+    .album-card:hover,
+    .song-item:hover,
+    .profile-section a:hover *,
+    .songs-list a:hover *,
+    .album-card:hover *,
+    .song-item:hover * {
+        text-decoration: none !important;
+        color: var(--accent-color) !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+    }
 
 /* Thêm vào cuối file để ghi đè lên tất cả */
 .profile-content a[href*="Đợi em tan học"],
@@ -45,12 +45,12 @@ a, a:hover, a:focus, a:active, a:visited {
     border-bottom: none !important;
 }
 
-.profile-content a[href*="Đợi em tan học"]:hover,
-.profile-content a[href*="tan-hoc"]:hover,
-.profile-content a[href*="Songs/Details"]:hover {
-    text-decoration: none !important;
-    border-bottom: none !important;
-}
+    .profile-content a[href*="Đợi em tan học"]:hover,
+    .profile-content a[href*="tan-hoc"]:hover,
+    .profile-content a[href*="Songs/Details"]:hover {
+        text-decoration: none !important;
+        border-bottom: none !important;
+    }
 
 /* Loại bỏ mọi kiểu gạch chân tiềm ẩn */
 .profile-content .song-item:before,
@@ -78,16 +78,16 @@ a, a:hover, a:focus, a:active, a:visited {
     justify-content: flex-end;
 }
 
-.artist-profile-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(transparent 0%, rgba(0, 0, 0, 0.8) 100%);
-    z-index: 1;
-}
+    .artist-profile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(transparent 0%, rgba(0, 0, 0, 0.8) 100%);
+        z-index: 1;
+    }
 
 .artist-profile-content {
     position: relative;
@@ -121,15 +121,15 @@ a, a:hover, a:focus, a:active, a:visited {
     color: #888;
 }
 
-.artist-stats span {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+    .artist-stats span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
-.artist-stats i {
-    font-size: 16px;
-}
+    .artist-stats i {
+        font-size: 16px;
+    }
 
 .stat-link {
     text-decoration: none;
@@ -137,10 +137,10 @@ a, a:hover, a:focus, a:active, a:visited {
     transition: color 0.3s ease;
 }
 
-.stat-link:hover {
-    color: var(--accent-color);
-    text-decoration: none;
-}
+    .stat-link:hover {
+        color: var(--accent-color);
+        text-decoration: none;
+    }
 
 .edit-profile-btn {
     position: absolute;
@@ -161,15 +161,15 @@ a, a:hover, a:focus, a:active, a:visited {
     gap: 8px;
 }
 
-.edit-profile-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: white;
-    transform: scale(1.05);
-}
+    .edit-profile-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: white;
+        transform: scale(1.05);
+    }
 
-.edit-profile-btn i {
-    font-size: 16px;
-}
+    .edit-profile-btn i {
+        font-size: 16px;
+    }
 
 .artist-bio {
     max-width: 800px;
@@ -201,10 +201,7 @@ a, a:hover, a:focus, a:active, a:visited {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(to bottom,
-        rgba(0,0,0,0.3) 0%,
-        rgba(0,0,0,0.6) 50%,
-        rgba(18,18,18,1) 100%);
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 50%, rgba(18,18,18,1) 100%);
 }
 
 .profile-info {
@@ -228,36 +225,36 @@ a, a:hover, a:focus, a:active, a:visited {
     flex-shrink: 0;
 }
 
-.profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-.profile-avatar i {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 100px;
-    color: #666;
-    background: #282828;
-}
+    .profile-avatar i {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 100px;
+        color: #666;
+        background: #282828;
+    }
 
 .profile-details {
     flex: 1;
     margin-bottom: 20px;
 }
 
-.profile-details h1 {
-    font-size: 72px;
-    font-weight: 900;
-    margin: 0 0 20px 0;
-    color: #fff;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    line-height: 1;
-}
+    .profile-details h1 {
+        font-size: 72px;
+        font-weight: 900;
+        margin: 0 0 20px 0;
+        color: #fff;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        line-height: 1;
+    }
 
 .profile-content {
     padding: 32px;
@@ -276,10 +273,10 @@ a, a:hover, a:focus, a:active, a:visited {
     margin-bottom: 24px;
 }
 
-.section-header h2 {
-    font-size: 24px;
-    font-weight: 700;
-}
+    .section-header h2 {
+        font-size: 24px;
+        font-weight: 700;
+    }
 
 .edit-btn, .view-all {
     padding: 8px 16px;
@@ -295,10 +292,10 @@ a, a:hover, a:focus, a:active, a:visited {
     gap: 8px;
 }
 
-.edit-btn:hover, .view-all:hover {
-    background: rgba(255,255,255,0.2);
-    transform: scale(1.05);
-}
+    .edit-btn:hover, .view-all:hover {
+        background: rgba(255,255,255,0.2);
+        transform: scale(1.05);
+    }
 
 .albums-grid {
     display: grid;
@@ -313,10 +310,10 @@ a, a:hover, a:focus, a:active, a:visited {
     transition: all 0.3s ease;
 }
 
-.album-card:hover {
-    background: #282828;
-    transform: translateY(-4px);
-}
+    .album-card:hover {
+        background: #282828;
+        transform: translateY(-4px);
+    }
 
 .album-image {
     position: relative;
@@ -326,11 +323,11 @@ a, a:hover, a:focus, a:active, a:visited {
     margin-bottom: 16px;
 }
 
-.album-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+    .album-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
 .album-overlay {
     position: absolute;
@@ -354,7 +351,7 @@ a, a:hover, a:focus, a:active, a:visited {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: #1DB954;
+    background: #523681;
     border: none;
     color: white;
     font-size: 20px;
@@ -372,6 +369,7 @@ a, a:hover, a:focus, a:active, a:visited {
 
 .album-info h3 {
     font-size: 16px;
+    color: #ffff;
     margin: 0 0 4px 0;
 }
 
@@ -400,11 +398,11 @@ a, a:hover, a:focus, a:active, a:visited {
     transition: all 0.3s ease;
 }
 
-.song-item:hover {
-    background: #282828;
-    color: var(--accent-color);
-    text-decoration: none;
-}
+    .song-item:hover {
+        background: #282828;
+        color: var(--accent-color);
+        text-decoration: none;
+    }
 
 .song-image {
     position: relative;
@@ -414,22 +412,22 @@ a, a:hover, a:focus, a:active, a:visited {
     overflow: hidden;
 }
 
-.song-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+    .song-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-.song-image .play-btn {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-    opacity: 0;
-}
+    .song-image .play-btn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        opacity: 0;
+    }
 
 .song-item:hover .play-btn {
     opacity: 1;
@@ -439,17 +437,17 @@ a, a:hover, a:focus, a:active, a:visited {
     flex: 1;
 }
 
-.song-info h3 {
-    font-size: 16px;
-    margin: 0 0 4px 0;
-    text-decoration: none;
-}
+    .song-info h3 {
+        font-size: 16px;
+        margin: 0 0 4px 0;
+        text-decoration: none;
+    }
 
-.song-info p {
-    font-size: 14px;
-    color: #b3b3b3;
-    margin: 0;
-}
+    .song-info p {
+        font-size: 14px;
+        color: #b3b3b3;
+        margin: 0;
+    }
 
 .song-duration {
     color: #b3b3b3;
@@ -470,10 +468,10 @@ a, a:hover, a:focus, a:active, a:visited {
     text-align: center;
 }
 
-.artist-card:hover {
-    background: #282828;
-    transform: translateY(-4px);
-}
+    .artist-card:hover {
+        background: #282828;
+        transform: translateY(-4px);
+    }
 
 .card-img-container {
     position: relative;
@@ -518,10 +516,10 @@ a, a:hover, a:focus, a:active, a:visited {
     color: white;
 }
 
-.artist-name:hover {
-    color: var(--accent-color);
-    text-decoration: none;
-}
+    .artist-name:hover {
+        color: var(--accent-color);
+        text-decoration: none;
+    }
 
 .artist-type {
     font-size: 14px;
@@ -556,19 +554,19 @@ a, a:hover, a:focus, a:active, a:visited {
         background: #5a3c93;
     }
 
-.follow-btn.following {
-    background: transparent;
-    border: 1px solid white;
-}
+    .follow-btn.following {
+        background: transparent;
+        border: 1px solid white;
+    }
 
-.follow-btn.following:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: scale(1);
-}
+        .follow-btn.following:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1);
+        }
 
-.follow-btn i {
-    font-size: 16px;
-}
+    .follow-btn i {
+        font-size: 16px;
+    }
 
 @media (max-width: 768px) {
     .profile-header {
@@ -632,51 +630,51 @@ a, a:hover, a:focus, a:active, a:visited {
     transition: color 0.3s ease;
 }
 
-/* Khi hover vào bất kỳ liên kết nào */
-.artist-profile a:hover,
-.profile-content a:hover,
-.songs-list a:hover,
-.song-item:hover,
-.album-card:hover,
-.stat-link:hover,
-.artists-grid a:hover,
-.view-all:hover {
-    text-decoration: none !important;
-    color: var(--accent-color);
-}
+    /* Khi hover vào bất kỳ liên kết nào */
+    .artist-profile a:hover,
+    .profile-content a:hover,
+    .songs-list a:hover,
+    .song-item:hover,
+    .album-card:hover,
+    .stat-link:hover,
+    .artists-grid a:hover,
+    .view-all:hover {
+        text-decoration: none !important;
+        color: var(--accent-color);
+    }
 
-/* Cập nhật hiệu ứng hover cho song-item */
-.song-item:hover {
-    background: #282828;
-    color: var(--accent-color);
-    text-decoration: none !important;
-}
+    /* Cập nhật hiệu ứng hover cho song-item */
+    .song-item:hover {
+        background: #282828;
+        color: var(--accent-color);
+        text-decoration: none !important;
+    }
 
-/* Đặc biệt cho liên kết bài hát */
-.song-item:hover .song-info h3 {
-    color: var(--accent-color);
-    text-decoration: none !important;
-}
+        /* Đặc biệt cho liên kết bài hát */
+        .song-item:hover .song-info h3 {
+            color: var(--accent-color);
+            text-decoration: none !important;
+        }
 
-/* Đảm bảo không có gạch chân trên stat-link */
-.stat-link:hover {
-    color: var(--accent-color);
-    text-decoration: none !important;
-}
+    /* Đảm bảo không có gạch chân trên stat-link */
+    .stat-link:hover {
+        color: var(--accent-color);
+        text-decoration: none !important;
+    }
 
-/* Bổ sung thêm cho các liên kết khác */
-.profile-section a.album-card:hover,
-.profile-section a.song-item:hover,
-.profile-section a.view-all:hover {
-    text-decoration: none !important;
-}
+    /* Bổ sung thêm cho các liên kết khác */
+    .profile-section a.album-card:hover,
+    .profile-section a.song-item:hover,
+    .profile-section a.view-all:hover {
+        text-decoration: none !important;
+    }
 
-/* Bổ sung cho cụ thể link bài hát trong hình */
-.profile-section a[href*="Songs/Details"]:hover {
-    text-decoration: none !important;
-}
+    /* Bổ sung cho cụ thể link bài hát trong hình */
+    .profile-section a[href*="Songs/Details"]:hover {
+        text-decoration: none !important;
+    }
 
 /* Ghi đè !important để đảm bảo áp dụng */
 a:hover {
     text-decoration: none !important;
-} 
+}
