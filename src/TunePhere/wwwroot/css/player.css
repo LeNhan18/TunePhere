@@ -77,7 +77,7 @@
     }
 
     .track-info:hover .song-name {
-        color: #1ed760;
+        color: #4B0082;
         transform: translateX(5px);
     }
 
@@ -119,8 +119,8 @@
 
     .control-button:hover {
         transform: scale(1.15);
-        color: #1ed760;
-        text-shadow: 0 0 10px rgba(30, 215, 96, 0.5);
+        color: #4B0082;
+        text-shadow: 0 0 10px rgba(75, 0, 130, 0.5);
     }
 
 .play-pause-btn {
@@ -138,22 +138,23 @@
 
 @keyframes pulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+        box-shadow: 0 0 0 0 rgba(75, 0, 130, 0.4);
     }
 
     70% {
-        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+        box-shadow: 0 0 0 10px rgba(75, 0, 130, 0);
     }
 
     100% {
-        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+        box-shadow: 0 0 0 0 rgba(75, 0, 130, 0);
     }
 }
 
 .play-pause-btn:hover {
     transform: scale(1.15);
-    background: #1ed760;
-    box-shadow: 0 0 20px rgba(30, 215, 96, 0.5);
+    background: #4B0082;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(75, 0, 130, 0.5);
 }
 
 .playback-bar {
@@ -188,9 +189,23 @@
     transition: all 0.3s ease;
 }
 
-.progress-bar:hover .progress-bar-bg {
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 4px;
+    width: var(--seek-percentage, 0%);
+    background: #4B0082;
+    border-radius: 2px;
+    transform: translateY(-50%);
+    z-index: 1;
+    transition: all 0.1s ease;
+}
+
+.progress-bar:hover::before {
     height: 6px;
-    background: #666666;
+    background: #4B0082;
 }
 
 .seek-bar {
@@ -219,8 +234,8 @@
     .seek-bar:hover::-webkit-slider-thumb {
         opacity: 1;
         transform: scale(1.2);
-        background: #1ed760;
-        box-shadow: 0 0 10px rgba(30, 215, 96, 0.5);
+        background: #4B0082;
+        box-shadow: 0 0 10px rgba(75, 0, 130, 0.5);
     }
 
 .now-playing-right {
@@ -248,7 +263,7 @@
         -webkit-appearance: none;
         width: 12px;
         height: 12px;
-        background: #fff;
+        background: #4B0082;
         border-radius: 50%;
         cursor: pointer;
         margin-top: -4px;
@@ -259,7 +274,7 @@
     .volume-bar::-webkit-slider-runnable-track {
         width: 100%;
         height: 4px;
-        background: linear-gradient(to right, #1ed760 var(--volume-percentage, 100%), #535353 var(--volume-percentage, 100%));
+        background: linear-gradient(to right, #4B0082 var(--volume-percentage, 100%), #535353 var(--volume-percentage, 100%));
         border-radius: 2px;
         cursor: pointer;
     }
@@ -279,10 +294,11 @@
     left: 0;
     width: calc(100% - 24px);
     height: 4px;
-    background: #535353;
+    background: #4B0082;
     border-radius: 2px;
     transform: translateY(-50%);
 }
+
 
 #volumeButton {
     margin: 0;
@@ -290,6 +306,11 @@
     position: relative;
     z-index: 3;
 }
+
+    #volumeButton:hover {
+        color: #4B0082;
+        transform: scale(1.15);
+    }
 
 #videoButton {
     color: #ff4444;
@@ -300,10 +321,15 @@
     z-index: 3;
 }
 
+    #videoButton:hover {
+        color: #4B0082;
+        transform: scale(1.15);
+    }
+
 .volume-bar:hover::-webkit-slider-thumb {
-    background: #1ed760;
+    background: #4B0082;
     transform: scale(1.2);
-    box-shadow: 0 0 10px rgba(30, 215, 96, 0.5);
+    box-shadow: 0 0 10px rgba(75, 0, 130, 0.5);
 }
 
 input[type="range"] {
@@ -324,7 +350,7 @@ input[type="range"] {
     }
 
     input[type="range"]:hover::-webkit-slider-thumb {
-        background: #1ed760;
+        background: #4B0082;
     }
 
     input[type="range"]::-webkit-slider-runnable-track {
@@ -333,6 +359,10 @@ input[type="range"] {
         background: #535353;
         border-radius: 2px;
         cursor: pointer;
+    }
+
+    input[type="range"]:focus::-webkit-slider-runnable-track {
+        background: linear-gradient(to right, #4B0082 var(--range-percentage, 50%), #535353 var(--range-percentage, 50%));
     }
 
 @media (max-width: 768px) {
@@ -358,4 +388,23 @@ input[type="range"] {
     .volume-bar-bg {
         width: calc(100% - 20px);
     }
+}
+
+/* Đảm bảo nút volume khi hover cũng là màu tím */
+.volume-icon:hover {
+    color: #4B0082;
+}
+
+/* Đảm bảo các icon khác và các phần tử tương tác đều có hiệu ứng màu tím */
+.playback-controls button:hover i,
+.extra-controls button:hover i {
+    color: #4B0082;
+}
+
+/* Nếu có bất kỳ khu vực nào còn màu xanh #1ed760, thay thế bằng màu tím */
+/* Thay thế tất cả các hiệu ứng còn lại */
+.player-container *:hover,
+.player-container *:focus,
+.player-container *:active {
+    --player-highlight-color: #4B0082;
 }
