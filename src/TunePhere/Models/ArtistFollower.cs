@@ -9,10 +9,10 @@ namespace TunePhere.Models
         public int Id { get; set; }
 
         [Required]
-        public string UserId { get; set; }  // ID của người theo dõi
+        public string? UserId { get; set; }  // ID của người theo dõi
 
         [Required]
-        public int ArtistId { get; set; }  // ID của nghệ sĩ được theo dõi
+        public int? ArtistId { get; set; }  // ID của nghệ sĩ được theo dõi
 
         public DateTime FollowedAt { get; set; } = DateTime.Now;
 

@@ -7,10 +7,10 @@ namespace TunePhere.Models
     public class Lyric
     {
         [Key]
-        public int LyricId { get; set; } // Khóa chính
+        public int? LyricId { get; set; } // Khóa chính
 
         [Required]
-        public int SongId { get; set; } // Khóa ngoại liên kết với Song
+        public int? SongId { get; set; } // Khóa ngoại liên kết với Song
 
         [ForeignKey("SongId")]
         public virtual Song? Song { get; set; } // Đánh dấu là nullable để tránh lỗi
