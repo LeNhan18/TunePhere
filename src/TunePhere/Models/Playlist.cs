@@ -30,8 +30,7 @@ namespace TunePhere.Models
         {
             PlaylistSongs = new HashSet<PlaylistSong>();
         }
-        
-        // Add this property if it doesn't exist
-        public string Description { get; set; }
+
+        public string? Description { get; set; }
     }
 }

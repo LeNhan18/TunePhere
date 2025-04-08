@@ -1,15 +1,15 @@
 @model IEnumerable<TunePhere.Models.Playlist>
-
 @{
     ViewData["Title"] = "Quản lý Playlist";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
     var users = ViewBag.Users as List<AppUser>;
 }
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3">Quản lý Playlist</h1>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createPlaylistModal">
-            <i class="fas fa-plus"></i> Tạo Playlist mới
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Playlist</h1>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPlaylistModal">
+            <i class="fas fa-plus"></i> Thêm Playlist
         </button>
     </div>
 
@@ -29,32 +29,34 @@
         </div>
     }
 
-    <div class="card">
+    <div class="card shadow mb-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-bordered" id="playlistsTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
+                            <th>ID</th>
                             <th>Ảnh bìa</th>
                             <th>Tên playlist</th>
                             <th>Người tạo</th>
                             <th>Số bài hát</th>
-                            <th>Trạng thái</th>
                             <th>Ngày tạo</th>
+                            <th>Trạng thái</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var playlist in Model)
                         {
-                            var user = users?.FirstOrDefault(u => u.Id == playlist.UserId);
                             <tr>
+                                <td>@playlist.PlaylistId</td>
                                 <td>
                                     <img src="@playlist.ImageUrl" alt="@playlist.Title" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
                                 </td>
                                 <td>@playlist.Title</td>
-                                <td>@(user?.FullName ?? "Không xác định")</td>
+                                <td>@playlist.User?.FullName</td>
                                 <td>@(playlist.PlaylistSongs?.Count ?? 0)</td>
+                                <td>@playlist.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td>
                                     @if (playlist.IsPublic)
                                     {
@@ -65,15 +67,11 @@
                                         <span class="badge bg-secondary">Riêng tư</span>
                                     }
                                 </td>
-                                <td>@playlist.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td>
-                                    <button type="button" class="btn btn-info btn-sm" onclick="viewPlaylist(@playlist.PlaylistId)">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-primary btn-sm" onclick="editPlaylist(@playlist.PlaylistId)">
+                                    <button class="btn btn-sm btn-info" onclick="editPlaylist(@playlist.PlaylistId)">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="deletePlaylist(@playlist.PlaylistId)">
+                                    <button class="btn btn-sm btn-danger" onclick="deletePlaylist(@playlist.PlaylistId)">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -86,27 +84,27 @@
     </div>
 </div>
 
-<!-- Modal tạo playlist -->
-<div class="modal fade" id="createPlaylistModal" tabindex="-1">
+<!-- Modal Thêm Playlist -->
+<div class="modal fade" id="addPlaylistModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Playlist mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
             <form asp-action="CreatePlaylist" method="post" enctype="multipart/form-data">
-                <div class="modal-header">
-                    <h5 class="modal-title">Tạo Playlist mới</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Tên playlist</label>
-                        <input type="text" class="form-control" name="title" required>
+                        <input type="text" class="form-control" name="Title" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Mô tả</label>
-                        <textarea class="form-control" name="description" rows="3"></textarea>
+                        <textarea class="form-control" name="Description" rows="3"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Người tạo</label>
-                        <select class="form-select" name="userId" required>
+                        <select class="form-select" name="UserId" required>
                             <option value="">Chọn người dùng</option>
                             @foreach (var user in users)
                             {
@@ -116,90 +114,50 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Ảnh bìa</label>
-                        <input type="file" class="form-control" name="image" accept="image/*">
+                        <input type="file" class="form-control" name="Image" accept="image/*">
                     </div>
                     <div class="mb-3">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="isPublic" value="true" checked>
+                            <input class="form-check-input" type="checkbox" name="IsPublic" value="true" checked>
                             <label class="form-check-label">Công khai</label>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary">Tạo playlist</button>
+                    <button type="submit" class="btn btn-primary">Thêm</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal xem chi tiết playlist -->
-<div class="modal fade" id="viewPlaylistModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Chi tiết Playlist</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-4">
-                        <img id="playlistImage" src="" alt="" class="img-fluid rounded">
-                    </div>
-                    <div class="col-md-8">
-                        <h4 id="playlistTitle"></h4>
-                        <p id="playlistDescription" class="text-muted"></p>
-                        <p><strong>Người tạo:</strong> <span id="playlistUser"></span></p>
-                        <p><strong>Trạng thái:</strong> <span id="playlistStatus"></span></p>
-                    </div>
-                </div>
-                <hr>
-                <h5>Danh sách bài hát</h5>
-                <div class="table-responsive">
-                    <table class="table" id="playlistSongsTable">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Tên bài hát</th>
-                                <th>Nghệ sĩ</th>
-                                <th>Thời lượng</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal chỉnh sửa playlist -->
+<!-- Modal Sửa Playlist -->
 <div class="modal fade" id="editPlaylistModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="editPlaylistForm" method="post" enctype="multipart/form-data">
-                <div class="modal-header">
-                    <h5 class="modal-title">Chỉnh sửa Playlist</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa thông tin Playlist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="EditPlaylist" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="PlaylistId" id="editPlaylistId">
                 <div class="modal-body">
-                    <input type="hidden" name="id" id="editPlaylistId">
                     <div class="mb-3">
                         <label class="form-label">Tên playlist</label>
-                        <input type="text" class="form-control" name="title" id="editPlaylistTitle" required>
+                        <input type="text" class="form-control" name="Title" id="editTitle" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Mô tả</label>
-                        <textarea class="form-control" name="description" id="editPlaylistDescription" rows="3"></textarea>
+                        <textarea class="form-control" name="Description" id="editDescription" rows="3"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Ảnh bìa mới</label>
-                        <input type="file" class="form-control" name="image" accept="image/*">
+                        <input type="file" class="form-control" name="Image" accept="image/*">
                     </div>
                     <div class="mb-3">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="isPublic" id="editPlaylistIsPublic" value="true">
+                            <input class="form-check-input" type="checkbox" name="IsPublic" id="editIsPublic" value="true">
                             <label class="form-check-label">Công khai</label>
                         </div>
                     </div>
@@ -215,43 +173,21 @@
 
 @section Scripts {
     <script>
-        function viewPlaylist(id) {
-            $.get('/Admin/GetPlaylist/' + id, function(response) {
-                if (response.success) {
-                    $('#playlistImage').attr('src', response.imageUrl);
-                    $('#playlistTitle').text(response.title);
-                    $('#playlistDescription').text(response.description);
-                    $('#playlistUser').text(response.userName);
-                    $('#playlistStatus').text(response.isPublic ? 'Công khai' : 'Riêng tư');
-
-                    var tbody = $('#playlistSongsTable tbody');
-                    tbody.empty();
-                    response.songs.forEach((song, index) => {
-                        tbody.append(`
-                            <tr>
-                                <td>${index + 1}</td>
-                                <td>${song.title}</td>
-                                <td>${song.artistName}</td>
-                                <td>${song.duration}</td>
-                            </tr>
-                        `);
-                    });
-
-                    $('#viewPlaylistModal').modal('show');
-                } else {
-                    alert(response.message);
+        $(document).ready(function() {
+            $('#playlistsTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
                 }
             });
-        }
+        });
 
         function editPlaylist(id) {
             $.get('/Admin/GetPlaylist/' + id, function(response) {
                 if (response.success) {
                     $('#editPlaylistId').val(response.id);
-                    $('#editPlaylistTitle').val(response.title);
-                    $('#editPlaylistDescription').val(response.description);
-                    $('#editPlaylistIsPublic').prop('checked', response.isPublic);
-                    $('#editPlaylistForm').attr('action', '/Admin/EditPlaylist');
+                    $('#editTitle').val(response.title);
+                    $('#editDescription').val(response.description);
+                    $('#editIsPublic').prop('checked', response.isPublic);
                     $('#editPlaylistModal').modal('show');
                 } else {
                     alert(response.message);

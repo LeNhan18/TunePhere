@@ -697,8 +697,32 @@ namespace TunePhere.Controllers
                     return RedirectToAction(nameof(Playlists));
                 }
 
+                if (string.IsNullOrEmpty(userId))
+                {
+                    TempData["Error"] = "Vui lòng chọn người tạo playlist";
+                    return RedirectToAction(nameof(Playlists));
+                }
+
                 // Xử lý upload ảnh
-                string imageUrl = await UploadFile(image, "images/playlists");
+                string imageUrl = null;
+                if (image != null && image.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "playlists");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    var uniqueFileName = $"{Guid.NewGuid()}_{image.FileName}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await image.CopyToAsync(fileStream);
+                    }
+
+                    imageUrl = $"/uploads/playlists/{uniqueFileName}";
+                }
 
                 var playlist = new Playlist
                 {
@@ -717,6 +741,10 @@ namespace TunePhere.Controllers
             catch (Exception ex)
             {
                 TempData["Error"] = "Có lỗi xảy ra khi thêm playlist: " + ex.Message;
+                if (ex.InnerException != null)
+                {
+                    TempData["Error"] += "\nChi tiết: " + ex.InnerException.Message;
+                }
                 return RedirectToAction(nameof(Playlists));
             }
         }
