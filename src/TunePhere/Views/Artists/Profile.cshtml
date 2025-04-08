@@ -75,7 +75,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div>  
     </div>
 
     <div class="profile-content">
@@ -95,7 +95,7 @@
         <div class="profile-section">
             <div class="section-header">
                 <h2>Album mới nhất</h2>
-                <a href="@Url.Action("Index", "Albums")" class="view-all">Xem tất cả</a>
+                <a href="@Url.Action("Index", "Albums", new { artistId = Model.ArtistId })" class="view-all">Xem tất cả</a>
             </div>
             <div class="albums-grid">
                 @foreach (var album in Model.Albums.OrderByDescending(a => a.ReleaseDate).Take(4))
