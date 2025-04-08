@@ -34,6 +34,9 @@ namespace TunePhere.Models
         // Favorite Songs
         public virtual ICollection<UserFavoriteSong> FavoriteSongs { get; set; }
 
+        // Play History
+        public virtual ICollection<PlayHistory> PlayHistory { get; set; }
+
         // Computed property for followed artists
         [NotMapped]
         public virtual ICollection<Artists> FollowedArtists { get; set; }
@@ -49,6 +52,7 @@ namespace TunePhere.Models
             ArtistFollowing = new HashSet<ArtistFollower>();
             FavoriteSongs = new HashSet<UserFavoriteSong>();
             FollowedArtists = new HashSet<Artists>();
+            PlayHistory = new HashSet<PlayHistory>();
         }
 
         // Helper methods to get counts
