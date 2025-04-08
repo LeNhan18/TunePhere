@@ -1,124 +1,53 @@
-﻿@model TunePhere.Models.Artists
+﻿@model TunePhere.Models.Song
 
 @{
-    ViewData["Title"] = "Chỉnh sửa thông tin nghệ sĩ";
+    ViewData["Title"] = "Chỉnh sửa bài hát";
 }
 
-<link rel="stylesheet" href="~/css/artist-edit.css" asp-append-version="true" />
+<h2>Chỉnh sửa bài hát</h2>
 
-<div class="container-fluid p-0">
-    <!-- Header -->
-    <div class="create-header position-relative" style="height: 200px;">
-        <div class="position-absolute w-100 h-100" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(13, 13, 13, 0.9));">
-            <div class="h-100 d-flex align-items-center justify-content-center">
-                <div class="text-center">
-                    <span class="header-label mb-2">THÔNG TIN NGHỆ SĨ</span>
-                    <h1 class="display-5 fw-bold text-white text-shadow text-glow mt-5">Chỉnh Sửa Hồ Sơ Nghệ Sĩ</h1>
-                </div>
-            </div>
-        </div>
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="SongId" />
+    <input type="hidden" asp-for="ArtistId" />
+    <input type="hidden" asp-for="FileUrl" />
+    <input type="hidden" asp-for="UploadDate" />
+    <input type="hidden" asp-for="PlayCount" />
+    <input type="hidden" asp-for="LikeCount" />
+
+    <div class="form-group">
+        <label asp-for="Title" class="control-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
     </div>
 
-    <div class="container mt-4">
-        <div class="edit-form-container">
-            @if (!ViewData.ModelState.IsValid)
-            {
-                <div class="alert alert-danger mb-4">
-                    <div asp-validation-summary="All" class="text-danger"></div>
-                </div>
-            }
-
-            <form asp-action="Edit" method="post" enctype="multipart/form-data">
-                <input type="hidden" asp-for="ArtistId" />
-                <input type="hidden" asp-for="userId" />
-                <input type="hidden" asp-for="ImageUrl" />
-                <input type="hidden" asp-for="CoverImageUrl" />
-
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="info-section">
-                            <div class="form-group">
-                                <div class="cover-upload-container mb-4">
-                                    <div class="cover-image" style="background-image: url('@(string.IsNullOrEmpty(Model.CoverImageUrl) ? "/images/cover-placeholder.jpg" : Model.CoverImageUrl)')">
-                                        <div class="image-overlay">
-                                            <i class="fas fa-camera"></i>
-                                            <span>Thay đổi ảnh bìa</span>
-                                        </div>
-                                    </div>
-                                    <input type="file" id="CoverImageFile" name="CoverImageFile" class="hidden-input" accept="image/*" />
-                                </div>
-
-                                <div class="image-upload-container mb-4">
-                                    <div class="profile-image">
-                                        <img id="profilePreview" src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/artist-placeholder.jpg" : Model.ImageUrl)" alt="Ảnh đại diện" />
-                                        <div class="image-overlay">
-                                            <i class="fas fa-camera"></i>
-                                            <span>Thay đổi ảnh</span>
-                                        </div>
-                                    </div>
-                                    <input type="file" id="ImageFile" name="ImageFile" class="hidden-input" accept="image/*" />
-                                </div>
-
-                                <div class="form-group mb-4">
-                                    <label asp-for="ArtistName" class="form-label">Tên nghệ sĩ</label>
-                                    <input asp-for="ArtistName" class="form-control custom-input" required />
-                                    <span asp-validation-for="ArtistName" class="text-danger"></span>
-                                </div>
-
-                                <div class="form-group mb-4">
-                                    <label asp-for="Bio" class="form-label">Giới thiệu</label>
-                                    <textarea asp-for="Bio" class="form-control custom-input" rows="5" placeholder="Viết một vài điều về bạn..."></textarea>
-                                    <span asp-validation-for="Bio" class="text-danger"></span>
-                                </div>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="submit" class="btn-submit">
-                                    <i class="fas fa-save me-2"></i>Lưu thay đổi
-                                </button>
-                                <a href="@Url.Action("Profile", "Artists")" class="btn-cancel">
-                                    <i class="fas fa-arrow-left me-2"></i>Quay lại
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
+    <div class="form-group">
+        <label asp-for="Genre" class="control-label"></label>
+        <input asp-for="Genre" class="form-control" />
+        <span asp-validation-for="Genre" class="text-danger"></span>
     </div>
-</div>
+
+    <div class="form-group">
+        <label asp-for="VideoUrl" class="control-label"></label>
+        <input asp-for="VideoUrl" class="form-control" />
+        <span asp-validation-for="VideoUrl" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Ảnh bìa hiện tại</label>
+        <img src="@Model.ImageUrl" alt="Ảnh bìa" style="max-width: 200px;" />
+    </div>
+
+    <div class="form-group">
+        <label for="imageFile" class="control-label">Chọn ảnh bìa mới</label>
+        <input type="file" id="imageFile" name="imageFile" accept="image/*" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Lưu thay đổi" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </div>
+</form>
 
 @section Scripts {
-    <script>
-        // Preview ảnh đại diện
-        document.getElementById('ImageFile').addEventListener('change', function (e) {
-            if (e.target.files && e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    document.getElementById('profilePreview').src = e.target.result;
-                };
-                reader.readAsDataURL(e.target.files[0]);
-            }
-        });
-
-        // Preview ảnh bìa
-        document.getElementById('CoverImageFile').addEventListener('change', function (e) {
-            if (e.target.files && e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    document.querySelector('.cover-image').style.backgroundImage = `url(${e.target.result})`;
-                };
-                reader.readAsDataURL(e.target.files[0]);
-            }
-        });
-
-        // Trigger file input khi click vào overlay
-        document.querySelector('.profile-image').addEventListener('click', function() {
-            document.getElementById('ImageFile').click();
-        });
-
-        document.querySelector('.cover-image').addEventListener('click', function() {
-            document.getElementById('CoverImageFile').click();
-        });
-    </script>
+    <partial name="_ValidationScriptsPartial" />
 }

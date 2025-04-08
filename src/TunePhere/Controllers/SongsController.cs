@@ -433,10 +433,11 @@ namespace TunePhere.Controllers
         }
 
         // POST: Songs/Edit/5
+        // POST: Songs/Edit/5
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("SongId,Title,Genre,Duration,FileUrl,ImageUrl,VideoUrl,UploadDate,PlayCount,LikeCount,ArtistId")] Song song)
+        public async Task<IActionResult> Edit(int id, [Bind("SongId,Title,Genre,Duration,FileUrl,ImageUrl,VideoUrl,UploadDate,PlayCount,LikeCount,ArtistId")] Song song, IFormFile imageFile)
         {
             if (id != song.SongId)
             {
@@ -464,29 +465,57 @@ namespace TunePhere.Controllers
             {
                 try
                 {
-                    // Cập nhật thông tin bài hát
-                    _context.Entry(song).State = EntityState.Modified;
+                    // Xử lý upload ảnh mới nếu có
+                    if (imageFile != null && imageFile.Length > 0)
+                    {
+                        // Xóa ảnh cũ nếu tồn tại
+                        if (!string.IsNullOrEmpty(existingSong.ImageUrl))
+                        {
+                            var oldImagePath = Path.Combine(_environment.WebRootPath, existingSong.ImageUrl.TrimStart('/'));
+                            if (System.IO.File.Exists(oldImagePath))
+                            {
+                                System.IO.File.Delete(oldImagePath);
+                            }
+                        }
 
-                    // Giữ nguyên các thông tin không được phép thay đổi
+                        // Tạo đường dẫn lưu ảnh mới
+                        var coverUploadPath = Path.Combine(_environment.WebRootPath, "uploads", "covers");
+                        Directory.CreateDirectory(coverUploadPath);
+
+                        var imageFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+                        var imagePath = Path.Combine(coverUploadPath, imageFileName);
+
+                        // Lưu ảnh mới
+                        using (var stream = new FileStream(imagePath, FileMode.Create))
+                        {
+                            await imageFile.CopyToAsync(stream);
+                        }
+
+                        // Cập nhật ImageUrl mới
+                        song.ImageUrl = "/uploads/covers/" + imageFileName;
+                    }
+                    else
+                    {
+                        // Giữ nguyên ImageUrl cũ nếu không có ảnh mới
+                        song.ImageUrl = existingSong.ImageUrl;
+                    }
+
+                    // Giữ nguyên các trường không được phép thay đổi
                     song.ArtistId = existingSong.ArtistId;
                     song.FileUrl = existingSong.FileUrl;
-                    song.ImageUrl = existingSong.ImageUrl;
                     song.UploadDate = existingSong.UploadDate;
                     song.PlayCount = existingSong.PlayCount;
                     song.LikeCount = existingSong.LikeCount;
 
+                    // Cập nhật entity trong database
+                    _context.Update(song);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (Exception ex)
                 {
-                    if (!SongExists(song.SongId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    _logger.LogError(ex, "Lỗi khi chỉnh sửa bài hát: {Message}", ex.Message);
+                    ModelState.AddModelError("", "Đã xảy ra lỗi khi cập nhật bài hát. Vui lòng thử lại.");
+                    return View(song);
                 }
                 return RedirectToAction(nameof(Index));
             }
