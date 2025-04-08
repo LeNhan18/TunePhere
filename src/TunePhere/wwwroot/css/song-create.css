@@ -114,10 +114,10 @@
     transition: all 0.3s ease;
 }
 
-.create-btn:hover {
-    background: #1ed760;
-    transform: scale(1.05);
-}
+    .create-btn:hover {
+        background: #5a3c93;
+        transform: scale(1.05);
+    }
 
 .cancel-btn {
     display: inline-flex;
