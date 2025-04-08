@@ -204,3 +204,42 @@ body {
         font-size: 12px;
     }
 }
+
+.context-menu {
+        display: none;
+        position: absolute;
+        background-color: #282828;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 16px 24px rgba(0,0,0,0.3), 0 6px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        min-width: 180px;
+        padding: 8px 0;
+    }
+
+    .context-menu ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .context-menu li {
+        padding: 10px 15px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.2s;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+    }
+
+    .context-menu li:hover {
+        background-color: rgba(187, 134, 252, 0.1);
+    }
+
+    .context-menu li i {
+        margin-right: 10px;
+        width: 16px;
+        text-align: center;
+        color: #bb86fc;
+    }

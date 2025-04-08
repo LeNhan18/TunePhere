@@ -1,4 +1,4 @@
-/* Spotify Album Create CSS */
+﻿/* Spotify Album Create CSS */
 :root {
     --spotify-black: #121212;
     --spotify-dark-gray: #181818;
@@ -407,4 +407,43 @@ body {
     margin-top: 12px;
     color: var(--spotify-light-gray);
     font-size: 13px;
-} 
+}
+
+:root {
+    --spotify-green: #7B2CBF; /* Thay đổi màu chính theo TunePhere */
+    --spotify-green-hover: #9D4EDD;
+}
+
+.create-header {
+    background: linear-gradient(45deg, #7B2CBF, #5A189A);
+    margin-bottom: 2rem;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.spotify-info-section {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 24px;
+    margin-top: 32px;
+}
+
+.spotify-info-item {
+    color: var(--spotify-light-gray);
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+    .spotify-info-item strong {
+        color: var(--spotify-white);
+        margin-right: 8px;
+    }
+
+.spotify-primary-button {
+    background: linear-gradient(45deg, #7B2CBF, #9D4EDD);
+}
+
+    .spotify-primary-button:hover {
+        background: linear-gradient(45deg, #9D4EDD, #7B2CBF);
+        transform: scale(1.02);
+    }

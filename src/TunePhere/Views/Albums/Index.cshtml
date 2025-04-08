@@ -34,7 +34,7 @@
             <div class="albums-grid">
                 @foreach (var album in Model)
                 {
-                    <div class="album-card">
+                    <div class="album-card" oncontextmenu="return showContextMenu(event, @album.AlbumId)">
                         <div class="album-image-container">
                             <img src="@(string.IsNullOrEmpty(album.ImageUrl) ? "/images/default-album.jpg" : album.ImageUrl)" alt="@album.AlbumName" />
                             <div class="album-overlay">
@@ -59,3 +59,69 @@
         </div>
     </div>
 </div>
+
+<!-- Context Menu -->
+<div id="albumContextMenu" class="context-menu">
+    <ul>
+        <li onclick="handleMenuClick('details')"><i class="fas fa-info-circle"></i> Chi tiết album</li>
+        @if (ViewBag.IsOwner)
+        {
+            <li onclick="handleMenuClick('edit')"><i class="fas fa-edit"></i> Chỉnh sửa album</li>
+            <li onclick="handleMenuClick('delete')"><i class="fas fa-trash"></i> Xóa album</li>
+        }
+    </ul>
+</div>
+
+@section Scripts {
+    <script>
+        let selectedAlbumId = null;
+
+        // Hàm hiển thị context menu khi chuột phải
+        function showContextMenu(event, albumId) {
+            event.preventDefault();
+
+            selectedAlbumId = albumId;
+
+            const contextMenu = document.getElementById('albumContextMenu');
+
+            // Hiển thị context menu tại vị trí chuột
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = event.pageX + 'px';
+            contextMenu.style.top = event.pageY + 'px';
+
+            return false;
+        }
+
+        // Hàm xử lý khi chọn một mục trong menu
+        function handleMenuClick(action) {
+            if (!selectedAlbumId) return;
+
+            switch(action) {
+                case 'details':
+                    window.location.href = `/Albums/Details/${selectedAlbumId}`;
+                    break;
+                case 'edit':
+                    window.location.href = `/Albums/Edit/${selectedAlbumId}`;
+                    break;
+                case 'delete':
+                    window.location.href = `/Albums/Delete/${selectedAlbumId}`;
+                    break;
+            }
+
+            // Ẩn context menu sau khi chọn
+            document.getElementById('albumContextMenu').style.display = 'none';
+        }
+
+        // Ẩn context menu khi click ra ngoài
+        document.addEventListener('click', function() {
+            document.getElementById('albumContextMenu').style.display = 'none';
+        });
+
+        // Ẩn context menu khi nhấn Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('albumContextMenu').style.display = 'none';
+            }
+        });
+    </script>
+}
