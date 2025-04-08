@@ -22,9 +22,33 @@ namespace TunePhere.Controllers
         }
 
         // GET: Albums
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? artistId = null)
         {
-            // Lấy nghệ sĩ phổ biến (dựa trên số lượng bài hát)
+            if (artistId.HasValue)
+            {
+                // Lấy thông tin nghệ sĩ
+                var artist = await _context.Artists
+                    .Include(a => a.Albums)
+                        .ThenInclude(a => a.Songs)
+                    .FirstOrDefaultAsync(a => a.ArtistId == artistId);
+
+                if (artist == null)
+                {
+                    return NotFound();
+                }
+
+                // Lấy userId của người đang đăng nhập
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                // Kiểm tra xem người đang xem có phải là chủ sở hữu không
+                ViewBag.IsOwner = (currentUserId == artist.userId);
+                ViewBag.Artist = artist;
+
+                var albums = artist.Albums.OrderByDescending(a => a.ReleaseDate).ToList();
+                return View(albums);
+            }
+
+            // Logic cũ cho trang Albums tổng
             var popularArtists = await _context.Artists
                 .Include(a => a.Songs)
                 .OrderByDescending(a => a.Songs.Count)
@@ -32,35 +56,15 @@ namespace TunePhere.Controllers
                 .ToListAsync();
             ViewBag.PopularArtists = popularArtists;
 
-            // Lấy tất cả album, sắp xếp theo ngày phát hành mới nhất
-            var albums = await _context.Albums
+            var allAlbums = await _context.Albums
                 .Include(a => a.Songs)
                 .Include(a => a.Artists)
                 .OrderByDescending(a => a.ReleaseDate)
-                .Take(10) // Lấy 10 album mới nhất
+                .Take(10)
                 .ToListAsync();
 
-            // Kiểm tra role của user hiện tại
-            var isArtist = User.IsInRole("Artist");
-            ViewBag.IsArtist = isArtist;
-
-            // Nếu user đã đăng nhập và là nghệ sĩ, lấy thêm album của họ
-            if (User.Identity.IsAuthenticated && isArtist)
-            {
-                string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var myAlbums = await _context.Albums
-                    .Include(a => a.Songs)
-                    .Include(a => a.Artists)
-                    .Where(a => a.Artists.userId == currentUserId)
-                    .OrderByDescending(a => a.ReleaseDate)
-                    .ToListAsync();
-
-                ViewBag.MyAlbums = myAlbums;
-            }
-
-            return View(albums);
+            return View(allAlbums);
         }
-
         // GET: Albums/Details/5
         public async Task<IActionResult> Details(int? id)
         {

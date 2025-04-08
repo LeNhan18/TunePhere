@@ -1,377 +1,96 @@
-/* Spotify Style Albums CSS */
 :root {
-    --spotify-black: #121212;
-    --spotify-dark-gray: #181818;
-    --spotify-gray: #282828;
-    --spotify-light-gray: #b3b3b3;
-    --spotify-green: #1DB954;
-    --spotify-green-hover: #7B2CBF;
-    --spotify-white: #ffffff;
+    --primary-color: #1f1f1f;
+    --primary-light: #2d2d2d;
+    --primary-dark: #121212;
+    --accent-color: #bb86fc;
+    --accent-color-hover: #9d4edd;
+    --text-color: #ffffff;
+    --text-muted: #9e9e9e;
+    --background-color: #121212;
+    --card-background: #1f1f1f;
+    --border-color: #333333;
+    --hover-color: rgba(187, 134, 252, 0.1);
+    --danger-color: #cf6679;
+    --danger-hover: #e74c3c;
+    --heading-color: #ffffff;
+    --input-background: #2d2d2d;
+    --success-bg: rgba(39, 174, 96, 0.2);
+    --success-color: #2ecc71;
 }
 
 body {
-    background-color: var(--spotify-black);
-    color: var(--spotify-white);
-    font-family: 'Circular', Arial, Helvetica, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
-/* Spotify Container */
-.spotify-albums-container {
-    padding: 24px;
-    max-width: 1955px;
-    margin: 0 auto;
+.artist-header {
+    margin-top: -24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Spotify Header */
-.spotify-header {
-    margin-bottom: 40px;
+.text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.page-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--spotify-white);
-    margin-bottom: 16px;
+.text-glow {
+    text-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
 }
 
-/* Section Styling */
-.my-albums-section,
-.featured-albums-section,
-.all-albums-section,
-.popular-artists-section {
-    margin-bottom: 48px;
-}
-
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-}
-
-.section-header h2 {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--spotify-white);
-    margin: 0;
-}
-
-/* Spotify Link */
-.spotify-link {
-    color: var(--spotify-light-gray);
-    font-size: 14px;
-    font-weight: 700;
-    text-decoration: none;
-    letter-spacing: 0.1px;
+.artist-label {
+    display: inline-block;
+    padding: 4px 12px;
+    background-color: var(--accent-color);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: var(--primary-dark);
     text-transform: uppercase;
 }
 
-.spotify-link:hover {
-    color: var(--spotify-white);
-    text-decoration: underline;
-}
-
-/* Spotify Button */
-.spotify-button {
+.btn-back {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    background-color: var(--spotify-white);
-    color: var(--spotify-black);
-    border-radius: 500px;
-    font-size: 14px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: transform 0.3s ease, background-color 0.3s ease;
-}
-
-.spotify-button:hover {
-    transform: scale(1.04);
-    background-color: var(--spotify-white);
-}
-
-/* Spotify Grid */
-.spotify-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    grid-gap: 24px;
-}
-
-/* Spotify Card */
-.spotify-card {
-    background-color: var(--spotify-dark-gray);
-    border-radius: 8px;
-    padding: 16px;
-    transition: background-color 0.3s ease;
-    position: relative;
-}
-
-.spotify-card:hover {
-    background-color: var(--spotify-gray);
-}
-
-.spotify-card-img-container {
-    position: relative;
-    width: 100%;
-    padding-bottom: 100%;
-    margin-bottom: 16px;
-    border-radius: 4px;
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-.spotify-card-img-container img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.spotify-card-play {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.3s ease;
-}
-
-.spotify-card:hover .spotify-card-play {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.spotify-play-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    background-color: var(--spotify-green);
-    border-radius: 50%;
-    color: var(--spotify-black);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease, background-color 0.3s ease;
-}
-
-.spotify-play-button:hover {
-    transform: scale(1.06);
-    background-color: var(--spotify-green-hover);
-}
-
-.spotify-play-button i {
-    font-size: 20px;
-}
-
-.spotify-card-info {
-    padding: 0 4px;
-}
-
-.spotify-card-title {
-    display: block;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--spotify-white);
-    margin-bottom: 8px;
-    text-decoration: none;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.spotify-card-title:hover {
-    text-decoration: underline;
-}
-
-.spotify-card-description {
-    font-size: 14px;
-    color: var(--spotify-light-gray);
-    margin: 0;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.spotify-card-subtitle {
-    color: var(--spotify-light-gray);
-    text-decoration: none;
-}
-
-.spotify-card-subtitle:hover {
-    color: var(--spotify-white);
-    text-decoration: underline;
-}
-
-/* Artist specific styles */
-.artist-img img {
-    border-radius: 50%;
-}
-
-.artists-grid .spotify-card {
-    text-align: center;
-}
-
-.artists-grid .spotify-card-img-container {
-    border-radius: 50%;
-}
-
-.artists-grid .spotify-card-play {
-    bottom: 0;
-    right: 0;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.8);
-}
-
-.artists-grid .spotify-card:hover .spotify-card-play {
-    transform: translate(-50%, -50%) scale(1);
-}
-
-/* Responsive adjustments */
-@media (max-width: 1200px) {
-    .spotify-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        grid-gap: 20px;
-    }
-    
-    .spotify-card {
-        padding: 12px;
-    }
-    
-    .spotify-play-button {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .spotify-play-button i {
-        font-size: 16px;
-    }
-}
-
-@media (max-width: 768px) {
-    .spotify-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        grid-gap: 16px;
-    }
-    
-    .spotify-card {
-        padding: 10px;
-    }
-    
-    .spotify-card-title {
-        font-size: 14px;
-    }
-    
-    .spotify-card-description {
-        font-size: 12px;
-    }
-    
-    .spotify-play-button {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .spotify-play-button i {
-        font-size: 14px;
-    }
-}
-
-.albums-container {
-    padding: 24px;
-}
-
-.trending-songs,
-.popular-artists,
-.featured-albums,
-.my-albums {
-    margin-bottom: 48px;
-}
-
-h2 {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 24px;
-    color: white;
-}
-
-.artists-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 24px;
-}
-
-.artist-card {
-    text-decoration: none;
-    color: inherit;
-    transition: transform 0.3s ease;
-    text-align: center;
-}
-
-.artist-card:hover {
-    transform: translateY(-5px);
-}
-
-.artist-image {
-    width: 180px;
-    height: 180px;
-    margin: 0 auto;
-    border-radius: 50%;
-    overflow: hidden;
-    background: #282828;
-}
-
-.artist-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.artist-info {
-    margin-top: 16px;
-}
-
-.artist-name {
-    font-size: 16px;
-    font-weight: 600;
-    margin: 0;
-    color: white;
-}
-
-.artist-songs {
-    font-size: 14px;
-    color: #b3b3b3;
-    margin: 4px 0 0;
-}
-
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-}
-
-.create-album-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
     padding: 8px 16px;
-    background: #1DB954;
-    color: white;
+    background: transparent;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
     border-radius: 20px;
     text-decoration: none;
-    font-size: 14px;
     transition: all 0.3s ease;
 }
 
-    .create-album-btn:hover {
-        background: #7B2CBF;
-        transform: scale(1.05);
+    .btn-back:hover {
+        background: var(--accent-color);
+        color: var(--primary-dark);
+        transform: translateY(-2px);
     }
+
+.btn-create {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: var(--accent-color);
+    color: var(--primary-dark);
+    border-radius: 20px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+    .btn-create:hover {
+        background: var(--accent-hover);
+        color: var(--text-color);
+        transform: translateY(-2px);
+    }
+
+.albums-container {
+    background: var(--primary-light);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
 
 .albums-grid {
     display: grid;
@@ -380,32 +99,30 @@ h2 {
 }
 
 .album-card {
-    text-decoration: none;
-    color: inherit;
+    background: var(--primary-color);
+    border-radius: 12px;
+    overflow: hidden;
     transition: transform 0.3s ease;
 }
 
-.album-card:hover {
-    transform: translateY(-5px);
-}
+    .album-card:hover {
+        transform: translateY(-5px);
+    }
 
-.album-image {
+.album-image-container {
     position: relative;
     width: 100%;
     padding-bottom: 100%;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #282828;
 }
 
-.album-image img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+    .album-image-container img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
 .album-overlay {
     position: absolute;
@@ -421,181 +138,69 @@ h2 {
     transition: opacity 0.3s ease;
 }
 
-.album-overlay i {
-    font-size: 48px;
-    color: white;
-}
-
 .album-card:hover .album-overlay {
     opacity: 1;
-}
-
-.album-info {
-    margin-top: 12px;
-}
-
-.album-name {
-    font-size: 16px;
-    font-weight: 600;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: white;
-}
-
-.artist-name {
-    font-size: 14px;
-    color: #b3b3b3;
-    margin: 4px 0 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.album-stats {
-    display: flex;
-    gap: 12px;
-    font-size: 14px;
-    color: #b3b3b3;
-    margin-top: 4px;
-}
-
-@media (max-width: 768px) {
-    .albums-grid,
-    .artists-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 16px;
-    }
-
-    .artist-image {
-        width: 150px;
-        height: 150px;
-    }
-
-    .album-name,
-    .artist-name {
-        font-size: 14px;
-    }
-
-    .artist-songs {
-        font-size: 12px;
-    }
-}
-
-.music-section {
-    margin-bottom: 48px;
-}
-
-.section-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 24px;
-    color: white;
-}
-
-.music-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 24px;
-}
-
-.music-card {
-    text-decoration: none;
-    color: inherit;
-    transition: transform 0.3s ease;
-}
-
-.music-card:hover {
-    transform: translateY(-5px);
-}
-
-.card-img-container {
-    position: relative;
-    width: 100%;
-    padding-bottom: 100%;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #282828;
-}
-
-.card-img-container img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.play-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
 }
 
 .play-btn {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: #1DB954;
-    border: none;
-    color: white;
-    font-size: 20px;
+    background: var(--accent-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    color: var(--primary-dark);
+    font-size: 20px;
+    transition: all 0.3s ease;
 }
 
     .play-btn:hover {
+        background: var(--accent-hover);
         transform: scale(1.1);
-        background: #7B2CBF;
+        color: var(--text-color);
     }
 
-.music-card:hover .play-overlay {
-    opacity: 1;
+.album-info {
+    padding: 16px;
 }
 
-.song-title {
+.album-title {
+    color: var(--text-color);
     font-size: 16px;
     font-weight: 600;
-    margin: 12px 0 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: white;
+    margin-bottom: 8px;
 }
 
-.artist-name {
+.album-meta {
+    color: var(--text-muted);
     font-size: 14px;
-    color: #b3b3b3;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: flex;
+    gap: 12px;
+}
+
+    .album-meta i {
+        color: var(--accent-color);
+        margin-right: 4px;
+    }
+
+.album-date {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 8px;
 }
 
 @media (max-width: 768px) {
-    .music-grid {
+    .albums-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
         gap: 16px;
     }
 
-    .song-title {
+    .album-title {
         font-size: 14px;
     }
 
-    .artist-name {
+    .album-meta {
         font-size: 12px;
     }
-} 
+}
