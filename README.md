@@ -1,7 +1,7 @@
 git clone https://github.com/LeNhan18/TunePhere.git
 
-## ⭐ Project Stats
+## 📊 RepoBeats Analytics
 
-<div align="center">
-![RepoBeats](https://repobeats.axiom.co/api/embed/28b5116183d0171f30dc4b6d430b142a22ed4053.svg)
-</div>
+<p align="center">
+  <img src="https://repobeats.axiom.co/api/embed/28b5116183d0171f30dc4b6d430b142a22ed4053.svg" alt="RepoBeats analytics" />
+</p>
