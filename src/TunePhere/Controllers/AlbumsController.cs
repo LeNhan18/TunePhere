@@ -23,48 +23,48 @@ namespace TunePhere.Controllers
 
         // GET: Albums
         public async Task<IActionResult> Index(int? artistId = null)
-{
-    if (artistId.HasValue)
-    {
-        // Lấy thông tin nghệ sĩ
-        var artist = await _context.Artists
-            .Include(a => a.Albums)
-                .ThenInclude(a => a.Songs)
-            .FirstOrDefaultAsync(a => a.ArtistId == artistId);
-
-        if (artist == null)
         {
-            return NotFound();
+            if (artistId.HasValue)
+            {
+                // Lấy thông tin nghệ sĩ
+                var artist = await _context.Artists
+                    .Include(a => a.Albums)
+                        .ThenInclude(a => a.Songs)
+                    .FirstOrDefaultAsync(a => a.ArtistId == artistId);
+
+                if (artist == null)
+                {
+                    return NotFound();
+                }
+
+                // Lấy userId của người đang đăng nhập
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                // Kiểm tra xem người đang xem có phải là chủ sở hữu không
+                ViewBag.IsOwner = (currentUserId == artist.userId);
+                ViewBag.Artist = artist;
+
+                var albums = artist.Albums.OrderByDescending(a => a.ReleaseDate).ToList();
+                return View(albums);
+            }
+
+            // Logic cũ cho trang Albums tổng
+            var popularArtists = await _context.Artists
+                .Include(a => a.Songs)
+                .OrderByDescending(a => a.Songs.Count)
+                .Take(6)
+                .ToListAsync();
+            ViewBag.PopularArtists = popularArtists;
+
+            var allAlbums = await _context.Albums
+                .Include(a => a.Songs)
+                .Include(a => a.Artists)
+                .OrderByDescending(a => a.ReleaseDate)
+                .Take(10)
+                .ToListAsync();
+
+            return View(allAlbums);
         }
-
-        // Lấy userId của người đang đăng nhập
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        
-        // Kiểm tra xem người đang xem có phải là chủ sở hữu không
-        ViewBag.IsOwner = (currentUserId == artist.userId);
-        ViewBag.Artist = artist;
-        
-        var albums = artist.Albums.OrderByDescending(a => a.ReleaseDate).ToList();
-        return View(albums);
-    }
-
-    // Logic cũ cho trang Albums tổng
-    var popularArtists = await _context.Artists
-        .Include(a => a.Songs)
-        .OrderByDescending(a => a.Songs.Count)
-        .Take(6)
-        .ToListAsync();
-    ViewBag.PopularArtists = popularArtists;
-
-    var allAlbums = await _context.Albums
-        .Include(a => a.Songs)
-        .Include(a => a.Artists)
-        .OrderByDescending(a => a.ReleaseDate)
-        .Take(10)
-        .ToListAsync();
-
-    return View(allAlbums);
-}
         // GET: Albums/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -692,7 +692,6 @@ namespace TunePhere.Controllers
         [Authorize(Roles = "Artist")]
         public async Task<IActionResult> DeleteSong(int songId)
         {
-            // Khai báo albumId ở ngoài khối try để có thể sử dụng trong khối catch
             int? albumId = null;
 
             try
@@ -717,48 +716,59 @@ namespace TunePhere.Controllers
                     return Unauthorized();
                 }
 
-                // Lưu albumId để sử dụng trong khối catch nếu cần
+                // Lưu albumId và duration để sử dụng sau
                 albumId = song.AlbumId;
                 var duration = song.Duration;
 
-                // Xóa các bài hát khỏi playlists
+                // 1. Xóa lịch sử nghe nhạc
+                var playHistories = await _context.PlayHistories
+                    .Where(ph => ph.SongId == songId)
+                    .ToListAsync();
+                if (playHistories.Any())
+                {
+                    _context.PlayHistories.RemoveRange(playHistories);
+                    await _context.SaveChangesAsync();
+                }
+
+                // 2. Xóa các bài hát khỏi playlists
                 var playlistSongs = await _context.PlaylistSongs
                     .Where(ps => ps.SongId == songId)
                     .ToListAsync();
                 if (playlistSongs.Any())
                 {
                     _context.PlaylistSongs.RemoveRange(playlistSongs);
+                    await _context.SaveChangesAsync();
                 }
 
-                // Xóa các remixes liên quan đến bài hát
+                // 3. Xóa các remixes liên quan đến bài hát
                 var remixes = await _context.Remixes
                     .Where(r => r.OriginalSongId == songId)
                     .ToListAsync();
                 if (remixes.Any())
                 {
                     _context.Remixes.RemoveRange(remixes);
+                    await _context.SaveChangesAsync();
                 }
 
-                // Xóa lyrics của bài hát
+                // 4. Xóa lyrics của bài hát
                 var lyrics = await _context.Lyrics
                     .Where(l => l.SongId == songId)
                     .ToListAsync();
                 if (lyrics.Any())
                 {
                     _context.Lyrics.RemoveRange(lyrics);
+                    await _context.SaveChangesAsync();
                 }
 
-                // Xóa các bài hát khỏi danh sách yêu thích
+                // 5. Xóa các bài hát khỏi danh sách yêu thích
                 var favoriteSongs = await _context.UserFavoriteSongs
                     .Where(fs => fs.SongId == songId)
                     .ToListAsync();
                 if (favoriteSongs.Any())
                 {
                     _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
+                    await _context.SaveChangesAsync();
                 }
-
-                // Lưu các thay đổi về xóa các mối quan hệ trước
-                await _context.SaveChangesAsync();
 
                 // Xóa file nhạc
                 if (!string.IsNullOrEmpty(song.FileUrl))
@@ -797,11 +807,8 @@ namespace TunePhere.Controllers
             }
             catch (Exception ex)
             {
-                // Log lỗi và hiển thị thông báo
                 Console.WriteLine($"Lỗi khi xóa bài hát: {ex.Message}");
                 TempData["Error"] = $"Có lỗi xảy ra khi xóa bài hát: {ex.Message}";
-
-                // Sử dụng albumId đã được lưu trước đó
                 return RedirectToAction(nameof(Details), new { id = albumId });
             }
         }

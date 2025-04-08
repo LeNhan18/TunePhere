@@ -1,0 +1,87 @@
+﻿@model IEnumerable<TunePhere.Models.PlayHistory>
+@{
+    ViewData["Title"] = "Lịch sử nghe nhạc";
+    Layout = "_Layout";
+}
+
+<link rel="stylesheet" href="~/css/playhistory.css" />
+
+<div class="play-history-container">
+    <div class="history-header">
+        <div class="header-content">
+            <h1>Lịch sử nghe nhạc</h1>
+            <p>Các bài hát bạn đã nghe gần đây</p>
+        </div>
+    </div>
+
+    <div class="history-content">
+        @if (Model.Any())
+        {
+            <div class="history-table">
+                <div class="table-header">
+                    <div class="header-index">#</div>
+                    <div class="header-title">TIÊU ĐỀ</div>
+                    <div class="header-artist">NGHỆ SĨ</div>
+                    <div class="header-time">THỜI GIAN NGHE</div>
+                </div>
+
+                <div class="table-body">
+                    @foreach (var (item, index) in Model.Select((history, index) => (history, index + 1)))
+                    {
+                        <div class="history-item" onclick="location.href='@Url.Action("Details", "Songs", new { id = item.Song?.SongId })'">
+                            <div class="item-index">@index</div>
+                            <div class="item-info">
+                                <div class="song-image">
+                                    <img src="@(item.Song?.ImageUrl ?? "/images/default-song.jpg")" alt="@item.Song?.Title" />
+                                    <div class="play-hover">
+                                        <i class="fas fa-play"></i>
+                                    </div>
+                                </div>
+                                <div class="song-details">
+                                    <div class="song-title">@item.Song?.Title</div>
+                                </div>
+                            </div>
+                            <div class="item-artist">
+                                <a href="@Url.Action("Profile", "Artists", new { id = item.Song?.Artists?.ArtistId })"
+                                   onclick="event.stopPropagation()">
+                                    @item.Song?.Artists?.ArtistName
+                                </a>
+                            </div>
+                            <div class="item-time">
+                                @{
+                                    var timeDiff = DateTime.Now - item.PlayedAt;
+                                    string timeAgo;
+                                    if (timeDiff.TotalMinutes < 60)
+                                    {
+                                        timeAgo = $"{Math.Floor(timeDiff.TotalMinutes)} phút trước";
+                                    }
+                                    else if (timeDiff.TotalHours < 24)
+                                    {
+                                        timeAgo = $"{Math.Floor(timeDiff.TotalHours)} giờ trước";
+                                    }
+                                    else
+                                    {
+                                        timeAgo = item.PlayedAt.ToString("dd/MM/yyyy HH:mm");
+                                    }
+                                }
+                                @timeAgo
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="no-history">
+                <i class="fas fa-history"></i>
+                <h2>Chưa có lịch sử nghe nhạc</h2>
+                <p>Hãy bắt đầu nghe nhạc để tạo lịch sử của bạn</p>
+                <a href="@Url.Action("Index", "Home")" class="discover-button">
+                    <i class="fas fa-music"></i>
+                    Khám phá nhạc
+                </a>
+            </div>
+        }
+    </div>
+</div>
