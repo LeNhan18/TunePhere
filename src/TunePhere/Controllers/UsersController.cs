@@ -8,6 +8,7 @@ using TunePhere.Models;
 using TunePhere.Repository.IMPRepository;
 using Microsoft.Extensions.Hosting;
 using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace TunePhere.Controllers
 {
@@ -17,12 +18,18 @@ namespace TunePhere.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IUserRepository _userRepository;
         private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly AppDbContext _context;
         
-        public UsersController(UserManager<AppUser> userManager, IUserRepository userRepository, IWebHostEnvironment hostEnvironment)
+        public UsersController(
+            UserManager<AppUser> userManager, 
+            IUserRepository userRepository, 
+            IWebHostEnvironment hostEnvironment,
+            AppDbContext context)
         {
             _userManager = userManager;
             _userRepository = userRepository;
             _hostEnvironment = hostEnvironment;
+            _context = context;
         }
         
         public async Task<IActionResult> Details()
@@ -32,6 +39,15 @@ namespace TunePhere.Controllers
             {
                 return NotFound();
             }
+
+            // Load danh sách nghệ sĩ được theo dõi
+            var followedArtists = await _context.ArtistFollowers
+                .Include(af => af.Artist)
+                .Where(af => af.UserId == user.Id)
+                .Select(af => af.Artist)
+                .ToListAsync();
+
+            user.FollowedArtists = followedArtists;
             
             return View(user);
         }
