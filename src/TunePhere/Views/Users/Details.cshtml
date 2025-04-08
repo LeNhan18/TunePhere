@@ -119,27 +119,46 @@
         <div class="tab" data-tab="playlists">Playlist</div>
         <div class="tab" data-tab="favorites">Bài hát đã thích</div>
         <div class="tab" data-tab="artists">Nghệ sĩ đã theo dõi</div>
+        <div class="tab" data-tab="history">Lịch sử phát nhạc</div>
     </div>
     
     <div class="profile-content">
         <div class="tab-content active" id="overview">
             <div class="section recently-played">
                 <div class="section-header">
-                    <h2>Phát gần đây</h2>
+                    <h2>Lịch sử phát nhạc</h2>
                     <a href="#" class="see-all">Xem tất cả</a>
                 </div>
                 <div class="music-grid">
-                    @for (int i = 0; i < 6; i++)
+                    @if (Model.PlayHistory != null && Model.PlayHistory.Any())
                     {
-                        <div class="music-card">
-                            <div class="music-thumbnail">
-                                <img src="~/images/music-placeholder.jpg" alt="Music" />
-                                <div class="play-button">
-                                    <i class="fas fa-play"></i>
+                        foreach (var history in Model.PlayHistory.Take(6))
+                        {
+                            <div class="music-card">
+                                <div class="music-thumbnail">
+                                    @if (!string.IsNullOrEmpty(history.Song.ImageUrl))
+                                    {
+                                        <img src="@history.Song.ImageUrl" alt="@history.Song.Title" />
+                                    }
+                                    else
+                                    {
+                                        <img src="~/images/music-placeholder.jpg" alt="@history.Song.Title" />
+                                    }
+                                    <div class="play-button">
+                                        <i class="fas fa-play"></i>
+                                    </div>
                                 </div>
+                                <h3 class="music-title">@history.Song.Title</h3>
+                                <p class="music-artist">@history.Song.Artists.ArtistName</p>
+                                <p class="play-time">@history.PlayedAt.ToString("dd/MM/yyyy HH:mm")</p>
                             </div>
-                            <h3 class="music-title">Bài hát mẫu</h3>
-                            <p class="music-artist">Nghệ sĩ</p>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-content">
+                            <i class="fas fa-history"></i>
+                            <p>Bạn chưa có lịch sử phát nhạc nào</p>
                         </div>
                     }
                 </div>
@@ -263,6 +282,47 @@
                         <div class="no-content">
                             <i class="fas fa-user-music"></i>
                             <p>Bạn chưa theo dõi nghệ sĩ nào</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="history">
+            <div class="section history">
+                <div class="section-header">
+                    <h2>Lịch sử phát nhạc</h2>
+                </div>
+                <div class="music-grid">
+                    @if (Model.PlayHistory != null && Model.PlayHistory.Any())
+                    {
+                        foreach (var history in Model.PlayHistory)
+                        {
+                            <div class="music-card">
+                                <div class="music-thumbnail">
+                                    @if (!string.IsNullOrEmpty(history.Song.ImageUrl))
+                                    {
+                                        <img src="@history.Song.ImageUrl" alt="@history.Song.Title" />
+                                    }
+                                    else
+                                    {
+                                        <img src="~/images/music-placeholder.jpg" alt="@history.Song.Title" />
+                                    }
+                                    <div class="play-button">
+                                        <i class="fas fa-play"></i>
+                                    </div>
+                                </div>
+                                <h3 class="music-title">@history.Song.Title</h3>
+                                <p class="music-artist">@history.Song.Artists.ArtistName</p>
+                                <p class="play-time">@history.PlayedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-content">
+                            <i class="fas fa-history"></i>
+                            <p>Bạn chưa có lịch sử phát nhạc nào</p>
                         </div>
                     }
                 </div>

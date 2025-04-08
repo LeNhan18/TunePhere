@@ -49,6 +49,16 @@ namespace TunePhere.Controllers
 
             user.FollowedArtists = followedArtists;
             
+            // Load lịch sử phát nhạc
+            var playHistory = await _context.PlayHistories
+                .Include(ph => ph.Song)
+                .Include(ph => ph.Song.Artists)
+                .Where(ph => ph.UserId == user.Id)
+                .OrderByDescending(ph => ph.PlayedAt)
+                .ToListAsync();
+                
+            user.PlayHistory = playHistory;
+            
             return View(user);
         }
         
