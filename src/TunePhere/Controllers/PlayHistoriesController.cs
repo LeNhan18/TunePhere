@@ -37,21 +37,23 @@ public class PlayHistoriesController : Controller
     [Authorize]
     public async Task<IActionResult> AddToHistory([FromBody] PlayHistoryViewModel model)
     {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
         try
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
                 return Unauthorized();
 
-            // Xóa tất cả bản ghi cũ của bài hát này cho người dùng hiện tại
-            var existingHistories = await _context.PlayHistories
-                .Where(p => p.SongId == model.songId && p.UserId == currentUser.Id)
-                .ToListAsync();
+            // Kiểm tra xem bài hát có tồn tại không
+            var song = await _context.Songs.FindAsync(model.songId);
+            if (song == null)
+                return NotFound();
 
-            if (existingHistories.Any())
-            {
-                _context.PlayHistories.RemoveRange(existingHistories);
-            }
+            // Xóa tất cả bản ghi cũ
+            await _context.PlayHistories
+                .Where(p => p.SongId == model.songId && p.UserId == currentUser.Id)
+                .ExecuteDeleteAsync();
 
             // Tạo bản ghi mới
             var playHistory = new PlayHistory
@@ -64,10 +66,12 @@ public class PlayHistoriesController : Controller
             _context.PlayHistories.Add(playHistory);
             await _context.SaveChangesAsync();
 
+            await transaction.CommitAsync();
             return Json(new { success = true, message = "Đã cập nhật lịch sử nghe" });
         }
         catch (Exception ex)
         {
+            await transaction.RollbackAsync();
             return Json(new { success = false, message = ex.Message });
         }
     }
