@@ -511,6 +511,10 @@ namespace TunePhere.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
@@ -537,11 +541,11 @@ namespace TunePhere.Migrations
 
             modelBuilder.Entity("TunePhere.Models.PlaylistSong", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("PlaylistSongId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PlaylistSongId"));
 
                     b.Property<DateTime>("AddedAt")
                         .HasColumnType("datetime2");
@@ -549,6 +553,9 @@ namespace TunePhere.Migrations
                     b.Property<string>("AddedByUserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
 
                     b.Property<int>("PlaylistId")
                         .HasColumnType("int");
@@ -559,7 +566,7 @@ namespace TunePhere.Migrations
                     b.Property<int>("VoteCount")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("PlaylistSongId");
 
                     b.HasIndex("AddedByUserId");
 
