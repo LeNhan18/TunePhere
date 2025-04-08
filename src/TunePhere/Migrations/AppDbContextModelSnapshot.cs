@@ -479,6 +479,9 @@ namespace TunePhere.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<DateTime>("PlayedAt")
                         .HasColumnType("datetime2");
 
@@ -489,6 +492,8 @@ namespace TunePhere.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
 
                     b.HasIndex("SongId");
 
@@ -930,6 +935,10 @@ namespace TunePhere.Migrations
 
             modelBuilder.Entity("TunePhere.Models.PlayHistory", b =>
                 {
+                    b.HasOne("TunePhere.Models.AppUser", null)
+                        .WithMany("PlayHistory")
+                        .HasForeignKey("AppUserId");
+
                     b.HasOne("TunePhere.Models.Song", "Song")
                         .WithMany()
                         .HasForeignKey("SongId")
@@ -1095,6 +1104,8 @@ namespace TunePhere.Migrations
                     b.Navigation("ListeningRoomParticipants");
 
                     b.Navigation("ListeningRooms");
+
+                    b.Navigation("PlayHistory");
 
                     b.Navigation("Playlists");
 
