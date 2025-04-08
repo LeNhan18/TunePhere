@@ -1,0 +1,227 @@
+﻿:root {
+    --primary-color: #7B2CBF;
+    --primary-hover: #9D4EDD;
+    --background-dark: #121212;
+    --background-light: #181818;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B3B3B3;
+    --border-color: #282828;
+}
+
+.play-history-container {
+    padding: 80px 32px 32px;
+    background-color: var(--background-dark);
+    min-height: 100vh;
+}
+
+.history-header {
+    background: linear-gradient(to bottom, rgba(123, 44, 191, 0.8), var(--background-dark));
+    padding: 60px 0 30px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.header-content h1 {
+    color: var(--text-primary);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header-content p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.history-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: var(--background-light);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.history-table {
+    width: 100%;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 50px 3fr 2fr 2fr 1fr;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.history-item {
+    display: grid;
+    grid-template-columns: 50px 3fr 2fr 2fr 1fr;
+    padding: 12px 20px;
+    align-items: center;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+    .history-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+.item-index {
+    color: var(--text-secondary);
+}
+
+.item-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.song-image {
+    width: 40px;
+    height: 40px;
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+    .song-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.play-hover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.history-item:hover .play-hover {
+    opacity: 1;
+}
+
+.play-hover i {
+    color: var(--text-primary);
+    font-size: 1.2rem;
+}
+
+.song-title {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.item-artist a, .item-album a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+    .item-artist a:hover, .item-album a:hover {
+        color: var(--primary-color);
+    }
+
+.item-time {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.no-history {
+    text-align: center;
+    padding: 60px 0;
+}
+
+    .no-history i {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 20px;
+    }
+
+    .no-history h2 {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+
+    .no-history p {
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+    }
+
+.discover-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background-color: var(--primary-color);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+    .discover-button:hover {
+        background-color: var(--primary-hover);
+        transform: scale(1.05);
+    }
+
+/* ... Giữ nguyên các CSS rules khác ... */
+
+.table-header {
+    display: grid;
+    grid-template-columns: 50px 3fr 2fr 1fr; /* Đã xóa cột album */
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.history-item {
+    display: grid;
+    grid-template-columns: 50px 3fr 2fr 1fr; /* Đã xóa cột album */
+    padding: 12px 20px;
+    align-items: center;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    cursor: pointer; /* Thêm con trỏ pointer để chỉ ra item có thể click */
+}
+
+    .history-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+/* Thêm style mới cho hover effect */
+.song-details {
+    transition: color 0.3s ease;
+}
+
+.history-item:hover .song-title {
+    color: var(--primary-color);
+}
+
+/* Đảm bảo link nghệ sĩ vẫn hoạt động độc lập */
+.item-artist a {
+    position: relative;
+    z-index: 2;
+}
+
+@media (max-width: 768px) {
+    .table-header, .history-item {
+        grid-template-columns: 40px 3fr 2fr; /* Responsive grid không có cột album */
+    }
+
+    .header-time, .item-time {
+        display: none;
+    }
+}
