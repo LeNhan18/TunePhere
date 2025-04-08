@@ -199,7 +199,7 @@ body {
 }
 
 .bg-success {
-  background: linear-gradient(45deg, #28a745, #34ce57) !important;
+  background: linear-gradient(45deg, #48228f, #391b7e) !important;
   box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
 }
 
@@ -327,7 +327,7 @@ audio {
 }
 
 .btn-success {
-  background: linear-gradient(45deg, #28a745, #34ce57);
+  background: linear-gradient(45deg, #471a99, #541586);
   border: none;
   box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
 }
