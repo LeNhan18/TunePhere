@@ -491,26 +491,21 @@ namespace TunePhere.Controllers
                 return NotFound();
             }
 
-            // Lấy các thể loại phổ biến của nghệ sĩ
-            var genres = artist.Songs
-                .GroupBy(s => s.Genre)
-                .OrderByDescending(g => g.Count())
-                .Select(g => g.Key)
-                .Take(3)
-                .ToList();
-
-            // Tìm nghệ sĩ có cùng thể loại
-            var similarArtists = await _context.Artists
+            // Sử dụng cùng logic với trang Profile để đảm bảo luôn có kết quả
+            var similarArtistsQuery = await _context.Artists
                 .Include(a => a.Songs)
-                .Include(a => a.Followers)
-                .Where(a => a.ArtistId != artist.ArtistId && a.Songs.Any(s => genres.Contains(s.Genre)))
+                .Where(a => a.ArtistId != artist.ArtistId) // Loại trừ nghệ sĩ hiện tại
+                .Select(a => new
+                {
+                    Artist = a,
+                    PlayCount = a.Songs.Sum(s => s.PlayCount)
+                })
+                .OrderByDescending(x => x.PlayCount) // Sắp xếp theo lượt nghe
+                .Take(8) // Lấy nhiều hơn (8 thay vì 4)
                 .ToListAsync();
 
-            // Tính tổng lượt nghe cho mỗi nghệ sĩ
-            var artistPlayCounts = similarArtists.ToDictionary(
-                a => a.ArtistId,
-                a => a.Songs.Sum(s => s.PlayCount)
-            );
+            var similarArtists = similarArtistsQuery.Select(x => x.Artist).ToList();
+            var artistPlayCounts = similarArtistsQuery.ToDictionary(x => x.Artist.ArtistId, x => x.PlayCount);
 
             ViewBag.ArtistPlayCounts = artistPlayCounts;
             ViewBag.OriginalArtist = artist;
