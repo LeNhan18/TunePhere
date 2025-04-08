@@ -549,7 +549,17 @@ namespace TunePhere.Controllers
                     return Forbid();
                 }
 
-                // 1. Xóa tất cả playlist songs liên quan đến bài hát
+                // 1. Xóa tất cả lịch sử nghe nhạc liên quan đến bài hát
+                var playHistories = await _context.PlayHistories
+                    .Where(ph => ph.SongId == id)
+                    .ToListAsync();
+                if (playHistories.Any())
+                {
+                    _context.PlayHistories.RemoveRange(playHistories);
+                    await _context.SaveChangesAsync();
+                }
+
+                // 2. Xóa tất cả playlist songs liên quan đến bài hát
                 var playlistSongs = await _context.PlaylistSongs
                     .Where(ps => ps.SongId == id)
                     .ToListAsync();
@@ -559,7 +569,7 @@ namespace TunePhere.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // 2. Xóa tất cả remixes liên quan đến bài hát (nếu có)
+                // 3. Xóa tất cả remixes liên quan đến bài hát (nếu có)
                 var remixes = await _context.Remixes
                     .Where(r => r.OriginalSongId == id)
                     .ToListAsync();
@@ -569,7 +579,7 @@ namespace TunePhere.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // 3. Xóa tất cả lyrics của bài hát
+                // 4. Xóa tất cả lyrics của bài hát
                 var lyrics = await _context.Lyrics
                     .Where(l => l.SongId == id)
                     .ToListAsync();
@@ -579,7 +589,7 @@ namespace TunePhere.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // 4. Xóa tất cả UserFavoriteSongs liên quan đến bài hát
+                // 5. Xóa tất cả UserFavoriteSongs liên quan đến bài hát
                 var userFavorites = await _context.UserFavoriteSongs
                     .Where(f => f.SongId == id)
                     .ToListAsync();
