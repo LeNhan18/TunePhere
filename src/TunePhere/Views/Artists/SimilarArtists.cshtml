@@ -1,0 +1,97 @@
+@model List<TunePhere.Models.Artists>
+@{
+    ViewData["Title"] = $"Nghệ sĩ tương tự {ViewBag.OriginalArtist.ArtistName}";
+}
+
+<link rel="stylesheet" href="~/css/similar-artist.css" asp-append-version="true" />
+
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="create-header position-relative" style="height: 200px;">
+        <div class="position-absolute w-100 h-100" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(13, 13, 13, 0.9));">
+            <div class="h-100 d-flex align-items-center justify-content-center">
+                <div class="text-center">
+                    <span class="header-label mb-2">KHÁM PHÁ</span>
+                    <h1 class="display-5 fw-bold text-white text-shadow text-glow mt-5">Nghệ Sĩ Tương Tự @ViewBag.OriginalArtist.ArtistName</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <div class="similar-artists-container">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h2 class="mb-0">Nghệ sĩ tương tự</h2>
+                <a href="@Url.Action("Profile", "Artists", new { id = ViewBag.OriginalArtist.ArtistId })" class="btn-back">
+                    <i class="fas fa-arrow-left me-2"></i>Quay lại trang nghệ sĩ
+                </a>
+            </div>
+
+            @if (Model != null && Model.Any())
+            {
+                <div class="artist-grid">
+                    @foreach (var artist in Model)
+                    {
+                        <a href="@Url.Action("Profile", "Artists", new { id = artist.ArtistId })" class="artist-card">
+                            <div class="artist-image">
+                                @if (!string.IsNullOrEmpty(artist.ImageUrl))
+                                {
+                                    <img src="@artist.ImageUrl" alt="@artist.ArtistName" />
+                                }
+                                else
+                                {
+                                    <div class="no-image">
+                                        <i class="fas fa-music"></i>
+                                    </div>
+                                }
+                                <div class="hover-overlay">
+                                    <button class="play-btn">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="artist-info">
+                                <h3>@artist.ArtistName</h3>
+                                <p>
+                                    <i class="fas fa-users"></i> @artist.GetFollowersCount() người theo dõi
+                                </p>
+                                <p>
+                                    <i class="fas fa-music"></i> @artist.Songs.Count bài hát
+                                </p>
+                                <p>
+                                    <i class="fas fa-play"></i> @(ViewBag.ArtistPlayCounts[artist.ArtistId]) lượt nghe
+                                </p>
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="no-artists">
+                    <i class="fas fa-users fa-4x mb-3"></i>
+                    <p>Không tìm thấy nghệ sĩ tương tự với @ViewBag.OriginalArtist.ArtistName</p>
+                    <a href="@Url.Action("Index", "Artists")" class="btn-explore mt-3">
+                        <i class="fas fa-search me-2"></i>Khám phá nghệ sĩ khác
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Thêm hiệu ứng hover cho các card
+            $('.artist-card').hover(
+                function() {
+                    $(this).find('.hover-overlay').fadeIn(200);
+                },
+                function() {
+                    $(this).find('.hover-overlay').fadeOut(200);
+                }
+            );
+        });
+    </script>
+}
