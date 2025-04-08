@@ -372,12 +372,13 @@ a, a:hover, a:focus, a:active, a:visited {
 
 .album-info h3 {
     font-size: 16px;
+    color: #5a3c93;
     margin: 0 0 4px 0;
 }
 
 .album-info p {
     font-size: 14px;
-    color: #b3b3b3;
+    color: #5a3c93;
     margin: 0;
 }
 
@@ -401,7 +402,7 @@ a, a:hover, a:focus, a:active, a:visited {
 }
 
 .song-item:hover {
-    background: #282828;
+    background:     ;
     color: var(--accent-color);
     text-decoration: none;
 }
@@ -509,6 +510,7 @@ a, a:hover, a:focus, a:active, a:visited {
 
 .artist-card:hover .play-overlay {
     opacity: 1;
+    color: blueviolet;
 }
 
 .artist-name {
