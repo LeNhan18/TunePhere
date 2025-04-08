@@ -284,6 +284,7 @@ function playAudio() {
                 audioPlayer.src = encodedUrl;
                 audioPlayer.type = mimeType;
                 audioPlayer.load();
+                logPlayHistory(window.songData.songId);
                 playWithErrorHandling();
             })
             .catch(error => {
@@ -1303,3 +1304,45 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(() => warningEl.remove(), 8000);
     }
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Lấy nút play hoặc trình phát nhạc
+    const playButton = document.querySelector('.play-button') || document.querySelector('.play-pause-button');
+
+    if (playButton) {
+        playButton.addEventListener('click', function () {
+            // Lấy ID bài hát từ URL hoặc từ data attribute
+            const songId = window.location.pathname.split('/').pop();
+            logPlayHistory(songId);
+        });
+    }
+
+    // Tự động ghi lại lịch sử khi trang chi tiết bài hát được tải
+    if (window.location.pathname.includes('/Songs/Details/')) {
+        const songId = window.location.pathname.split('/').pop();
+        logPlayHistory(songId);
+    }
+});
+
+function logPlayHistory(songId) {
+    console.log("Đang gửi songId:", songId);
+
+    fetch('/PlayHistories/AddToHistory', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.getElementById('RequestVerificationToken').value
+        },
+        body: JSON.stringify({ songId: songId })
+    })
+        .then(response => {
+            console.log("Trạng thái phản hồi:", response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log("Dữ liệu phản hồi:", data);
+        })
+        .catch(error => {
+            console.error('Lỗi khi lưu lịch sử:', error);
+        });
+}
