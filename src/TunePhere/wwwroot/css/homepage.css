@@ -23,14 +23,14 @@ body {
 }
 
 html, body {
-    scrollbar-width: none;  /* Firefox */
-    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
     overflow-x: hidden;
 }
 
-html::-webkit-scrollbar, body::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari, Opera */
-}
+    html::-webkit-scrollbar, body::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+    }
 
 .main-container {
     display: flex;
@@ -272,7 +272,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background-color: var(--primary-color);
+    background-color: var(--primary-color); /* #8B5CF6 */
     border: none;
     color: var(--text-color);
     font-size: 18px;
@@ -287,7 +287,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 }
 
     .play-btn:hover {
-        background-color: var(--primary-dark);
+        background-color: var(--primary-dark); /* #7C3AED */
         transform: scale(1.05) translateY(0) !important;
     }
 
@@ -311,27 +311,28 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 }
 
 .btn-secondary {
-    background-color: #50187e; /* Màu xanh giống Spotify */
+    background-color: #1DB954; /* Màu xanh giống Spotify */
     border: none;
 }
 
     .btn-secondary:hover {
-        background-color: #754da3; /* Màu xanh đậm hơn khi hover */
+        background-color: #1AA34A; /* Màu xanh đậm hơn khi hover */
     }
 
 body {
-    background-color: #121212; /* Màu nền tối */
-    color: #ffffff; /* Màu chữ sáng */
+    background-color: #121212;
+    color: #ffffff;
 }
 
 .modal-content {
-    background-color: #1e1e1e; /* Màu nền modal tối */
-    color: #ffffff; /* Màu chữ trong modal sáng */
+    background-color: #1e1e1e;
+    color: #ffffff;
 }
 
 .modal-header, .modal-body {
-    border-color: #333; /* Màu viền cho modal */
+    border-color: #333;
 }
+
 /* Responsive */
 @media (max-width: 1200px) {
     .music-grid {
@@ -745,7 +746,7 @@ body {
 
 .play-btn:hover {
     transform: scale(1.1) !important;
-    background: white;
+    background: var(--primary-dark); /* #7C3AED */
 }
 
 .song-title {

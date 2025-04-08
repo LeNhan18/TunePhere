@@ -124,7 +124,6 @@
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     allowfullscreen>
                             </iframe>
-
                         </div>
                     }
                 </div>
@@ -239,13 +238,11 @@
                 }
             </div>
         </section>
-        
 
         <!-- Bảng xếp hạng nổi bật -->
         <section class="music-section">
             <h2 class="section-title">Bảng xếp hạng nổi bật</h2>
             <div class="music-grid">
-
                 @for (int i = 0; i < 8; i++)
                 {
                     <div class="chart-card">
@@ -364,7 +361,7 @@
         audioPlayer.addEventListener('timeupdate', () => {
             const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
             seekBar.value = percent;
-            seekBar.style.background = `linear-gradient(to right, #1ed760 ${percent}%, #535353 ${percent}%)`;
+            seekBar.style.background = `linear-gradient(to right, #8B5CF6 ${percent}%, #535353 ${percent}%)`;
 
             document.getElementById('currentTime').textContent = formatTime(audioPlayer.currentTime);
             document.getElementById('duration').textContent = formatTime(audioPlayer.duration);
@@ -548,34 +545,28 @@
             videoId = url.split("youtu.be/")[1];
         }
 
-        // Tạo URL nhúng cho video với mute=1 để tắt âm thanh
         const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=1&showinfo=0&rel=0&modestbranding=1&fs=1`;
 
-        // Tìm container video trong featured playlist
         const featuredVideo = document.querySelector('.featured-playlist .video-container iframe');
         if (featuredVideo) {
             featuredVideo.src = embedUrl;
         }
 
-        // Cập nhật thông tin bài hát trong featured playlist
         const playlistTitle = document.querySelector('.playlist-title');
         const playlistDescription = document.querySelector('.playlist-description');
 
-        // Lấy thông tin từ card nếu có
         if (card instanceof HTMLElement) {
             const title = card.dataset.title;
             const artist = card.dataset.artist;
             if (playlistTitle) playlistTitle.textContent = title;
             if (playlistDescription) playlistDescription.textContent = `By ${artist}`;
         }
-        // Nếu không có card, sử dụng currentSong
         else if (currentSong) {
             if (playlistTitle) playlistTitle.textContent = currentSong.title;
             if (playlistDescription) playlistDescription.textContent = `By ${currentSong.artist}`;
         }
     }
 
-    // Cập nhật onclick cho nút video trong thanh player
     document.getElementById('videoButton').onclick = function() {
         if (currentSong?.videoUrl) {
             showVideo(currentSong.videoUrl);
@@ -583,235 +574,7 @@
     };
 </script>
 
-@* <!-- Add this CSS to your homepage.css file --> *@
-@* <style> *@
-@* .now-playing-bar { *@
-@*     position: fixed; *@
-@*     bottom: 0; *@
-@*     left: 0; *@
-@*     right: 0; *@
-@*     height: 90px; *@
-@*     background: linear-gradient(to right, #ae2896, #509bf5); *@
-@*     padding: 16px; *@
-@*     display: flex; *@
-@*     justify-content: space-between; *@
-@*     align-items: center; *@
-@*     z-index: 1000; *@
-@*     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5); *@
-@* } *@
-
-@* .now-playing-left { *@
-@*     display: flex; *@
-@*     align-items: center; *@
-@*     width: 30%; *@
-@*     min-width: 180px; *@
-@* } *@
-
-@* .now-playing-cover { *@
-@*     width: 56px; *@
-@*     height: 56px; *@
-@*     margin-right: 16px; *@
-@*     border-radius: 4px; *@
-@*     overflow: hidden; *@
-@*     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); *@
-@* } *@
-
-@* .now-playing-cover img { *@
-@*     width: 100%; *@
-@*     height: 100%; *@
-@*     object-fit: cover; *@
-@* } *@
-
-@* .track-info { *@
-@*     display: flex; *@
-@*     flex-direction: column; *@
-@*     max-width: calc(100% - 72px); *@
-@* } *@
-
-@* .track-info .song-name { *@
-@*     color: white; *@
-@*     font-size: 14px; *@
-@*     font-weight: 500; *@
-@*     margin-bottom: 4px; *@
-@*     white-space: nowrap; *@
-@*     overflow: hidden; *@
-@*     text-overflow: ellipsis; *@
-@* } *@
-
-@* .track-info .artist-name { *@
-@*     color: rgba(255, 255, 255, 0.7); *@
-@*     font-size: 12px; *@
-@*     white-space: nowrap; *@
-@*     overflow: hidden; *@
-@*     text-overflow: ellipsis; *@
-@* } *@
-
-@* .now-playing-center { *@
-@*     flex: 1; *@
-@*     max-width: 722px; *@
-@*     display: flex; *@
-@*     flex-direction: column; *@
-@*     align-items: center; *@
-@*     padding: 0 20px; *@
-@* } *@
-
-@* .player-controls { *@
-@*     display: flex; *@
-@*     align-items: center; *@
-@*     gap: 20px; *@
-@*     margin-bottom: 8px; *@
-@* } *@
-
-@* .control-button { *@
-@*     background: none; *@
-@*     border: none; *@
-@*     color: white; *@
-@*     cursor: pointer; *@
-@*     padding: 8px; *@
-@*     transition: transform 0.2s; *@
-@* } *@
-
-@* .control-button:hover { *@
-@*     transform: scale(1.1); *@
-@* } *@
-
-@* .play-pause-btn { *@
-@*     width: 40px; *@
-@*     height: 40px; *@
-@*     border-radius: 50%; *@
-@*     background: white; *@
-@*     color: #000; *@
-@*     display: flex; *@
-@*     align-items: center; *@
-@*     justify-content: center; *@
-@* } *@
-
-@* .play-pause-btn:hover { *@
-@*     transform: scale(1.1); *@
-@*     background: #f0f0f0; *@
-@* } *@
-
-@* .playback-bar { *@
-@*     width: 100%; *@
-@*     display: flex; *@
-@*     align-items: center; *@
-@*     gap: 8px; *@
-@* } *@
-
-@* .time { *@
-@*     color: rgba(255, 255, 255, 0.7); *@
-@*     font-size: 12px; *@
-@*     min-width: 40px; *@
-@*     text-align: center; *@
-@* } *@
-
-@* .progress-bar { *@
-@*     flex: 1; *@
-@*     position: relative; *@
-@*     height: 4px; *@
-@* } *@
-
-@* .seek-bar { *@
-@*     width: 100%; *@
-@*     height: 4px; *@
-@*     -webkit-appearance: none; *@
-@*     background: transparent; *@
-@*     position: relative; *@
-@*     z-index: 2; *@
-@*     cursor: pointer; *@
-@* } *@
-
-@* .progress-bar-bg { *@
-@*     position: absolute; *@
-@*     top: 50%; *@
-@*     left: 0; *@
-@*     right: 0; *@
-@*     height: 4px; *@
-@*     background: rgba(255, 255, 255, 0.3); *@
-@*     border-radius: 2px; *@
-@*     transform: translateY(-50%); *@
-@* } *@
-
-@* .now-playing-right { *@
-@*     width: 30%; *@
-@*     min-width: 180px; *@
-@*     display: flex; *@
-@*     align-items: center; *@
-@*     justify-content: flex-end; *@
-@*     gap: 8px; *@
-@* } *@
-
-@* .volume-bar-container { *@
-@*     width: 100px; *@
-@*     position: relative; *@
-@*     height: 4px; *@
-@* } *@
-
-@* .volume-bar { *@
-@*     width: 100%; *@
-@*     height: 4px; *@
-@*     -webkit-appearance: none; *@
-@*     background: transparent; *@
-@*     position: relative; *@
-@*     z-index: 2; *@
-@*     cursor: pointer; *@
-@* } *@
-
-@* .volume-bar-bg { *@
-@*     position: absolute; *@
-@*     top: 50%; *@
-@*     left: 0; *@
-@*     right: 0; *@
-@*     height: 4px; *@
-@*     background: rgba(255, 255, 255, 0.3); *@
-@*     border-radius: 2px; *@
-@*     transform: translateY(-50%); *@
-@* } *@
-
-@* input[type="range"] { *@
-@*     -webkit-appearance: none; *@
-@*     background: transparent; *@
-@* } *@
-
-@* input[type="range"]::-webkit-slider-thumb { *@
-@*     -webkit-appearance: none; *@
-@*     width: 12px; *@
-@*     height: 12px; *@
-@*     background: white; *@
-@*     border-radius: 50%; *@
-@*     cursor: pointer; *@
-@*     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); *@
-@*     margin-top: -4px; *@
-@* } *@
-
-@* input[type="range"]::-webkit-slider-runnable-track { *@
-@*     width: 100%; *@
-@*     height: 4px; *@
-@*     background: rgba(255, 255, 255, 0.3); *@
-@*     border-radius: 2px; *@
-@*     cursor: pointer; *@
-@* } *@
-
-@* @media (max-width: 768px) { *@
-@*     .now-playing-bar { *@
-@*         padding: 8px; *@
-@*     } *@
-
-@*     .now-playing-left { *@
-@*         width: 40%; *@
-@*     } *@
-
-@*     .now-playing-right { *@
-@*         width: 20%; *@
-@*     } *@
-
-@*     .volume-bar-container { *@
-@*         display: none; *@
-@*     } *@
-@* } *@
-</style>
-
-<style>
+    <style >
     /* CSS để thêm vào homepage.css */
     .sidebar-content a.library-item {
         text-decoration: none;
@@ -823,9 +586,27 @@
         transition: all 0.3s ease;
     }
 
-        .sidebar-content a.library-item:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            text-decoration: none;
-        }
+    .song-name:hover{
+        color: #fff;
+    }
+
+    .sidebar-content a.library-item:hover {
+        background-color: rgba(128, 0, 128, 0.1); /* Màu tím nhạt */
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .btn:hover {
+        background-color: #4B0082; /* Màu tím */
+        color: #fff;
+    }
+
+    .play-btn:hover, .video-btn:hover, .add-button:hover, .toggle-btn:hover, .play-button:hover {
+        background-color: #4B0082; /* Màu tím */
+        color: #fff;
+    }
+
+    .play-button:hover {
+        color: #4B0082;
+    }
 </style>
