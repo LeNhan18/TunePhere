@@ -5,6 +5,46 @@
 
 <link rel="stylesheet" href="~/css/user-profile.css">
 
+<style>
+    .profile-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 1rem;
+    }
+
+    .tab {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        color: #666;
+    }
+
+    .tab:hover {
+        color: #fff;
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .tab.active {
+        color: #fff;
+        border-bottom: 2px solid #fff;
+        background-color: transparent;
+    }
+
+    .tab-content {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .tab-content.active {
+        display: block;
+        opacity: 1;
+    }
+</style>
+
 <div class="profile-container">
     <div class="profile-header">
         <div class="profile-cover-photo">
@@ -39,13 +79,16 @@
                 <h1 class="profile-name">@Model.FullName</h1>
                 <div class="profile-stats">
                     <div class="stat">
-                        <span class="stat-count">0</span> Playlist
+                        <span class="stat-count">@Model.GetPlaylistCount()</span> Playlist
                     </div>
                     <div class="stat">
-                        <span class="stat-count">0</span> Đang theo dõi
+                        <span class="stat-count">@Model.GetFollowingCount()</span> Đang theo dõi
                     </div>
                     <div class="stat">
-                        <span class="stat-count">0</span> Người theo dõi
+                        <span class="stat-count">@Model.GetFollowersCount()</span> Người theo dõi
+                    </div>
+                    <div class="stat">
+                        <span class="stat-count">@Model.GetFollowedArtistsCount()</span> Nghệ sĩ yêu thích
                     </div>
                 </div>
             </div>
@@ -72,51 +115,157 @@
     </div>
     
     <div class="profile-tabs">
-        <div class="tab active">Tổng quan</div>
-        <div class="tab">Playlist</div>
-        <div class="tab">Bài hát đã lưu</div>
-        <div class="tab">Nghệ sĩ đã theo dõi</div>
+        <div class="tab active" data-tab="overview">Tổng quan</div>
+        <div class="tab" data-tab="playlists">Playlist</div>
+        <div class="tab" data-tab="favorites">Bài hát đã thích</div>
+        <div class="tab" data-tab="artists">Nghệ sĩ đã theo dõi</div>
     </div>
     
     <div class="profile-content">
-        <div class="section recently-played">
-            <div class="section-header">
-                <h2>Phát gần đây</h2>
-                <a href="#" class="see-all">Xem tất cả</a>
-            </div>
-            <div class="music-grid">
-                @for (int i = 0; i < 6; i++)
-                {
-                    <div class="music-card">
-                        <div class="music-thumbnail">
-                            <img src="~/images/music-placeholder.jpg" alt="Music" />
-                            <div class="play-button">
-                                <i class="fas fa-play"></i>
+        <div class="tab-content active" id="overview">
+            <div class="section recently-played">
+                <div class="section-header">
+                    <h2>Phát gần đây</h2>
+                    <a href="#" class="see-all">Xem tất cả</a>
+                </div>
+                <div class="music-grid">
+                    @for (int i = 0; i < 6; i++)
+                    {
+                        <div class="music-card">
+                            <div class="music-thumbnail">
+                                <img src="~/images/music-placeholder.jpg" alt="Music" />
+                                <div class="play-button">
+                                    <i class="fas fa-play"></i>
+                                </div>
                             </div>
+                            <h3 class="music-title">Bài hát mẫu</h3>
+                            <p class="music-artist">Nghệ sĩ</p>
                         </div>
-                        <h3 class="music-title">Bài hát mẫu</h3>
-                        <p class="music-artist">Nghệ sĩ</p>
-                    </div>
-                }
+                    }
+                </div>
             </div>
         </div>
-        
-        <div class="section top-artists">
-            <div class="section-header">
-                <h2>Nghệ sĩ yêu thích</h2>
-                <a href="#" class="see-all">Xem tất cả</a>
-            </div>
-            <div class="artist-grid">
-                @for (int i = 0; i < 6; i++)
-                {
-                    <div class="artist-card">
-                        <div class="artist-thumbnail">
-                            <img src="~/images/artist-placeholder.jpg" alt="Artist" />
+
+        <div class="tab-content" id="playlists">
+            <div class="section playlists">
+                <div class="section-header">
+                    <h2>Playlist của bạn</h2>
+                    <a href="/Playlists/Create" class="create-btn">
+                        <i class="fas fa-plus"></i> Tạo playlist mới
+                    </a>
+                </div>
+                <div class="playlist-grid">
+                    @if (Model.Playlists != null && Model.Playlists.Any())
+                    {
+                        foreach (var playlist in Model.Playlists.Where(p => p.IsPublic).Take(6))
+                        {
+                            <div class="playlist-card">
+                                <div class="playlist-thumbnail">
+                                    @if (!string.IsNullOrEmpty(playlist.ImageUrl))
+                                    {
+                                        <img src="@playlist.ImageUrl" alt="@playlist.Title" />
+                                    }
+                                    else
+                                    {
+                                        <div class="default-playlist-thumbnail">
+                                            <i class="fas fa-music"></i>
+                                        </div>
+                                    }
+                                    <div class="play-button">
+                                        <i class="fas fa-play"></i>
+                                    </div>
+                                </div>
+                                <h3 class="playlist-title">@playlist.Title</h3>
+                                <p class="playlist-info">@playlist.PlaylistSongs.Count bài hát</p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-content">
+                            <i class="fas fa-music"></i>
+                            <p>Bạn chưa có playlist nào</p>
+                            <a href="/Playlists/Create" class="create-btn">Tạo playlist đầu tiên</a>
                         </div>
-                        <h3 class="artist-name">Nghệ sĩ mẫu</h3>
-                        <p class="artist-type">Nghệ sĩ</p>
-                    </div>
-                }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="favorites">
+            <div class="section favorites">
+                <div class="section-header">
+                    <h2>Bài hát yêu thích</h2>
+                </div>
+                <div class="music-grid">
+                    @if (Model.FavoriteSongs != null && Model.FavoriteSongs.Any())
+                    {
+                        foreach (var favorite in Model.FavoriteSongs.Take(6))
+                        {
+                            <div class="music-card">
+                                <div class="music-thumbnail">
+                                    @if (!string.IsNullOrEmpty(favorite.Song.ImageUrl))
+                                    {
+                                        <img src="@favorite.Song.ImageUrl" alt="@favorite.Song.Title" />
+                                    }
+                                    else
+                                    {
+                                        <img src="~/images/music-placeholder.jpg" alt="@favorite.Song.Title" />
+                                    }
+                                    <div class="play-button">
+                                        <i class="fas fa-play"></i>
+                                    </div>
+                                </div>
+                                <h3 class="music-title">@favorite.Song.Title</h3>
+                                <p class="music-artist">@favorite.Song.Artists.ArtistName</p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-content">
+                            <i class="fas fa-heart"></i>
+                            <p>Bạn chưa có bài hát yêu thích nào</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="artists">
+            <div class="section artists">
+                <div class="section-header">
+                    <h2>Nghệ sĩ yêu thích</h2>
+                </div>
+                <div class="artist-grid">
+                    @if (Model.FollowedArtists != null && Model.FollowedArtists.Any())
+                    {
+                        foreach (var artist in Model.FollowedArtists.Take(6))
+                        {
+                            <div class="artist-card">
+                                <div class="artist-thumbnail">
+                                    @if (!string.IsNullOrEmpty(artist.ImageUrl))
+                                    {
+                                        <img src="@artist.ImageUrl" alt="@artist.ArtistName" />
+                                    }
+                                    else
+                                    {
+                                        <img src="~/images/artist-placeholder.jpg" alt="@artist.ArtistName" />
+                                    }
+                                </div>
+                                <h3 class="artist-name">@artist.ArtistName</h3>
+                                <p class="artist-type">Nghệ sĩ</p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-content">
+                            <i class="fas fa-user-music"></i>
+                            <p>Bạn chưa theo dõi nghệ sĩ nào</p>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -190,10 +339,47 @@
                 <button type="submit" class="save-btn">Lưu</button>
             </div>
         </form>
-</div>
+    </div>
 </div>
 
 <script src="~/js/user-profile.js"></script>
 <script src="~/js/navigation.js"></script>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Xử lý chuyển tab
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Xóa active class từ tất cả các tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // Thêm active class vào tab được chọn
+                    tab.classList.add('active');
+
+                    // Ẩn tất cả các tab content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    // Hiện tab content tương ứng
+                    const tabId = tab.getAttribute('data-tab');
+                    const selectedContent = document.getElementById(tabId);
+                    if (selectedContent) {
+                        selectedContent.classList.add('active');
+                    }
+                });
+            });
+
+            // Hiển thị tab mặc định (overview)
+            const defaultTab = document.querySelector('.tab[data-tab="overview"]');
+            if (defaultTab) {
+                defaultTab.click();
+            }
+        });
+    </script>
+}
 
 
