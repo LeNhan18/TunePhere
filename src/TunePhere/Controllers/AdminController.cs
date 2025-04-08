@@ -268,7 +268,7 @@ namespace TunePhere.Controllers
 
                 if (result.Succeeded)
                 {
-                    // Gán vai trò Administrator
+                    // Gán vai tròng Administrator
                     await _userManager.AddToRoleAsync(admin, "Administrator");
                     return View("AdminCreated");
                 }
@@ -623,6 +623,226 @@ namespace TunePhere.Controllers
             // TODO: Implement audio duration detection
             // Tạm thời return giá trị mặc định
             return TimeSpan.FromMinutes(3);
+        }
+
+        // GET: /Admin/Playlists
+        [HttpGet]
+        public async Task<IActionResult> Playlists()
+        {
+            try
+            {
+                var playlists = await _playlistRepository.GetAllAsync();
+                ViewBag.Users = await _userManager.Users.ToListAsync();
+                return View(playlists);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách playlist: " + ex.Message;
+                return View(new List<Playlist>());
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetPlaylist(int id)
+        {
+            try
+            {
+                var playlist = await _playlistRepository.GetByIdAsync(id);
+                if (playlist == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy playlist" });
+                }
+
+                var user = await _userManager.FindByIdAsync(playlist.UserId);
+                var songs = playlist.PlaylistSongs?.Select(ps => ps.Song).ToList() ?? new List<Song>();
+
+                return Json(new
+                {
+                    success = true,
+                    id = playlist.PlaylistId,
+                    title = playlist.Title,
+                    description = playlist.Description ?? "",
+                    imageUrl = playlist.ImageUrl,
+                    isPublic = playlist.IsPublic,
+                    userId = playlist.UserId,
+                    userName = user?.FullName ?? "Không xác định",
+                    songCount = songs.Count,
+                    songs = songs.Select(s => new {
+                        id = s.SongId,
+                        title = s.Title,
+                        artistName = s.Artists?.ArtistName ?? "Không xác định",
+                        duration = s.Duration.ToString(@"mm\:ss")
+                    }).ToList()
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePlaylist(
+            string title,
+            string description,
+            string userId,
+            IFormFile image,
+            bool isPublic = true)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(title))
+                {
+                    TempData["Error"] = "Vui lòng nhập tên playlist";
+                    return RedirectToAction(nameof(Playlists));
+                }
+
+                // Xử lý upload ảnh
+                string imageUrl = await UploadFile(image, "images/playlists");
+
+                var playlist = new Playlist
+                {
+                    Title = title,
+                    Description = description ?? "",
+                    UserId = userId,
+                    ImageUrl = imageUrl,
+                    IsPublic = isPublic,
+                    CreatedAt = DateTime.Now,
+                };
+
+                await _playlistRepository.AddAsync(playlist);
+                TempData["Success"] = "Thêm playlist thành công";
+                return RedirectToAction(nameof(Playlists));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Có lỗi xảy ra khi thêm playlist: " + ex.Message;
+                return RedirectToAction(nameof(Playlists));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditPlaylist(
+            int id,
+            string title,
+            string description,
+            bool isPublic,
+            IFormFile? image)
+        {
+            try
+            {
+                var playlist = await _playlistRepository.GetByIdAsync(id);
+                if (playlist == null)
+                {
+                    TempData["Error"] = "Không tìm thấy playlist";
+                    return RedirectToAction(nameof(Playlists));
+                }
+
+                // Cập nhật thông tin cơ bản
+                playlist.Title = title;
+                playlist.Description = description ?? "";
+                playlist.IsPublic = isPublic;
+                playlist.CreatedAt = DateTime.Now;
+
+                // Xử lý upload ảnh mới nếu có
+                if (image != null)
+                {
+                    DeleteFile(playlist.ImageUrl);
+                    playlist.ImageUrl = await UploadFile(image, "images/playlists");
+                }
+
+                await _playlistRepository.UpdateAsync(playlist);
+                TempData["Success"] = "Cập nhật playlist thành công";
+                return RedirectToAction(nameof(Playlists));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Có lỗi xảy ra khi cập nhật playlist: " + ex.Message;
+                return RedirectToAction(nameof(Playlists));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeletePlaylist(int id)
+        {
+            try
+            {
+                var playlist = await _playlistRepository.GetByIdAsync(id);
+                if (playlist == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy playlist" });
+                }
+
+                // Xóa file ảnh
+                DeleteFile(playlist.ImageUrl);
+
+                await _playlistRepository.DeleteAsync(id);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa playlist: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddSongToPlaylist(int playlistId, int songId)
+        {
+            try
+            {
+                var playlist = await _playlistRepository.GetByIdAsync(playlistId);
+                if (playlist == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy playlist" });
+                }
+
+                await _playlistRepository.AddSongToPlaylistAsync(playlistId, songId);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra khi thêm bài hát vào playlist: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveSongFromPlaylist(int playlistId, int songId)
+        {
+            try
+            {
+                var playlist = await _playlistRepository.GetByIdAsync(playlistId);
+                if (playlist == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy playlist" });
+                }
+
+                await _playlistRepository.RemoveSongFromPlaylistAsync(playlistId, songId);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa bài hát khỏi playlist: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReorderPlaylistSongs(int playlistId, List<int> songIds)
+        {
+            try
+            {
+                var playlist = await _playlistRepository.GetByIdAsync(playlistId);
+                if (playlist == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy playlist" });
+                }
+
+                await _playlistRepository.ReorderPlaylistSongsAsync(playlistId, songIds);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra khi sắp xếp lại bài hát: " + ex.Message });
+            }
         }
     }
 
