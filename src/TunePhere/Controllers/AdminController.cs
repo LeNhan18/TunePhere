@@ -23,6 +23,7 @@ namespace TunePhere.Controllers
         private readonly IPlaylistRepository _playlistRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IArtistRepository _artistRepository;
+        private readonly AppDbContext _context;
 
         public AdminController(
             UserManager<AppUser> userManager, 
@@ -30,7 +31,8 @@ namespace TunePhere.Controllers
             ISongRepository songRepository,
             IPlaylistRepository playlistRepository,
             IWebHostEnvironment webHostEnvironment,
-            IArtistRepository artistRepository)
+            IArtistRepository artistRepository,
+            AppDbContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -38,6 +40,7 @@ namespace TunePhere.Controllers
             _playlistRepository = playlistRepository;
             _webHostEnvironment = webHostEnvironment;
             _artistRepository = artistRepository;
+            _context = context;
         }
 
         // GET: /Admin
@@ -393,17 +396,109 @@ namespace TunePhere.Controllers
                     return Json(new { success = false, message = "Không tìm thấy người dùng" });
                 }
 
-                var result = await _userManager.DeleteAsync(user);
-                if (result.Succeeded)
+                // Kiểm tra xem user có phải là admin không
+                if (await _userManager.IsInRoleAsync(user, "Administrator"))
                 {
-                    return Json(new { success = true });
+                    return Json(new { success = false, message = "Không thể xóa tài khoản Administrator" });
                 }
 
-                return Json(new { success = false, message = string.Join(", ", result.Errors.Select(e => e.Description)) });
+                // Xóa các mối quan hệ trước
+                using var transaction = await _context.Database.BeginTransactionAsync();
+
+                try
+                {
+                    // Xóa UserPreferences
+                    var preferences = await _context.UserPreferences.Where(p => p.UserId == id).ToListAsync();
+                    _context.UserPreferences.RemoveRange(preferences);
+
+                    // Xóa PlayHistory
+                    var playHistory = await _context.PlayHistories.Where(p => p.UserId == id).ToListAsync();
+                    _context.PlayHistories.RemoveRange(playHistory);
+
+                    // Xóa UserFavoriteSongs
+                    var favoriteSongs = await _context.UserFavoriteSongs.Where(f => f.UserId == id).ToListAsync();
+                    _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
+
+                    // Xóa UserFollowers
+                    var followers = await _context.UserFollowers.Where(f => f.FollowerId == id || f.FollowingId == id).ToListAsync();
+                    _context.UserFollowers.RemoveRange(followers);
+
+                    // Xóa ArtistFollowers
+                    var artistFollowers = await _context.ArtistFollowers.Where(f => f.UserId == id).ToListAsync();
+                    _context.ArtistFollowers.RemoveRange(artistFollowers);
+
+                    // Xóa ListeningRoomParticipants
+                    var roomParticipants = await _context.ListeningRoomParticipants.Where(p => p.UserId == id).ToListAsync();
+                    _context.ListeningRoomParticipants.RemoveRange(roomParticipants);
+
+                    // Xóa ListeningRooms (nếu user là creator)
+                    var rooms = await _context.ListeningRooms.Where(r => r.CreatorId == id).ToListAsync();
+                    _context.ListeningRooms.RemoveRange(rooms);
+
+                    // Xóa Playlists và PlaylistSongs
+                    var playlists = await _context.Playlists.Where(p => p.UserId == id).ToListAsync();
+                    foreach (var playlist in playlists)
+                    {
+                        var playlistSongs = await _context.PlaylistSongs.Where(ps => ps.PlaylistId == playlist.PlaylistId).ToListAsync();
+                        _context.PlaylistSongs.RemoveRange(playlistSongs);
+                    }
+                    _context.Playlists.RemoveRange(playlists);
+
+                    // Xóa Remixes
+                    var remixes = await _context.Remixes.Where(r => r.UserId == id).ToListAsync();
+                    _context.Remixes.RemoveRange(remixes);
+
+                    // Xóa ChatMessages
+                    var chatMessages = await _context.ChatMessages.Where(m => m.SenderId == id).ToListAsync();
+                    _context.ChatMessages.RemoveRange(chatMessages);
+
+                    // Xóa Artists và các bài hát, album liên quan
+                    var artists = await _context.Artists.Where(a => a.userId == id).ToListAsync();
+                    foreach (var artist in artists)
+                    {
+                        // Xóa Songs
+                        var songs = await _context.Songs.Where(s => s.ArtistId == artist.ArtistId).ToListAsync();
+                        foreach (var song in songs)
+                        {
+                            // Xóa Lyrics
+                            var lyrics = await _context.Lyrics.Where(l => l.SongId == song.SongId).ToListAsync();
+                            _context.Lyrics.RemoveRange(lyrics);
+
+                            // Xóa PlaylistSongs liên quan
+                            var songPlaylists = await _context.PlaylistSongs.Where(ps => ps.SongId == song.SongId).ToListAsync();
+                            _context.PlaylistSongs.RemoveRange(songPlaylists);
+                        }
+                        _context.Songs.RemoveRange(songs);
+
+                        // Xóa Albums
+                        var albums = await _context.Albums.Where(a => a.ArtistId == artist.ArtistId).ToListAsync();
+                        _context.Albums.RemoveRange(albums);
+                    }
+                    _context.Artists.RemoveRange(artists);
+
+                    // Lưu các thay đổi
+                    await _context.SaveChangesAsync();
+
+                    // Xóa user
+                    var result = await _userManager.DeleteAsync(user);
+                    if (result.Succeeded)
+                    {
+                        await transaction.CommitAsync();
+                        return Json(new { success = true });
+                    }
+
+                    await transaction.RollbackAsync();
+                    return Json(new { success = false, message = string.Join(", ", result.Errors.Select(e => e.Description)) });
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return Json(new { success = false, message = "Có lỗi xảy ra khi xóa người dùng: " + ex.Message });
+                }
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa người dùng" });
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa người dùng: " + ex.Message });
             }
         }
 
@@ -573,12 +668,47 @@ namespace TunePhere.Controllers
                     return Json(new { success = false, message = "Không tìm thấy bài hát" });
                 }
 
-                // Xóa file ảnh và audio
-                DeleteFile(song.ImageUrl);
-                DeleteFile(song.FileUrl);
+                using var transaction = await _context.Database.BeginTransactionAsync();
 
-                await _songRepository.DeleteAsync(id);
-                return Json(new { success = true });
+                try
+                {
+                    // Cập nhật PlayHistories - set SongId thành null
+                    var playHistories = await _context.PlayHistories.Where(p => p.SongId == id).ToListAsync();
+                    foreach (var history in playHistories)
+                    {
+                        history.SongId = 0;
+                    }
+
+                    // Xóa PlaylistSongs liên quan
+                    var playlistSongs = await _context.PlaylistSongs.Where(ps => ps.SongId == id).ToListAsync();
+                    _context.PlaylistSongs.RemoveRange(playlistSongs);
+
+                    // Xóa Lyrics liên quan
+                    var lyrics = await _context.Lyrics.Where(l => l.SongId == id).ToListAsync();
+                    _context.Lyrics.RemoveRange(lyrics);
+
+                    // Xóa UserFavoriteSongs liên quan
+                    var favoriteSongs = await _context.UserFavoriteSongs.Where(f => f.SongId == id).ToListAsync();
+                    _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
+
+                    // Lưu các thay đổi
+                    await _context.SaveChangesAsync();
+
+                    // Xóa file ảnh và audio
+                    DeleteFile(song.ImageUrl);
+                    DeleteFile(song.FileUrl);
+
+                    // Xóa bài hát
+                    await _songRepository.DeleteAsync(id);
+
+                    await transaction.CommitAsync();
+                    return Json(new { success = true });
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return Json(new { success = false, message = "Có lỗi xảy ra khi xóa bài hát: " + ex.Message });
+                }
             }
             catch (Exception ex)
             {

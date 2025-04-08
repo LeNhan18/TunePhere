@@ -10,7 +10,7 @@ namespace TunePhere.Models
         [Key]
         public int RoomId { get; set; } // Khóa chính
 
-        public string CreatorId { get; set; }
+        public string? CreatorId { get; set; }
 
         [ForeignKey("CreatorId")]
         public AppUser? Creator { get; set; } // Quan hệ với User
