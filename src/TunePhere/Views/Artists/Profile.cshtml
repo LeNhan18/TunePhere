@@ -141,7 +141,7 @@
         <div class="profile-section">
             <div class="section-header">
                 <h2>Nghệ sĩ tương tự</h2>
-                <a href="@Url.Action("Index", "Artists")" class="view-all">Xem tất cả</a>
+                <a href="@Url.Action("SimilarArtists", "Artists", new { id = Model.ArtistId })" class="view-all">Xem tất cả</a>
             </div>
             <div class="artists-grid">
                 @foreach (var artist in ViewBag.SimilarArtists)
