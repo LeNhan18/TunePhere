@@ -68,7 +68,7 @@
                             <button type="submit" class="btn-delete">
                                 <i class="fas fa-trash-alt me-2"></i>Xóa album
                             </button>
-                            <a asp-action="Index" class="btn-cancel">
+                            <a href="@Url.Action("Index", "Albums", new { artistId = Model.ArtistId })" class="btn-cancel">
                                 <i class="fas fa-arrow-left me-2"></i>Quay lại
                             </a>
                         </div>
