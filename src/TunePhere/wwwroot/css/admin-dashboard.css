@@ -121,6 +121,76 @@ body {
     padding: 20px;
 }
 
+/* Màu chữ cho biểu đồ và tiêu đề */
+.card-header h6 {
+    color: var(--text-primary) !important;
+    font-weight: 600;
+    font-size: 1.1rem;
+    opacity: 1 !important;
+}
+
+.chart-title {
+    color: var(--text-primary) !important;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.chart-axis-label {
+    color: var(--text-primary) !important;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+.chart-value {
+    color: var(--text-primary) !important;
+    font-weight: 500;
+}
+
+.stats-table {
+    color: var(--text-primary) !important;
+}
+
+.stats-number {
+    color: var(--text-primary) !important;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.stats-label {
+    color: var(--text-secondary) !important;
+}
+
+/* Thông báo không có dữ liệu */
+.no-data-message,
+.text-center.py-4,
+.text-center.py-5 {
+    color: var(--text-primary) !important;
+    opacity: 0.9;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.text-center.py-4 i,
+.text-center.py-5 i {
+    color: var(--accent-color);
+    margin-right: 0.5rem;
+}
+
+/* Tiêu đề thống kê */
+.card h4.mb-0 {
+    color: var(--text-primary) !important;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+/* Top bài hát */
+.table thead th {
+    color: var(--text-primary) !important;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
 /* Bảng dữ liệu */
 .table {
     color: var(--text-primary);
