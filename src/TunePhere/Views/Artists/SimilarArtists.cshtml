@@ -22,9 +22,9 @@
         <div class="similar-artists-container">
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <h2 class="mb-0">Nghệ sĩ tương tự</h2>
-                <button href="@Url.Action("Profile", "Artists", new { id = ViewBag.OriginalArtist.ArtistId })" class="btn-back">
+                <a href="@Url.Action("Profile", "Artists", new { id = ViewBag.OriginalArtist.ArtistId })" class="btn-back">
                     <i class="fas fa-arrow-left me-2"></i>Quay lại trang nghệ sĩ
-                </button>
+                </a>
             </div>
 
             @if (Model != null && Model.Any())
