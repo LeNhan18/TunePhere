@@ -18,7 +18,7 @@
             <div class="songs-list">
                 @foreach (var song in Model.Songs)
                 {
-                    <div class="song-item"  data-song-id="@song.SongId" data-song-url="@song.FileUrl" data-song-title="@song.Title" data-song-artist="@(song.Artists?.ArtistName ?? "Unknown")" data-song-image="@song.ImageUrl">
+                    <div class="song-item" data-song-id="@song.SongId" data-song-url="@song.FileUrl" data-song-title="@song.Title" data-song-artist="@(song.Artists?.ArtistName ?? "Unknown")" data-song-image="@song.ImageUrl">
                         <div class="song-number">
                             <span class="number">@(Model.Songs.ToList().IndexOf(song) + 1)</span>
                             <i class="fas fa-play play-icon"></i>
@@ -80,18 +80,18 @@
             @{
                 // Nhóm bài hát theo nghệ sĩ
                 var groupedByArtist = Model.Songs
-                    .Where(s => s.Artists != null)
-                    .GroupBy(s => s.Artists.ArtistId)
-                    .Where(g => g.Count() > 0);
-                
+                .Where(s => s.Artists != null)
+                .GroupBy(s => s.Artists.ArtistId)
+                .Where(g => g.Count() > 0);
+
                 foreach (var artistGroup in groupedByArtist.Take(2))
                 {
                     var artist = artistGroup.First().Artists;
                     var artistSongs = artist.Songs
-                        .Where(s => !artistGroup.Select(sg => sg.SongId).Contains(s.SongId))
-                        .OrderByDescending(s => s.PlayCount)
-                        .Take(6);
-                    
+                    .Where(s => !artistGroup.Select(sg => sg.SongId).Contains(s.SongId))
+                    .OrderByDescending(s => s.PlayCount)
+                    .Take(6);
+
                     if (artistSongs.Any())
                     {
                         <div class="artist-songs-container">
@@ -105,7 +105,7 @@
                                 </div>
                                 <a href="/Artists/Profile/@artist.ArtistId" class="view-all-btn">Xem tất cả <i class="fas fa-chevron-right"></i></a>
                             </div>
-                            
+
                             <div class="related-songs-grid">
                                 @foreach (var song in artistSongs)
                                 {
@@ -157,29 +157,29 @@
         border-radius: 0 0 30px 30px;
     }
 
-    .search-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,10 C70,30 50,15 0,30 Z" fill="rgba(255,255,255,0.07)"/></svg>');
-        background-size: cover;
-        opacity: 0.6;
-        z-index: 1;
-    }
+        .search-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,10 C70,30 50,15 0,30 Z" fill="rgba(255,255,255,0.07)"/></svg>');
+            background-size: cover;
+            opacity: 0.6;
+            z-index: 1;
+        }
 
-    .search-header::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: radial-gradient(circle at 70% 20%, rgba(255,255,255,0.12), transparent 60%);
-        z-index: 0;
-    }
+        .search-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 20%, rgba(255,255,255,0.12), transparent 60%);
+            z-index: 0;
+        }
 
     .search-info {
         max-width: 1200px;
@@ -189,34 +189,41 @@
         transform: translateY(-5px);
     }
 
-    .search-info h1 {
-        font-size: 4rem;
-        font-weight: 800;
-        margin-bottom: 1.5rem;
-        letter-spacing: -0.05em;
-        text-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
-        position: relative;
-        display: inline-block;
-        color: white;
-    }
+        .search-info h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.05em;
+            text-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+            position: relative;
+            display: inline-block;
+            color: white;
+        }
 
-    .search-info h1::after {
-        content: '';
-        position: absolute;
-        bottom: -15px;
-        left: 0;
-        width: 150px;
-        height: 5px;
-        background: linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.3));
-        border-radius: 5px;
-        transform-origin: left;
-        animation: lineExpand 3s infinite alternate ease-in-out;
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-    }
+            .search-info h1::after {
+                content: '';
+                position: absolute;
+                bottom: -15px;
+                left: 0;
+                width: 150px;
+                height: 5px;
+                background: linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.3));
+                border-radius: 5px;
+                transform-origin: left;
+                animation: lineExpand 3s infinite alternate ease-in-out;
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            }
 
     @@keyframes lineExpand {
-        0% { transform: scaleX(0.5); opacity: 0.7; }
-        100% { transform: scaleX(1); opacity: 1; }
+        0% {
+            transform: scaleX(0.5);
+            opacity: 0.7;
+        }
+
+        100% {
+            transform: scaleX(1);
+            opacity: 1;
+        }
     }
 
     .search-term {
@@ -237,8 +244,13 @@
     }
 
     @@keyframes textShine {
-        0% { background-position: 0% center; }
-        100% { background-position: 200% center; }
+        0% {
+            background-position: 0% center;
+        }
+
+        100% {
+            background-position: 200% center;
+        }
     }
 
     .search-term::before {
@@ -279,42 +291,42 @@
         transition: all 0.3s ease;
     }
 
-    .result-count:hover {
-        background: rgba(0, 0, 0, 0.2);
-        transform: translateX(5px) translateY(-2px);
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-    }
+        .result-count:hover {
+            background: rgba(0, 0, 0, 0.2);
+            transform: translateX(5px) translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        }
 
     .search-header:hover {
         background: linear-gradient(135deg, #313131, #505050, #6d6d6d);
     }
 
-    .search-header:hover .search-info h1::after {
-        width: 180px;
-        animation: none;
-        background: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.4));
-    }
+        .search-header:hover .search-info h1::after {
+            width: 180px;
+            animation: none;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.4));
+        }
 
     .search-info h1 {
         position: relative;
         overflow: hidden;
     }
 
-    .search-info h1::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 50%;
-        height: 100%;
-        background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-        transform: skewX(-25deg);
-        transition: all 0s ease;
-    }
+        .search-info h1::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: skewX(-25deg);
+            transition: all 0s ease;
+        }
 
-    .search-info h1:hover::before {
-        animation: shine 1.5s;
-    }
+        .search-info h1:hover::before {
+            animation: shine 1.5s;
+        }
 
     @@keyframes shine {
         100% {
@@ -346,22 +358,22 @@
         box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
     }
 
-    .song-item::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
-        opacity: 0;
-        z-index: 0;
-        transition: opacity 0.4s ease;
-    }
+        .song-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
+            opacity: 0;
+            z-index: 0;
+            transition: opacity 0.4s ease;
+        }
 
-    .song-item:hover::after {
-        opacity: 1;
-    }
+        .song-item:hover::after {
+            opacity: 1;
+        }
 
     .song-number, .song-image, .song-info, .song-stats, .song-link {
         position: relative;
@@ -393,7 +405,7 @@
     }
 
     .song-item:hover .song-number {
-        background: var(--song-dominant-color, rgba(29, 185, 84, 0.15));
+        background: rgba(255, 255, 255, 0.05);
         color: white;
     }
 
@@ -407,14 +419,21 @@
     }
 
     @@keyframes fadeIn {
-        from { opacity: 0; transform: scale(0.8); }
-        to { opacity: 1; transform: scale(1); }
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
     }
 
     .play-icon, .pause-icon {
         display: none;
         cursor: pointer;
-        color: #1DB954;
+        color: #6f42c1;
         font-size: 1.2rem;
     }
 
@@ -429,7 +448,7 @@
 
     .song-item.playing .pause-icon {
         display: block;
-        color: #1DB954;
+        color: #6f42c1;
     }
 
     .song-image {
@@ -494,7 +513,7 @@
     }
 
     .song-item:hover .song-info h3 {
-        color: var(--song-text-color, white);
+        color: #6f42c1;
     }
 
     .song-meta {
@@ -516,26 +535,26 @@
         padding-bottom: 2px;
     }
 
-    .artist-name::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        height: 1px;
-        background: #1DB954;
-        transform: scaleX(0);
-        transform-origin: center;
-        transition: transform 0.3s ease;
-    }
+        .artist-name::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 1px;
+            background: #6f42c1;
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform 0.3s ease;
+        }
 
-    .artist-name:hover {
-        color: #1DB954;
-    }
+        .artist-name:hover {
+            color: #6f42c1;
+        }
 
-    .artist-name:hover::after {
-        transform: scaleX(1);
-    }
+            .artist-name:hover::after {
+                transform: scaleX(1);
+            }
 
     .separator {
         color: rgba(255, 255, 255, 0.3);
@@ -565,7 +584,7 @@
 
     .song-stats i {
         font-size: 0.85rem;
-        color: #1DB954;
+        color: #6f42c1;
     }
 
     .no-results {
@@ -580,18 +599,18 @@
         justify-content: center;
     }
 
-    .no-results i {
-        font-size: 4rem;
-        color: rgba(255, 255, 255, 0.2);
-        margin-bottom: 1.5rem;
-    }
+        .no-results i {
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.2);
+            margin-bottom: 1.5rem;
+        }
 
-    .no-results p {
-        font-size: 1.2rem;
-        color: rgba(255, 255, 255, 0.7);
-        margin-bottom: 2rem;
-        max-width: 600px;
-    }
+        .no-results p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
 
     .btn-back {
         display: inline-block;
@@ -605,11 +624,11 @@
         box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
     }
 
-    .btn-back:hover {
-        background: #18a449;
-        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
-        transform: translateY(-3px);
-    }
+        .btn-back:hover {
+            background: #18a449;
+            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+            transform: translateY(-3px);
+        }
 
     .search-suggestions {
         max-width: 1200px;
@@ -627,25 +646,25 @@
         border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .suggestions-container h2 {
-        color: white;
-        font-size: 1.7rem;
-        font-weight: 700;
-        margin-bottom: 1.8rem;
-        position: relative;
-        padding-bottom: 0.7rem;
-    }
+        .suggestions-container h2 {
+            color: white;
+            font-size: 1.7rem;
+            font-weight: 700;
+            margin-bottom: 1.8rem;
+            position: relative;
+            padding-bottom: 0.7rem;
+        }
 
-    .suggestions-container h2::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 50px;
-        height: 3px;
-        background: #1DB954;
-        border-radius: 2px;
-    }
+            .suggestions-container h2::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 50px;
+                height: 3px;
+                background: #1DB954;
+                border-radius: 2px;
+            }
 
     .suggestions-grid {
         display: grid;
@@ -665,12 +684,12 @@
         border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    .suggestion-item:hover {
-        background: rgba(255, 255, 255, 0.1);
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        border-color: rgba(29, 185, 84, 0.3);
-    }
+        .suggestion-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border-color: rgba(29, 185, 84, 0.3);
+        }
 
     .suggestion-image {
         width: 55px;
@@ -735,21 +754,21 @@
             font-size: 2.8rem;
         }
 
-        .search-info h1::after {
-            bottom: -10px;
-            height: 4px;
-            width: 120px;
-        }
+            .search-info h1::after {
+                bottom: -10px;
+                height: 4px;
+                width: 120px;
+            }
 
         .search-term {
             font-size: 1.6rem;
             margin-top: 2rem;
         }
 
-        .search-term::before,
-        .search-term::after {
-            font-size: 1.8rem;
-        }
+            .search-term::before,
+            .search-term::after {
+                font-size: 1.8rem;
+            }
 
         .result-count {
             font-size: 1.1rem;
@@ -917,22 +936,22 @@
     document.addEventListener('DOMContentLoaded', () => {
         // Khởi tạo ColorThief
         const colorThief = new ColorThief();
-        
+
         // Hàm tính màu văn bản phù hợp (đen hoặc trắng) dựa trên độ sáng
         function getTextColor(r, g, b) {
             // Tính toán độ sáng theo công thức
             const brightness = (r * 299 + g * 587 + b * 114) / 1000;
             return brightness > 128 ? '#000000' : '#ffffff';
         }
-        
+
         // Hàm chuyển đổi RGB sang chuỗi CSS
         function rgbToCSS(r, g, b, alpha = 1) {
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
-        
+
         // Lấy tất cả các phần tử hình ảnh bài hát
         const songImages = document.querySelectorAll('.song-item .song-image img');
-        
+
         // Xử lý mỗi hình ảnh
         songImages.forEach(img => {
             // Đợi ảnh tải xong
@@ -942,25 +961,25 @@
                 img.addEventListener('load', () => extractColors(img));
             }
         });
-        
+
         function extractColors(img) {
             try {
                 // Trích xuất màu chủ đạo
                 const dominantColor = colorThief.getColor(img);
                 const [r, g, b] = dominantColor;
-                
+
                 // Lấy phần tử song-item chứa hình ảnh
                 const songItem = img.closest('.song-item');
-                
+
                 // Thiết lập biến CSS tùy chỉnh
                 songItem.style.setProperty('--song-dominant-color', rgbToCSS(r, g, b, 0.7));
                 songItem.style.setProperty('--song-text-color', getTextColor(r, g, b));
-                
+
                 // Tạo gradient cá nhân hóa cho mỗi bài hát khi hover
                 songItem.addEventListener('mouseenter', () => {
                     songItem.style.background = `linear-gradient(to right, rgba(${r}, ${g}, ${b}, 0.2), rgba(${r}, ${g}, ${b}, 0.05))`;
                 });
-                
+
                 songItem.addEventListener('mouseleave', () => {
                     songItem.style.background = 'rgba(255, 255, 255, 0.04)';
                 });
@@ -968,11 +987,11 @@
                 console.log('Không thể trích xuất màu từ ảnh:', error);
             }
         }
-        
+
         // Áp dụng hiệu ứng màu cho các phần tử khác
         function applyColorEffects() {
             const songItems = document.querySelectorAll('.song-item');
-            
+
             songItems.forEach(item => {
                 // Thêm hiệu ứng nhấp nháy nhẹ cho các bài hát có màu rực rỡ
                 const colorVar = getComputedStyle(item).getPropertyValue('--song-dominant-color');
@@ -988,11 +1007,11 @@
                 }
             });
         }
-        
+
         // Gọi hàm áp dụng hiệu ứng sau khi đã xử lý màu
         setTimeout(applyColorEffects, 1000);
     });
-    
+
     // Thêm animation cho hiệu ứng nhịp màu
     document.head.insertAdjacentHTML('beforeend', `
         <style>
@@ -1007,10 +1026,10 @@
     document.addEventListener('DOMContentLoaded', () => {
         // Đã có colorThief từ script trước đó
         const colorThief = new ColorThief();
-        
+
         // Tìm ảnh bài hát đầu tiên trong kết quả tìm kiếm
         const firstSongImage = document.querySelector('.song-item:first-child .song-image img');
-        
+
         if (firstSongImage) {
             // Đợi ảnh tải xong
             if (firstSongImage.complete) {
@@ -1019,47 +1038,47 @@
                 firstSongImage.addEventListener('load', () => applyHeaderColors(firstSongImage));
             }
         }
-        
+
         function applyHeaderColors(img) {
             try {
                 // Trích xuất màu chủ đạo
                 const dominantColor = colorThief.getColor(img);
                 const [r, g, b] = dominantColor;
-                
+
                 // Trích xuất bảng màu
                 const palette = colorThief.getPalette(img, 3);
                 const secondColor = palette[1] || dominantColor;
                 const thirdColor = palette[2] || secondColor;
-                
+
                 const [r2, g2, b2] = secondColor;
                 const [r3, g3, b3] = thirdColor;
-                
+
                 // Tạo gradient với màu sắc trích xuất từ ảnh
                 const searchHeader = document.querySelector('.search-header');
-                searchHeader.style.background = `linear-gradient(135deg, 
-                    rgba(${r}, ${g}, ${b}, 0.85) 0%, 
-                    rgba(${r2}, ${g2}, ${b2}, 0.75) 50%, 
+                searchHeader.style.background = `linear-gradient(135deg,
+                    rgba(${r}, ${g}, ${b}, 0.85) 0%,
+                    rgba(${r2}, ${g2}, ${b2}, 0.75) 50%,
                     rgba(${r3}, ${g3}, ${b3}, 0.85) 100%)`;
-                
+
                 // Tính toán độ sáng để điều chỉnh màu chữ
                 const brightness = (r * 299 + g * 587 + b * 114) / 1000;
                 const textColor = brightness > 128 ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.95)';
                 const textShadow = brightness > 128 ? '0 2px 5px rgba(0,0,0,0.1)' : '0 2px 5px rgba(0,0,0,0.3)';
-                
+
                 // Điều chỉnh màu chữ nếu cần
                 const searchTerm = document.querySelector('.search-term');
                 const resultCount = document.querySelector('.result-count');
-                
+
                 if (searchTerm) {
                     searchTerm.style.color = textColor;
                     searchTerm.style.textShadow = textShadow;
                 }
-                
+
                 if (resultCount) {
                     resultCount.style.color = textColor;
                     resultCount.style.background = brightness > 128 ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.3)';
                 }
-                
+
                 // Thêm hiệu ứng glowing cho đường kẻ dưới tiêu đề
                 const title = document.querySelector('.search-info h1');
                 if (title) {
@@ -1070,33 +1089,33 @@
                         titleLine.style.boxShadow = `0 0 15px rgba(${r}, ${g}, ${b}, 0.7)`;
                     }
                 }
-                
+
                 // Thêm hiệu ứng nhẹ khi di chuột qua header
                 searchHeader.addEventListener('mousemove', (e) => {
                     const xPos = (e.clientX / window.innerWidth) * 100;
                     const yPos = (e.clientY / window.innerHeight) * 100;
-                    
+
                     searchHeader.style.backgroundImage = `
-                        linear-gradient(135deg, 
-                            rgba(${r}, ${g}, ${b}, 0.85) 0%, 
-                            rgba(${r2}, ${g2}, ${b2}, 0.75) 50%, 
+                        linear-gradient(135deg,
+                            rgba(${r}, ${g}, ${b}, 0.85) 0%,
+                            rgba(${r2}, ${g2}, ${b2}, 0.75) 50%,
                             rgba(${r3}, ${g3}, ${b3}, 0.85) 100%),
-                        radial-gradient(circle at ${xPos}% ${yPos}%, 
-                            rgba(255, 255, 255, 0.15), 
+                        radial-gradient(circle at ${xPos}% ${yPos}%,
+                            rgba(255, 255, 255, 0.15),
                             transparent 80%)
                     `;
                 });
-                
+
                 // Reset khi rời khỏi
                 searchHeader.addEventListener('mouseleave', () => {
                     searchHeader.style.backgroundImage = `
-                        linear-gradient(135deg, 
-                            rgba(${r}, ${g}, ${b}, 0.85) 0%, 
-                            rgba(${r2}, ${g2}, ${b2}, 0.75) 50%, 
+                        linear-gradient(135deg,
+                            rgba(${r}, ${g}, ${b}, 0.85) 0%,
+                            rgba(${r2}, ${g2}, ${b2}, 0.75) 50%,
                             rgba(${r3}, ${g3}, ${b3}, 0.85) 100%)
                     `;
                 });
-                
+
             } catch (error) {
                 console.log('Không thể trích xuất màu cho header:', error);
             }

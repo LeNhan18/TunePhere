@@ -77,6 +77,53 @@ body {
         box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
     }
 
+.btn-back {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .btn-back:hover {
+        background-color: #6f42c1; 
+        color: white; 
+    }
+
+.btn-explore {
+    width:230px;
+    height: 50px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-explore:hover {
+        background-color: #6f42c1;
+        color: white;
+}
+
+.btn-explore-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+
 .artist-image {
     width: 100%;
     height: 220px;
