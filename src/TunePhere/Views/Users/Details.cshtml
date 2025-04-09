@@ -99,10 +99,7 @@
                         <span class="stat-count">@ViewBag.TotalFollowing</span> Đang theo dõi
                     </div>
                     <div class="stat">
-                        <span class="stat-count">@Model.GetFollowersCount()</span> Người theo dõi
-                    </div>
-                    <div class="stat">
-                        <span class="stat-count">@Model.GetFollowedArtistsCount()</span> Nghệ sĩ yêu thích
+                        <span class="stat-count">@Model.GetFavoriteSongsCount()</span> Bài hát yêu thích
                     </div>
                 </div>
             </div>
@@ -284,7 +281,7 @@
                     {
                         foreach (var artist in Model.FollowedArtists.Take(6))
                         {
-                            <div class="artist-card">
+                            <div class="artist-card" onclick="location.href='@Url.Action("Profile", "Artists", new { id = artist.ArtistId })'">
                                 <div class="artist-thumbnail">
                                     @if (!string.IsNullOrEmpty(artist.ImageUrl))
                                     {
@@ -294,9 +291,16 @@
                                     {
                                         <img src="~/images/artist-placeholder.jpg" alt="@artist.ArtistName" />
                                     }
+                                    <div class="play-overlay">
+                                        <button class="play-btn">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <h3 class="artist-name">@artist.ArtistName</h3>
-                                <p class="artist-type">Nghệ sĩ</p>
+                                <p class="artist-type">
+                                    <i class="fas fa-music"></i> @artist.Songs.Count bài hát
+                                </p>
                             </div>
                         }
                     }
