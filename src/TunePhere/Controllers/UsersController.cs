@@ -40,6 +40,15 @@ namespace TunePhere.Controllers
                 return NotFound();
             }
 
+            // Load danh sách bài hát yêu thích
+            var favoriteSongs = await _context.UserFavoriteSongs
+                .Include(fs => fs.Song)
+                .Include(fs => fs.Song.Artists)
+                .Where(fs => fs.UserId == user.Id)
+                .ToListAsync();
+
+            user.FavoriteSongs = favoriteSongs;
+
             // Load danh sách nghệ sĩ được theo dõi
             var followedArtists = await _context.ArtistFollowers
                 .Include(af => af.Artist)
@@ -48,6 +57,18 @@ namespace TunePhere.Controllers
                 .ToListAsync();
 
             user.FollowedArtists = followedArtists;
+            
+            // Load danh sách người dùng đang theo dõi
+            var userFollowing = await _context.UserFollowers
+                .Where(uf => uf.FollowerId == user.Id)
+                .ToListAsync();
+
+            var artistFollowing = await _context.ArtistFollowers
+                .Where(af => af.UserId == user.Id)
+                .ToListAsync();
+
+            // Cập nhật số lượng following tổng cộng
+            ViewBag.TotalFollowing = userFollowing.Count + artistFollowing.Count;
             
             // Load lịch sử phát nhạc
             var playHistory = await _context.PlayHistories
@@ -58,6 +79,23 @@ namespace TunePhere.Controllers
                 .ToListAsync();
                 
             user.PlayHistory = playHistory;
+
+            // Load danh sách playlist
+            var playlists = await _context.Playlists
+                .Include(p => p.PlaylistSongs)
+                .Where(p => p.UserId == user.Id && (p.IsPublic || p.UserId == user.Id))
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            user.Playlists = playlists;
+
+            // Load danh sách người theo dõi
+            var followers = await _context.UserFollowers
+                .Include(uf => uf.Follower)
+                .Where(uf => uf.FollowingId == user.Id)
+                .ToListAsync();
+
+            user.Followers = followers;
             
             return View(user);
         }
