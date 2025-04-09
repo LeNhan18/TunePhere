@@ -92,8 +92,7 @@ namespace TunePhere.Controllers
             }
         }
 
-        // Lấy thống kê theo ngày
-        private void GetDailyStats(List<Song> songsList)
+        private async Task GetDailyStats(List<Song> songsList)
         {
             try
             {
@@ -102,67 +101,60 @@ namespace TunePhere.Controllers
                     .OrderBy(d => d)
                     .ToList();
 
-                var dailyPlayCounts = new List<int>();
-                var days = new List<string>();
                 var dailyStats = new List<DailyStats>();
-
-                // Biến để giả lập dữ liệu tăng trưởng theo ngày
-                var rand = new Random();
-                var basePlayCount = ViewBag.TotalPlays / 30; // Ước tính lượt nghe trung bình 1 ngày
-                int previousDayCount = 0;
 
                 foreach (var day in last15Days)
                 {
-                    // Lấy bài hát được upload trong ngày
-                    var songsInDay = songsList
-                        .Where(s => s.UploadDate.Date == day.Date)
-                        .ToList();
+                    // Lấy số lượt nghe trong ngày từ bảng PlayHistories
+                    var dailyPlays = await _context.PlayHistories
+                        .Where(ph => ph.PlayedAt.Date == day.Date)
+                        .CountAsync();
 
-                    // Mô phỏng lượng nghe cho ngày cụ thể
-                    // Lượt nghe cơ bản + độ dao động ngẫu nhiên + thêm lượt nghe cho bài hát mới upload trong ngày
-                    var dailyVariation = rand.Next(-basePlayCount / 10, basePlayCount / 5);
-                    var newSongsBonus = songsInDay.Count * rand.Next(10, 50);
-                    
-                    // Mô phỏng lượt nghe theo xu hướng ngày trong tuần (cuối tuần cao hơn)
-                    var dayOfWeekFactor = day.DayOfWeek == DayOfWeek.Saturday || day.DayOfWeek == DayOfWeek.Sunday 
-                        ? 1.3 : 1.0;
-                    
-                    var dailyPlays = (int)((basePlayCount + dailyVariation + newSongsBonus) * dayOfWeekFactor);
-                    
-                    // Đảm bảo không có lượt nghe âm
-                    dailyPlays = Math.Max(dailyPlays, 10);
-                    
-                    dailyPlayCounts.Add(dailyPlays);
-                    days.Add(day.ToString("dd/MM"));
-                    
-                    // Tính % tăng trưởng
+                    // Lấy số người dùng hoạt động (distinct users có PlayHistory trong ngày)
+                    var activeUsers = await _context.PlayHistories
+                        .Where(ph => ph.PlayedAt.Date == day.Date)
+                        .Select(ph => ph.UserId)
+                        .Distinct()
+                        .CountAsync();
+
+                    // Lấy số bài hát mới upload trong ngày
+                    var newSongs = await _context.Songs
+                        .Where(s => s.UploadDate.Date == day.Date)
+                        .CountAsync();
+
+                    // Tính thời gian nghe trung bình (phút) từ PlayHistories
+                    var avgListeningTime = await _context.PlayHistories
+                        .Where(ph => ph.PlayedAt.Date == day.Date)
+                        .Select(ph => ph.Song.Duration.TotalMinutes)
+                        .DefaultIfEmpty(0)
+                        .AverageAsync();
+
+                    // Tính % tăng trưởng so với ngày trước
+                    var previousDayPlays = await _context.PlayHistories
+                        .Where(ph => ph.PlayedAt.Date == day.AddDays(-1).Date)
+                        .CountAsync();
+
                     double growthPercent = 0;
-                    if (previousDayCount > 0)
+                    if (previousDayPlays > 0)
                     {
-                        growthPercent = Math.Round((dailyPlays - previousDayCount) * 100.0 / previousDayCount, 1);
+                        growthPercent = Math.Round((dailyPlays - previousDayPlays) * 100.0 / previousDayPlays, 1);
                     }
-                    previousDayCount = dailyPlays;
-                    
-                    // Tạo đối tượng thống kê ngày
-                    var activeUsers = rand.Next(10, 50); // Mô phỏng số người dùng hoạt động
-                    var newSongsCount = songsInDay.Count;
-                    var avgListeningTime = rand.Next(2, 8); // Mô phỏng thời gian nghe trung bình (phút)
-                    
+
                     dailyStats.Add(new DailyStats
                     {
                         Date = day.ToString("dd/MM/yyyy"),
                         DayOfWeek = day.ToString("dddd", new System.Globalization.CultureInfo("vi-VN")),
                         PlayCount = dailyPlays,
                         ActiveUsers = activeUsers,
-                        NewSongs = newSongsCount,
-                        AverageListeningTime = avgListeningTime,
+                        NewSongs = newSongs,
+                        AverageListeningTime = (int)avgListeningTime,
                         Growth = growthPercent
                     });
                 }
 
-                ViewBag.DailyPlayCounts = dailyPlayCounts;
-                ViewBag.Days = days;
                 ViewBag.DailyStats = dailyStats;
+                ViewBag.DailyPlayCounts = dailyStats.Select(d => d.PlayCount).ToList();
+                ViewBag.Days = dailyStats.Select(d => d.Date).ToList();
             }
             catch (Exception error)
             {
@@ -170,7 +162,7 @@ namespace TunePhere.Controllers
             }
         }
 
-        private void GetMonthlyStats(List<Song> songsList)
+        private async Task GetMonthlyStats(List<Song> songsList)
         {
             try
             {
@@ -179,63 +171,72 @@ namespace TunePhere.Controllers
                     .OrderBy(d => d)
                     .ToList();
 
-                var playCounts = new List<int>();
-                var months = new List<string>();
                 var monthlyStats = new List<MonthlyStats>();
 
                 foreach (var month in last6Months)
                 {
                     var startDate = new DateTime(month.Year, month.Month, 1);
                     var endDate = startDate.AddMonths(1).AddDays(-1);
-                    
-                    var songsInMonth = songsList.Where(s => s.UploadDate.Month == month.Month && s.UploadDate.Year == month.Year).ToList();
-                    var monthlyPlays = songsInMonth.Sum(s => s.PlayCount);
-                    
-                    if (monthlyPlays == 0)
-                    {
-                        int monthIndex = last6Months.IndexOf(month);
-                        double ratio = 0.1 + (0.05 * monthIndex);
-                        monthlyPlays = (int)(ViewBag.TotalPlays * ratio / last6Months.Count);
-                    }
-                    
-                    playCounts.Add(monthlyPlays);
-                    months.Add(month.ToString("MM/yyyy"));
-                    
-                    var activeUsers = new Random().Next(20, 100);
-                    var newSongs = songsInMonth.Count;
-                    var avgListeningTime = new Random().Next(2, 10);
-                    
+
+                    // Lấy số lượt nghe trong tháng
+                    var monthlyPlays = await _context.PlayHistories
+                        .Where(ph => ph.PlayedAt >= startDate && ph.PlayedAt <= endDate)
+                        .CountAsync();
+
+                    // Lấy số người dùng hoạt động trong tháng
+                    var activeUsers = await _context.PlayHistories
+                        .Where(ph => ph.PlayedAt >= startDate && ph.PlayedAt <= endDate)
+                        .Select(ph => ph.UserId)
+                        .Distinct()
+                        .CountAsync();
+
+                    // Lấy số bài hát mới trong tháng
+                    var newSongs = await _context.Songs
+                        .Where(s => s.UploadDate >= startDate && s.UploadDate <= endDate)
+                        .CountAsync();
+
+                    // Tính thời gian nghe trung bình
+                    var avgListeningTime = await _context.PlayHistories
+                        .Where(ph => ph.PlayedAt >= startDate && ph.PlayedAt <= endDate)
+                        .Select(ph => ph.Song.Duration.TotalMinutes)
+                        .DefaultIfEmpty(0)
+                        .AverageAsync();
+
+                    // Tính % tăng trưởng so với tháng trước
+                    var previousMonth = month.AddMonths(-1);
+                    var previousMonthStart = new DateTime(previousMonth.Year, previousMonth.Month, 1);
+                    var previousMonthEnd = previousMonthStart.AddMonths(1).AddDays(-1);
+
+                    var previousMonthPlays = await _context.PlayHistories
+                        .Where(ph => ph.PlayedAt >= previousMonthStart && ph.PlayedAt <= previousMonthEnd)
+                        .CountAsync();
+
                     double growthPercent = 0;
-                    if (playCounts.Count > 1)
+                    if (previousMonthPlays > 0)
                     {
-                        int prevCount = playCounts[playCounts.Count - 2];
-                        if (prevCount > 0)
-                        {
-                            growthPercent = Math.Round((monthlyPlays - prevCount) * 100.0 / prevCount, 1);
-                        }
+                        growthPercent = Math.Round((monthlyPlays - previousMonthPlays) * 100.0 / previousMonthPlays, 1);
                     }
-                    
+
                     monthlyStats.Add(new MonthlyStats
                     {
                         Month = month.ToString("MM/yyyy"),
                         PlayCount = monthlyPlays,
                         ActiveUsers = activeUsers,
                         NewSongs = newSongs,
-                        AverageListeningTime = avgListeningTime,
+                        AverageListeningTime = (int)avgListeningTime,
                         Growth = growthPercent
                     });
                 }
 
-                ViewBag.PlayCounts = playCounts;
-                ViewBag.Months = months;
                 ViewBag.MonthlyStats = monthlyStats;
+                ViewBag.PlayCounts = monthlyStats.Select(m => m.PlayCount).ToList();
+                ViewBag.Months = monthlyStats.Select(m => m.Month).ToList();
             }
             catch (Exception error)
             {
                 Console.WriteLine($"Lỗi khi tạo thống kê tháng: {error.Message}");
             }
         }
-
         // Chỉ truy cập được endpoint này nếu chưa có tài khoản admin
         [AllowAnonymous]
         public async Task<IActionResult> CreateAdminAccount()
@@ -402,84 +403,124 @@ namespace TunePhere.Controllers
                     return Json(new { success = false, message = "Không thể xóa tài khoản Administrator" });
                 }
 
-                // Xóa các mối quan hệ trước
                 using var transaction = await _context.Database.BeginTransactionAsync();
 
                 try
                 {
-                    // Xóa UserPreferences
-                    var preferences = await _context.UserPreferences.Where(p => p.UserId == id).ToListAsync();
-                    _context.UserPreferences.RemoveRange(preferences);
+                    // 1. Xóa PlayHistories trước
+                    var playHistories = await _context.PlayHistories
+                        .Where(p => p.UserId == id)
+                        .ToListAsync();
+                    _context.PlayHistories.RemoveRange(playHistories);
+                    await _context.SaveChangesAsync();
 
-                    // Xóa PlayHistory
-                    var playHistory = await _context.PlayHistories.Where(p => p.UserId == id).ToListAsync();
-                    _context.PlayHistories.RemoveRange(playHistory);
-
-                    // Xóa UserFavoriteSongs
-                    var favoriteSongs = await _context.UserFavoriteSongs.Where(f => f.UserId == id).ToListAsync();
-                    _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
-
-                    // Xóa UserFollowers
-                    var followers = await _context.UserFollowers.Where(f => f.FollowerId == id || f.FollowingId == id).ToListAsync();
-                    _context.UserFollowers.RemoveRange(followers);
-
-                    // Xóa ArtistFollowers
-                    var artistFollowers = await _context.ArtistFollowers.Where(f => f.UserId == id).ToListAsync();
-                    _context.ArtistFollowers.RemoveRange(artistFollowers);
-
-                    // Xóa ListeningRoomParticipants
-                    var roomParticipants = await _context.ListeningRoomParticipants.Where(p => p.UserId == id).ToListAsync();
-                    _context.ListeningRoomParticipants.RemoveRange(roomParticipants);
-
-                    // Xóa ListeningRooms (nếu user là creator)
-                    var rooms = await _context.ListeningRooms.Where(r => r.CreatorId == id).ToListAsync();
-                    _context.ListeningRooms.RemoveRange(rooms);
-
-                    // Xóa Playlists và PlaylistSongs
-                    var playlists = await _context.Playlists.Where(p => p.UserId == id).ToListAsync();
-                    foreach (var playlist in playlists)
-                    {
-                        var playlistSongs = await _context.PlaylistSongs.Where(ps => ps.PlaylistId == playlist.PlaylistId).ToListAsync();
-                        _context.PlaylistSongs.RemoveRange(playlistSongs);
-                    }
-                    _context.Playlists.RemoveRange(playlists);
-
-                    // Xóa Remixes
-                    var remixes = await _context.Remixes.Where(r => r.UserId == id).ToListAsync();
-                    _context.Remixes.RemoveRange(remixes);
-
-                    // Xóa ChatMessages
-                    var chatMessages = await _context.ChatMessages.Where(m => m.SenderId == id).ToListAsync();
-                    _context.ChatMessages.RemoveRange(chatMessages);
-
-                    // Xóa Artists và các bài hát, album liên quan
+                    // 2. Xóa các bản ghi liên quan đến Artists và Songs
                     var artists = await _context.Artists.Where(a => a.userId == id).ToListAsync();
                     foreach (var artist in artists)
                     {
-                        // Xóa Songs
-                        var songs = await _context.Songs.Where(s => s.ArtistId == artist.ArtistId).ToListAsync();
+                        // Lấy danh sách songs của artist
+                        var songs = await _context.Songs
+                            .Where(s => s.ArtistId == artist.ArtistId)
+                            .ToListAsync();
+
                         foreach (var song in songs)
                         {
-                            // Xóa Lyrics
-                            var lyrics = await _context.Lyrics.Where(l => l.SongId == song.SongId).ToListAsync();
+                            // 2.1 Xóa PlayHistories của các bài hát
+                            var songPlayHistories = await _context.PlayHistories
+                                .Where(ph => ph.SongId == song.SongId)
+                                .ToListAsync();
+                            _context.PlayHistories.RemoveRange(songPlayHistories);
+
+                            // 2.2 Xóa Lyrics
+                            var lyrics = await _context.Lyrics
+                                .Where(l => l.SongId == song.SongId)
+                                .ToListAsync();
                             _context.Lyrics.RemoveRange(lyrics);
 
-                            // Xóa PlaylistSongs liên quan
-                            var songPlaylists = await _context.PlaylistSongs.Where(ps => ps.SongId == song.SongId).ToListAsync();
-                            _context.PlaylistSongs.RemoveRange(songPlaylists);
+                            // 2.3 Xóa PlaylistSongs
+                            var playlistSongs = await _context.PlaylistSongs
+                                .Where(ps => ps.SongId == song.SongId)
+                                .ToListAsync();
+                            _context.PlaylistSongs.RemoveRange(playlistSongs);
+
+                            // 2.4 Xóa UserFavoriteSongs
+                            var favoriteSongs = await _context.UserFavoriteSongs
+                                .Where(fs => fs.SongId == song.SongId)
+                                .ToListAsync();
+                            _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
                         }
+
+                        // 2.5 Xóa Songs
                         _context.Songs.RemoveRange(songs);
 
-                        // Xóa Albums
-                        var albums = await _context.Albums.Where(a => a.ArtistId == artist.ArtistId).ToListAsync();
+                        // 2.6 Xóa Albums
+                        var albums = await _context.Albums
+                            .Where(a => a.ArtistId == artist.ArtistId)
+                            .ToListAsync();
                         _context.Albums.RemoveRange(albums);
                     }
+
+                    // 2.7 Xóa Artists
                     _context.Artists.RemoveRange(artists);
 
-                    // Lưu các thay đổi
+                    // 3. Xóa các bản ghi khác liên quan đến user
+                    // 3.1 UserPreferences
+                    var preferences = await _context.UserPreferences
+                        .Where(p => p.UserId == id)
+                        .ToListAsync();
+                    _context.UserPreferences.RemoveRange(preferences);
+
+                    // 3.2 UserFavoriteSongs
+                    var userFavoriteSongs = await _context.UserFavoriteSongs
+                        .Where(f => f.UserId == id)
+                        .ToListAsync();
+                    _context.UserFavoriteSongs.RemoveRange(userFavoriteSongs);
+
+                    // 3.3 UserFollowers
+                    var followers = await _context.UserFollowers
+                        .Where(f => f.FollowerId == id || f.FollowingId == id)
+                        .ToListAsync();
+                    _context.UserFollowers.RemoveRange(followers);
+
+                    // 3.4 ArtistFollowers
+                    var artistFollowers = await _context.ArtistFollowers
+                        .Where(f => f.UserId == id)
+                        .ToListAsync();
+                    _context.ArtistFollowers.RemoveRange(artistFollowers);
+
+                    // 3.5 ListeningRoomParticipants
+                    var roomParticipants = await _context.ListeningRoomParticipants
+                        .Where(p => p.UserId == id)
+                        .ToListAsync();
+                    _context.ListeningRoomParticipants.RemoveRange(roomParticipants);
+
+                    // 3.6 ListeningRooms
+                    var rooms = await _context.ListeningRooms
+                        .Where(r => r.CreatorId == id)
+                        .ToListAsync();
+                    _context.ListeningRooms.RemoveRange(rooms);
+
+                    // 3.7 Playlists và PlaylistSongs
+                    var playlists = await _context.Playlists
+                        .Where(p => p.UserId == id)
+                        .ToListAsync();
+                    _context.Playlists.RemoveRange(playlists);
+
+                    // 3.8 Remixes
+                    var remixes = await _context.Remixes
+                        .Where(r => r.UserId == id)
+                        .ToListAsync();
+                    _context.Remixes.RemoveRange(remixes);
+
+                    // 3.9 ChatMessages
+                    var chatMessages = await _context.ChatMessages
+                        .Where(m => m.SenderId == id)
+                        .ToListAsync();
+                    _context.ChatMessages.RemoveRange(chatMessages);
+
                     await _context.SaveChangesAsync();
 
-                    // Xóa user
+                    // 4. Cuối cùng xóa user
                     var result = await _userManager.DeleteAsync(user);
                     if (result.Succeeded)
                     {
