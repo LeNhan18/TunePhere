@@ -665,7 +665,7 @@ namespace TunePhere.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // 7. Xóa file nhạc và ảnh bìa
+                // 7. Xóa file nhạc
                 if (!string.IsNullOrEmpty(song.FileUrl))
                 {
                     var audioPath = Path.Combine(_environment.WebRootPath, song.FileUrl.TrimStart('/'));
@@ -675,16 +675,34 @@ namespace TunePhere.Controllers
                     }
                 }
 
+                // 8. Kiểm tra xem ảnh bìa có đang được sử dụng bởi bài hát khác hoặc album không
                 if (!string.IsNullOrEmpty(song.ImageUrl))
                 {
-                    var imagePath = Path.Combine(_environment.WebRootPath, song.ImageUrl.TrimStart('/'));
-                    if (System.IO.File.Exists(imagePath))
+                    // Kiểm tra các bài hát khác có dùng ảnh này không
+                    bool imageIsUsedElsewhere = await _context.Songs
+                        .Where(s => s.SongId != id && s.ImageUrl == song.ImageUrl)
+                        .AnyAsync();
+
+                    // Kiểm tra có album nào đang dùng ảnh này không
+                    if (!imageIsUsedElsewhere)
                     {
-                        System.IO.File.Delete(imagePath);
+                        imageIsUsedElsewhere = await _context.Albums
+                            .Where(a => a.ImageUrl == song.ImageUrl)
+                            .AnyAsync();
+                    }
+
+                    // Chỉ xóa file ảnh nếu không có nơi nào khác đang sử dụng
+                    if (!imageIsUsedElsewhere)
+                    {
+                        var imagePath = Path.Combine(_environment.WebRootPath, song.ImageUrl.TrimStart('/'));
+                        if (System.IO.File.Exists(imagePath))
+                        {
+                            System.IO.File.Delete(imagePath);
+                        }
                     }
                 }
 
-                // 8. Xóa bài hát
+                // 9. Xóa bài hát
                 _context.Songs.Remove(song);
                 await _context.SaveChangesAsync();
 

@@ -423,7 +423,6 @@ namespace TunePhere.Controllers
         {
             if (string.IsNullOrEmpty(userId))
             {
-                // Nếu không có userId, lấy danh sách theo dõi của người đang đăng nhập
                 userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (string.IsNullOrEmpty(userId))
                 {
@@ -437,6 +436,22 @@ namespace TunePhere.Controllers
 
             ViewBag.DisplayName = artist?.ArtistName ?? "Người dùng";
             ViewBag.UserId = userId;
+
+            // Lấy danh sách tất cả các nghệ sĩ
+            var allArtists = await _context.Artists.ToListAsync();
+            var artistUserIds = allArtists.ToDictionary(a => a.userId, a => a);
+
+            // Lấy danh sách người dùng đang theo dõi
+            var userFollowing = await _context.UserFollowers
+                .Include(f => f.Following)
+                .Where(f => f.FollowerId == userId)
+                .OrderByDescending(f => f.FollowedAt)
+                .ToListAsync();
+
+            // Lọc ra những người theo dõi không phải là nghệ sĩ
+            var nonArtistFollowing = userFollowing
+                .Where(f => !artistUserIds.ContainsKey(f.FollowingId))
+                .ToList();
 
             // Lấy danh sách nghệ sĩ đang theo dõi
             var artistFollowing = await _context.ArtistFollowers
@@ -457,13 +472,6 @@ namespace TunePhere.Controllers
                 })
                 .ToListAsync();
 
-            // Lấy danh sách người dùng đang theo dõi
-            var userFollowing = await _context.UserFollowers
-                .Include(f => f.Following)
-                .Where(f => f.FollowerId == userId)
-                .OrderByDescending(f => f.FollowedAt)
-                .ToListAsync();
-
             // Tạo map giữa userId và ArtistId
             var artistMap = await _context.Artists
                 .Where(a => artistFollowing.Select(f => f.FollowingId).Contains(a.userId))
@@ -471,8 +479,8 @@ namespace TunePhere.Controllers
 
             ViewBag.ArtistMap = artistMap;
 
-            // Kết hợp cả 2 danh sách
-            var allFollowing = artistFollowing.Concat(userFollowing)
+            // Kết hợp danh sách nghệ sĩ và người dùng không phải nghệ sĩ
+            var allFollowing = artistFollowing.Concat(nonArtistFollowing)
                 .OrderByDescending(f => f.FollowedAt)
                 .ToList();
 
@@ -511,6 +519,50 @@ namespace TunePhere.Controllers
             ViewBag.OriginalArtist = artist;
 
             return View(similarArtists);
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> UnfollowBoth(string targetUserId, int? artistId)
+        {
+            try
+            {
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(currentUserId))
+                {
+                    return Json(new { success = false, message = "Bạn cần đăng nhập để thực hiện chức năng này" });
+                }
+
+                // Xóa từ UserFollowers nếu có
+                var userFollow = await _context.UserFollowers
+                    .FirstOrDefaultAsync(f => f.FollowerId == currentUserId && f.FollowingId == targetUserId);
+                if (userFollow != null)
+                {
+                    _context.UserFollowers.Remove(userFollow);
+                }
+
+                // Xóa từ ArtistFollowers nếu có
+                if (artistId.HasValue)
+                {
+                    var artistFollow = await _context.ArtistFollowers
+                        .FirstOrDefaultAsync(f => f.UserId == currentUserId && f.ArtistId == artistId);
+                    if (artistFollow != null)
+                    {
+                        _context.ArtistFollowers.Remove(artistFollow);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Json(new { 
+                    success = true, 
+                    message = "Đã hủy theo dõi thành công"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
         }
     }
 }
