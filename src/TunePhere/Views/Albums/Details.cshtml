@@ -66,7 +66,7 @@
 
     .track-header {
         display: grid;
-        grid-template-columns: 16px 4fr 2fr 1fr 1fr;
+        grid-template-columns: 16px 4fr 2fr 2fr 1fr 1fr;
         padding: 0.5rem 1rem;
         color: #b3b3b3;
         font-size: 0.875rem;
@@ -76,7 +76,7 @@
 
     .track-item {
         display: grid;
-        grid-template-columns: 16px 4fr 2fr 1fr 1fr;
+        grid-template-columns: 16px 4fr 2fr 2fr 1fr 1fr;
         padding: 0.5rem 1rem;
         color: white;
         border-radius: 4px;
@@ -466,6 +466,12 @@
     .dropdown-toggle::after {
         display: none;
     }
+
+    .track-genre {
+        color: #b3b3b3;
+        display: flex;
+        align-items: center;
+    }
 </style>
 
 <div class="album-header" style="background: linear-gradient(transparent 0, rgba(0, 0, 0, .5) 100%), url('@Model.ImageUrl') center/cover">
@@ -497,6 +503,7 @@
     <div class="track-header">
         <div>#</div>
         <div>Tiêu đề</div>
+        <div>Thể loại</div>
         <div>Ngày thêm</div>
         <div>Lượt nghe</div>
         <div>Thời lượng</div>
@@ -516,6 +523,7 @@
                     <div class="track-artist">@Model.Artists?.ArtistName</div>
                 </div>
             </div>
+            <div class="track-genre">@song.Genre</div>
             <div class="track-artist">@song.UploadDate.ToString("dd/MM/yyyy")</div>
             <div class="track-stats">
                 <span class="track-play-count">@song.PlayCount lượt nghe</span>
@@ -529,6 +537,10 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
                             <li><a class="dropdown-item add-to-playlist-option" href="javascript:void(0)" data-song-id="@song.SongId">Thêm vào playlist</a></li>
+                            @if (User.IsInRole("Artist") && Model.Artists?.userId == User.FindFirst(ClaimTypes.NameIdentifier)?.Value)
+                            {
+                                <li><a class="dropdown-item" href="@Url.Action("EditAlbumSong", "Songs", new { id = song.SongId })">Chỉnh sửa bài hát</a></li>
+                            }
                             <!-- Có thể thêm các submenu item khác ở đây sau này -->
                         </ul>
                     </div>

@@ -20,6 +20,26 @@
         white-space: nowrap;
         border: 0;
     }
+
+    /* Cập nhật style cho spotify-song-info để chứa cả trường thể loại */
+    .spotify-song-info {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        flex: 1;
+    }
+
+    .spotify-song-file {
+        flex-basis: 100%;
+    }
+
+    .spotify-song-title {
+        flex: 3;
+    }
+
+    .spotify-song-genre {
+        flex: 2;
+    }
 </style>
 
 <div class="spotify-create-container">
@@ -172,6 +192,21 @@
                     </div>
                     <div class="spotify-song-title">
                         <input type="text" name="SongTitles" class="spotify-input" placeholder="Tên bài hát" required />
+                    </div>
+                    <div class="spotify-song-genre">
+                        <select name="SongGenres" class="spotify-input">
+                            <option value="">Chọn thể loại (không bắt buộc)</option>
+                            <option value="Pop">Pop</option>
+                            <option value="Rock">Rock</option>
+                            <option value="Hip Hop">Hip Hop</option>
+                            <option value="R&B">R&B</option>
+                            <option value="Jazz">Jazz</option>
+                            <option value="Classical">Classical</option>
+                            <option value="Electronic">Electronic</option>
+                            <option value="Folk">Folk</option>
+                            <option value="Country">Country</option>
+                            <option value="Other">Khác</option>
+                        </select>
                     </div>
                 </div>
                 <div class="spotify-song-duration">
