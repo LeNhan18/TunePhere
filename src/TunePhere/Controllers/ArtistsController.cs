@@ -520,5 +520,49 @@ namespace TunePhere.Controllers
 
             return View(similarArtists);
         }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> UnfollowBoth(string targetUserId, int? artistId)
+        {
+            try
+            {
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(currentUserId))
+                {
+                    return Json(new { success = false, message = "Bạn cần đăng nhập để thực hiện chức năng này" });
+                }
+
+                // Xóa từ UserFollowers nếu có
+                var userFollow = await _context.UserFollowers
+                    .FirstOrDefaultAsync(f => f.FollowerId == currentUserId && f.FollowingId == targetUserId);
+                if (userFollow != null)
+                {
+                    _context.UserFollowers.Remove(userFollow);
+                }
+
+                // Xóa từ ArtistFollowers nếu có
+                if (artistId.HasValue)
+                {
+                    var artistFollow = await _context.ArtistFollowers
+                        .FirstOrDefaultAsync(f => f.UserId == currentUserId && f.ArtistId == artistId);
+                    if (artistFollow != null)
+                    {
+                        _context.ArtistFollowers.Remove(artistFollow);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Json(new { 
+                    success = true, 
+                    message = "Đã hủy theo dõi thành công"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
     }
 }
