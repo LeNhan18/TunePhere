@@ -457,177 +457,95 @@
             animateCounters();
         });
 
-        // Khởi tạo biểu đồ thống kê lượt nghe theo ngày
-        function initDailyChart() {
-            var ctx = document.getElementById('dailyListeningChart').getContext('2d');
-
-            // Gradient cho area chart
-            var gradientFill = ctx.createLinearGradient(0, 0, 0, 300);
-            gradientFill.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
-            gradientFill.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-
-            var myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: @Html.Raw(Json.Serialize(ViewBag.Days ?? new List<string>())),
-                    datasets: [{
-                        label: 'Lượt nghe',
-                        data: @Html.Raw(Json.Serialize(ViewBag.DailyPlayCounts ?? new List<int>())),
-                        borderColor: '#10b981',
-                        backgroundColor: gradientFill,
-                        pointBackgroundColor: '#ffffff',
-                        pointBorderColor: '#10b981',
-                        pointHoverBackgroundColor: '#10b981',
-                        pointHoverBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1500,
-                        easing: 'easeOutQuart'
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false,
-                                drawBorder: false
-                            },
-                            ticks: {
-                                color: '#cbd5e1',
-                                padding: 10
-                            }
-                        },
-                        y: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.05)',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                beginAtZero: true,
-                                color: '#cbd5e1',
-                                padding: 10,
-                                callback: function(value) {
-                                    return formatNumber(value);
-                                }
-                            }
+        // Cấu hình chung cho biểu đồ
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        color: '#f8fafc',  // Màu chữ cho chú thích
+                        font: {
+                            size: 14,
+                            weight: '500'
                         }
+                    }
+                },
+                title: {
+                    display: true,
+                    color: '#f8fafc',  // Màu chữ cho tiêu đề
+                    font: {
+                        size: 16,
+                        weight: '600'
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(248, 250, 252, 0.1)'  // Màu đường lưới trục x
                     },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(30, 41, 59, 0.9)',
-                            titleColor: '#f8fafc',
-                            bodyColor: '#cbd5e1',
-                            borderColor: 'rgba(255, 255, 255, 0.1)',
-                            borderWidth: 1,
-                            padding: 15,
-                            displayColors: false,
-                            callbacks: {
-                                label: function(context) {
-                                    return 'Lượt nghe: ' + formatNumber(context.raw);
-                                }
-                            }
+                    ticks: {
+                        color: '#f8fafc',  // Màu chữ cho nhãn trục x
+                        font: {
+                            size: 12,
+                            weight: '500'
+                        }
+                    }
+                },
+                y: {
+                    grid: {
+                        color: 'rgba(248, 250, 252, 0.1)'  // Màu đường lưới trục y
+                    },
+                    ticks: {
+                        color: '#f8fafc',  // Màu chữ cho nhãn trục y
+                        font: {
+                            size: 12,
+                            weight: '500'
                         }
                     }
                 }
-            });
-        }
+            }
+        };
 
-        // Khởi tạo biểu đồ thống kê lượt nghe theo tháng
-        function initMonthlyChart() {
-            var ctx = document.getElementById('monthlyListeningChart').getContext('2d');
+        // Khởi tạo biểu đồ ngày
+        const dailyCtx = document.getElementById('dailyListeningChart').getContext('2d');
+        new Chart(dailyCtx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(Json.Serialize(ViewBag.Days)),
+                datasets: [{
+                    label: 'Lượt nghe',
+                    data: @Html.Raw(Json.Serialize(ViewBag.DailyPlayCounts)),
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: chartOptions
+        });
 
-            // Gradient cho area chart
-            var gradientFill = ctx.createLinearGradient(0, 0, 0, 300);
-            gradientFill.addColorStop(0, 'rgba(139, 92, 246, 0.3)');
-            gradientFill.addColorStop(1, 'rgba(139, 92, 246, 0.0)');
-
-            var myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: @Html.Raw(Json.Serialize(ViewBag.Months ?? new List<string>())),
-                    datasets: [{
-                        label: 'Lượt nghe',
-                        data: @Html.Raw(Json.Serialize(ViewBag.PlayCounts ?? new List<int>())),
-                        borderColor: '#8b5cf6',
-                        backgroundColor: gradientFill,
-                        pointBackgroundColor: '#ffffff',
-                        pointBorderColor: '#8b5cf6',
-                        pointHoverBackgroundColor: '#8b5cf6',
-                        pointHoverBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1500,
-                        easing: 'easeOutQuart'
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false,
-                                drawBorder: false
-                            },
-                            ticks: {
-                                color: '#cbd5e1',
-                                padding: 10
-                            }
-                        },
-                        y: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.05)',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                beginAtZero: true,
-                                color: '#cbd5e1',
-                                padding: 10,
-                                callback: function(value) {
-                                    return formatNumber(value);
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(30, 41, 59, 0.9)',
-                            titleColor: '#f8fafc',
-                            bodyColor: '#cbd5e1',
-                            borderColor: 'rgba(255, 255, 255, 0.1)',
-                            borderWidth: 1,
-                            padding: 15,
-                            displayColors: false,
-                            callbacks: {
-                                label: function(context) {
-                                    return 'Lượt nghe: ' + formatNumber(context.raw);
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
+        // Khởi tạo biểu đồ tháng
+        const monthlyCtx = document.getElementById('monthlyListeningChart').getContext('2d');
+        new Chart(monthlyCtx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(ViewBag.Months)),
+                datasets: [{
+                    label: 'Lượt nghe',
+                    data: @Html.Raw(Json.Serialize(ViewBag.PlayCounts)),
+                    backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                    borderColor: '#8b5cf6',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: chartOptions
+        });
 
         // Hiệu ứng đếm số
         function animateCounters() {
