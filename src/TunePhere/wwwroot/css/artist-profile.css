@@ -292,8 +292,13 @@ a, a:hover, a:focus, a:active, a:visited {
     gap: 8px;
 }
 
-    .edit-btn:hover, .view-all:hover {
-        background: rgba(255,255,255,0.2);
+    .edit-btn:hover {
+        background: #6f42c1;
+        transform: scale(1.05);
+    }
+
+    .view-all:hover {
+        background-color: #6f42c1;
         transform: scale(1.05);
     }
 
