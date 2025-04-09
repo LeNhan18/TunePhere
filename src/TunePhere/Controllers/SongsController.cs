@@ -429,6 +429,12 @@ namespace TunePhere.Controllers
                 return Forbid();
             }
 
+            // Kiểm tra nếu bài hát thuộc album, chuyển hướng đến trang chỉnh sửa bài hát album
+            if (song.AlbumId.HasValue)
+            {
+                return RedirectToAction(nameof(EditAlbumSong), new { id = song.SongId });
+            }
+
             return View(song);
         }
 
@@ -820,6 +826,170 @@ namespace TunePhere.Controllers
                 liked = isNowLiked,
                 likeCount = likeCount
             });
+        }
+
+        // GET: Songs/EditAlbumSong/5
+        [Authorize]
+        public async Task<IActionResult> EditAlbumSong(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var song = await _context.Songs
+                .Include(s => s.Artists)
+                .Include(s => s.Albums)
+                .FirstOrDefaultAsync(m => m.SongId == id);
+
+            if (song == null)
+            {
+                return NotFound();
+            }
+
+            // Kiểm tra bài hát có thuộc album không
+            if (!song.AlbumId.HasValue)
+            {
+                return RedirectToAction(nameof(Edit), new { id = song.SongId });
+            }
+
+            // Kiểm tra quyền sở hữu
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null || song.Artists?.userId != user.Id)
+            {
+                return Forbid();
+            }
+
+            // Đảm bảo Model.Genre được thiết lập chính xác cho dropdown
+            ViewBag.CurrentGenre = song.Genre;
+
+            return View(song);
+        }
+
+        // POST: Songs/EditAlbumSong/5
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAlbumSong(int id, [Bind("SongId,Title,Genre")] Song song, IFormFile? audioFile)
+        {
+            if (id != song.SongId)
+            {
+                return NotFound();
+            }
+
+            // Lấy thông tin bài hát hiện tại từ database
+            var existingSong = await _context.Songs
+                .Include(s => s.Artists)
+                .Include(s => s.Albums)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.SongId == id);
+
+            if (existingSong == null)
+            {
+                return NotFound();
+            }
+
+            // Kiểm tra bài hát có thuộc album không
+            if (!existingSong.AlbumId.HasValue)
+            {
+                return RedirectToAction(nameof(Edit), new { id = song.SongId });
+            }
+
+            // Kiểm tra quyền sở hữu
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null || existingSong.Artists?.userId != user.Id)
+            {
+                return Forbid();
+            }
+
+            // Chỉ hợp lệ nếu không lỗi về Title và Genre
+            if (ModelState.GetFieldValidationState("Title") == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid &&
+                ModelState.GetFieldValidationState("Genre") == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid)
+            {
+                try
+                {
+                    // Xử lý upload file nhạc mới nếu có
+                    if (audioFile != null && audioFile.Length > 0)
+                    {
+                        // Kiểm tra định dạng file
+                        var allowedAudioExtensions = new[] { ".mp3", ".m4a", ".wav", ".ogg", ".aac", ".flac" };
+                        var audioExtension = Path.GetExtension(audioFile.FileName).ToLowerInvariant();
+
+                        if (!allowedAudioExtensions.Contains(audioExtension))
+                        {
+                            ModelState.AddModelError("", $"File {audioFile.FileName} có định dạng không được hỗ trợ. Hỗ trợ: mp3, m4a, wav, ogg, aac, flac");
+                            return View(existingSong);
+                        }
+
+                        // Xóa file nhạc cũ nếu tồn tại
+                        if (!string.IsNullOrEmpty(existingSong.FileUrl))
+                        {
+                            var oldFilePath = Path.Combine(_environment.WebRootPath, existingSong.FileUrl.TrimStart('/'));
+                            if (System.IO.File.Exists(oldFilePath))
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+                        }
+
+                        // Upload file bài hát mới
+                        var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "songs");
+                        Directory.CreateDirectory(uploadsFolder);
+
+                        var audioFileName = Guid.NewGuid().ToString();
+                        var fullAudioFileName = audioFileName + audioExtension;
+                        var filePath = Path.Combine(uploadsFolder, fullAudioFileName);
+
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await audioFile.CopyToAsync(fileStream);
+                        }
+
+                        // Cập nhật đường dẫn file nhạc mới
+                        existingSong.FileUrl = $"/uploads/songs/{fullAudioFileName}";
+                        existingSong.FileType = audioExtension;
+
+                        // Đọc thời lượng từ file audio
+                        try
+                        {
+                            using (var audioFileInfo = TagLib.File.Create(filePath))
+                            {
+                                existingSong.Duration = audioFileInfo.Properties.Duration;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Không thể đọc thời lượng file: {Message}", ex.Message);
+                        }
+                    }
+
+                    // Cập nhật tiêu đề bài hát
+                    existingSong.Title = song.Title;
+                    
+                    // Cập nhật thể loại bài hát nếu có
+                    if (!string.IsNullOrWhiteSpace(song.Genre))
+                    {
+                        existingSong.Genre = song.Genre;
+                    }
+
+                    // Cập nhật bài hát
+                    _context.Entry(existingSong).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction("Details", "Albums", new { id = existingSong.AlbumId });
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!SongExists(song.SongId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+            return View(existingSong);
         }
 
         private bool SongExists(int id)

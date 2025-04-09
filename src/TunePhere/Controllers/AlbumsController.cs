@@ -127,7 +127,7 @@ namespace TunePhere.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Artist")]
         public async Task<IActionResult> Create([Bind("AlbumName,AlbumDescription,ReleaseDate,ArtistId")] Album album,
-    IFormFile ImageFile, List<IFormFile> SongFiles, List<string> SongTitles)
+    IFormFile ImageFile, List<IFormFile> SongFiles, List<string> SongTitles, List<string> SongGenres)
         {
             if (ModelState.IsValid)
             {
@@ -186,6 +186,9 @@ namespace TunePhere.Controllers
                         {
                             var songFile = SongFiles[i];
                             var songTitle = (i < SongTitles.Count) ? SongTitles[i] : "Unknown Title";
+                            // Xử lý thể loại nếu có
+                            var songGenre = (i < SongGenres?.Count) ? SongGenres[i] : "";
+                            songGenre = string.IsNullOrWhiteSpace(songGenre) ? "Unknown" : songGenre;
 
                             if (songFile != null && songFile.Length > 0)
                             {
@@ -239,7 +242,7 @@ namespace TunePhere.Controllers
                                     UploadDate = DateTime.Now,
                                     ArtistId = artist.ArtistId,
                                     AlbumId = album.AlbumId,
-                                    Genre = "Unknown", // Giá trị mặc định cho Genre
+                                    Genre = songGenre, // Sử dụng thể loại được chọn
                                     PlayCount = 0,
                                     LikeCount = 0,
                                     Duration = duration,
