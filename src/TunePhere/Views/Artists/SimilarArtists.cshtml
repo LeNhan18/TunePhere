@@ -22,9 +22,9 @@
         <div class="similar-artists-container">
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <h2 class="mb-0">Nghệ sĩ tương tự</h2>
-                <a href="@Url.Action("Profile", "Artists", new { id = ViewBag.OriginalArtist.ArtistId })" class="btn-back">
+                <button href="@Url.Action("Profile", "Artists", new { id = ViewBag.OriginalArtist.ArtistId })" class="btn-back">
                     <i class="fas fa-arrow-left me-2"></i>Quay lại trang nghệ sĩ
-                </a>
+                </button>
             </div>
 
             @if (Model != null && Model.Any())
@@ -71,9 +71,11 @@
                 <div class="no-artists">
                     <i class="fas fa-users fa-4x mb-3"></i>
                     <p>Không tìm thấy nghệ sĩ tương tự với @ViewBag.OriginalArtist.ArtistName</p>
+                    <div class="btn-explore-container">
                     <a href="@Url.Action("Index", "Home")" class="btn-explore mt-3">
                         <i class="fas fa-search me-2"></i>Khám phá nghệ sĩ khác
                     </a>
+                    </div>
                 </div>
             }
         </div>
