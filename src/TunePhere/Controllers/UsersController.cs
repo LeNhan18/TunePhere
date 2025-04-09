@@ -49,6 +49,18 @@ namespace TunePhere.Controllers
 
             user.FollowedArtists = followedArtists;
             
+            // Load danh sách người dùng đang theo dõi (bao gồm cả nghệ sĩ và người dùng thường)
+            var userFollowing = await _context.UserFollowers
+                .Where(uf => uf.FollowerId == user.Id)
+                .ToListAsync();
+
+            var artistFollowing = await _context.ArtistFollowers
+                .Where(af => af.UserId == user.Id)
+                .ToListAsync();
+
+            // Cập nhật số lượng following tổng cộng
+            ViewBag.TotalFollowing = userFollowing.Count + artistFollowing.Count;
+            
             // Load lịch sử phát nhạc
             var playHistory = await _context.PlayHistories
                 .Include(ph => ph.Song)
@@ -58,6 +70,31 @@ namespace TunePhere.Controllers
                 .ToListAsync();
                 
             user.PlayHistory = playHistory;
+
+            // Load danh sách playlist
+            var playlists = await _context.Playlists
+                .Include(p => p.PlaylistSongs)
+                .Where(p => p.UserId == user.Id && (p.IsPublic || p.UserId == user.Id))
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            user.Playlists = playlists;
+
+            // Load danh sách người dùng đang theo dõi
+            var following = await _context.UserFollowers
+                .Include(uf => uf.Following)
+                .Where(uf => uf.FollowerId == user.Id)
+                .ToListAsync();
+
+            user.Following = following;
+            
+            // Load danh sách người theo dõi
+            var followers = await _context.UserFollowers
+                .Include(uf => uf.Follower)
+                .Where(uf => uf.FollowingId == user.Id)
+                .ToListAsync();
+
+            user.Followers = followers;
             
             return View(user);
         }
