@@ -109,17 +109,20 @@
                     const userId = button.data('user-id');
                     const artistId = button.data('artist-id');
 
-                    const url = isArtist ? '/Artists/ToggleFollow' : '/Artists/ToggleFollowUser';
-                    const data = isArtist ? { artistId: artistId } : { userId: userId };
-
+                    // Thực hiện cả hai loại unfollow
                     $.ajax({
-                        url: url,
+                        url: '/Artists/UnfollowBoth',
                         type: 'POST',
-                        data: data,
+                        data: { 
+                            targetUserId: userId,
+                            artistId: artistId
+                        },
                         success: function(response) {
                             if (response.success) {
+                                // Xóa phần tử khỏi giao diện
                                 button.closest('.col-xl-3').fadeOut(function() {
                                     $(this).remove();
+                                    // Nếu không còn phần tử nào, tải lại trang
                                     if ($('.col-xl-3').length === 0) {
                                         location.reload();
                                     }
