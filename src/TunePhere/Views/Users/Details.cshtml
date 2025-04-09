@@ -43,6 +43,20 @@
         display: block;
         opacity: 1;
     }
+
+    .music-card {
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .music-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+    .music-title, .music-artist {
+        pointer-events: none;
+    }
 </style>
 
 <div class="profile-container">
@@ -82,13 +96,10 @@
                         <span class="stat-count">@Model.GetPlaylistCount()</span> Playlist
                     </div>
                     <div class="stat">
-                        <span class="stat-count">@Model.GetFollowingCount()</span> Đang theo dõi
+                        <span class="stat-count">@ViewBag.TotalFollowing</span> Đang theo dõi
                     </div>
                     <div class="stat">
-                        <span class="stat-count">@Model.GetFollowersCount()</span> Người theo dõi
-                    </div>
-                    <div class="stat">
-                        <span class="stat-count">@Model.GetFollowedArtistsCount()</span> Nghệ sĩ yêu thích
+                        <span class="stat-count">@Model.GetFavoriteSongsCount()</span> Bài hát yêu thích
                     </div>
                 </div>
             </div>
@@ -134,7 +145,7 @@
                     {
                         foreach (var history in Model.PlayHistory.Take(6))
                         {
-                            <div class="music-card">
+                            <div class="music-card" onclick="location.href='@Url.Action("Details", "Songs", new { id = history.Song.SongId })'">
                                 <div class="music-thumbnail">
                                     @if (!string.IsNullOrEmpty(history.Song.ImageUrl))
                                     {
@@ -176,9 +187,9 @@
                 <div class="playlist-grid">
                     @if (Model.Playlists != null && Model.Playlists.Any())
                     {
-                        foreach (var playlist in Model.Playlists.Where(p => p.IsPublic).Take(6))
+                        foreach (var playlist in Model.Playlists)
                         {
-                            <div class="playlist-card">
+                            <div class="playlist-card" onclick="location.href='@Url.Action("Details", "Playlists", new { id = playlist.PlaylistId })'">
                                 <div class="playlist-thumbnail">
                                     @if (!string.IsNullOrEmpty(playlist.ImageUrl))
                                     {
@@ -193,9 +204,18 @@
                                     <div class="play-button">
                                         <i class="fas fa-play"></i>
                                     </div>
+                                    @if (!playlist.IsPublic)
+                                    {
+                                        <div class="privacy-badge">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                    }
                                 </div>
                                 <h3 class="playlist-title">@playlist.Title</h3>
-                                <p class="playlist-info">@playlist.PlaylistSongs.Count bài hát</p>
+                                <p class="playlist-info">
+                                    <span class="song-count">@playlist.PlaylistSongs.Count bài hát</span>
+                                    <span class="playlist-date">@playlist.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                </p>
                             </div>
                         }
                     }
@@ -221,7 +241,7 @@
                     {
                         foreach (var favorite in Model.FavoriteSongs.Take(6))
                         {
-                            <div class="music-card">
+                            <div class="music-card" onclick="location.href='@Url.Action("Details", "Songs", new { id = favorite.Song.SongId })'">
                                 <div class="music-thumbnail">
                                     @if (!string.IsNullOrEmpty(favorite.Song.ImageUrl))
                                     {
@@ -261,7 +281,7 @@
                     {
                         foreach (var artist in Model.FollowedArtists.Take(6))
                         {
-                            <div class="artist-card">
+                            <div class="artist-card" onclick="location.href='@Url.Action("Profile", "Artists", new { id = artist.ArtistId })'">
                                 <div class="artist-thumbnail">
                                     @if (!string.IsNullOrEmpty(artist.ImageUrl))
                                     {
@@ -271,9 +291,16 @@
                                     {
                                         <img src="~/images/artist-placeholder.jpg" alt="@artist.ArtistName" />
                                     }
+                                    <div class="play-overlay">
+                                        <button class="play-btn">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <h3 class="artist-name">@artist.ArtistName</h3>
-                                <p class="artist-type">Nghệ sĩ</p>
+                                <p class="artist-type">
+                                    <i class="fas fa-music"></i> @artist.Songs.Count bài hát
+                                </p>
                             </div>
                         }
                     }
@@ -298,7 +325,7 @@
                     {
                         foreach (var history in Model.PlayHistory)
                         {
-                            <div class="music-card">
+                            <div class="music-card" onclick="location.href='@Url.Action("Details", "Songs", new { id = history.Song.SongId })'">
                                 <div class="music-thumbnail">
                                     @if (!string.IsNullOrEmpty(history.Song.ImageUrl))
                                     {
