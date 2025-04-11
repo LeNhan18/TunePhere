@@ -55,9 +55,16 @@ namespace TunePhere.Controllers
                     return View();
                 }
 
+                // Kiểm tra số lượng bản ghi trong database
+                var totalPlayHistories = await _context.PlayHistories.CountAsync();
+                var totalSongs = await _context.Songs.CountAsync();
+                Console.WriteLine($"Tổng số PlayHistories: {totalPlayHistories}");
+                Console.WriteLine($"Tổng số Songs: {totalSongs}");
+
                 // Thống kê tổng quan
                 var userCount = await _userManager.Users.CountAsync();
                 ViewBag.TotalUsers = userCount;
+                Console.WriteLine($"Tổng số Users: {userCount}");
 
                 var songs = await _songRepository.GetAllAsync();
                 var songsList = songs?.ToList() ?? new List<Song>();
@@ -80,14 +87,19 @@ namespace TunePhere.Controllers
                 ViewBag.TopSongs = topSongs;
 
                 // Thống kê theo tháng và ngày
-                GetMonthlyStats(songsList);
-                GetDailyStats(songsList);
+                await GetMonthlyStats(songsList);
+                await GetDailyStats(songsList);
 
                 return View();
             }
             catch (Exception error)
             {
                 ViewBag.Error = $"Có lỗi xảy ra khi tải dữ liệu dashboard: {error.Message}";
+                Console.WriteLine($"Error in Index: {error.Message}");
+                if (error.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {error.InnerException.Message}");
+                }
                 return View();
             }
         }
@@ -101,38 +113,48 @@ namespace TunePhere.Controllers
                     .OrderBy(d => d)
                     .ToList();
 
+                Console.WriteLine($"Checking stats for dates: {string.Join(", ", last15Days.Select(d => d.ToString("dd/MM/yyyy")))}");
+
                 var dailyStats = new List<DailyStats>();
+                var dailyPlayCounts = new List<int>();
+                var days = new List<string>();
 
                 foreach (var day in last15Days)
                 {
-                    // Lấy số lượt nghe trong ngày từ bảng PlayHistories
-                    var dailyPlays = await _context.PlayHistories
-                        .Where(ph => ph.PlayedAt.Date == day.Date)
-                        .CountAsync();
+                    // Lấy tổng PlayCount của các bài hát được upload trong ngày
+                    var songsInDay = await _context.Songs
+                        .Where(s => s.UploadDate.Date == day.Date)
+                        .ToListAsync();
 
-                    // Lấy số người dùng hoạt động (distinct users có PlayHistory trong ngày)
-                    var activeUsers = await _context.PlayHistories
-                        .Where(ph => ph.PlayedAt.Date == day.Date)
-                        .Select(ph => ph.UserId)
+                    var dailyPlays = songsInDay.Sum(s => s.PlayCount);
+                    Console.WriteLine($"Date: {day.ToString("dd/MM/yyyy")}, Plays: {dailyPlays}");
+
+                    // Lấy số người dùng hoạt động (distinct users có bài hát được upload trong ngày)
+                    var activeUsers = await _context.Songs
+                        .Where(s => s.UploadDate.Date == day.Date)
+                        .Select(s => s.ArtistId)
                         .Distinct()
                         .CountAsync();
 
-                    // Lấy số bài hát mới upload trong ngày
-                    var newSongs = await _context.Songs
-                        .Where(s => s.UploadDate.Date == day.Date)
-                        .CountAsync();
+                    Console.WriteLine($"Active Users: {activeUsers}");
 
-                    // Tính thời gian nghe trung bình (phút) từ PlayHistories
-                    var avgListeningTime = await _context.PlayHistories
-                        .Where(ph => ph.PlayedAt.Date == day.Date)
-                        .Select(ph => ph.Song.Duration.TotalMinutes)
-                        .DefaultIfEmpty(0)
-                        .AverageAsync();
+                    // Lấy số bài hát mới upload trong ngày
+                    var newSongs = songsInDay.Count;
+                    Console.WriteLine($"New Songs: {newSongs}");
+
+                    // Tính thời gian nghe trung bình (phút)
+                    double avgListeningTime = 0;
+                    if (songsInDay.Any())
+                    {
+                        avgListeningTime = songsInDay.Average(s => s.Duration.TotalMinutes);
+                    }
+                    Console.WriteLine($"Average Listening Time: {avgListeningTime} minutes");
 
                     // Tính % tăng trưởng so với ngày trước
-                    var previousDayPlays = await _context.PlayHistories
-                        .Where(ph => ph.PlayedAt.Date == day.AddDays(-1).Date)
-                        .CountAsync();
+                    var previousDaySongs = await _context.Songs
+                        .Where(s => s.UploadDate.Date == day.AddDays(-1).Date)
+                        .ToListAsync();
+                    var previousDayPlays = previousDaySongs.Sum(s => s.PlayCount);
 
                     double growthPercent = 0;
                     if (previousDayPlays > 0)
@@ -150,15 +172,24 @@ namespace TunePhere.Controllers
                         AverageListeningTime = (int)avgListeningTime,
                         Growth = growthPercent
                     });
+
+                    dailyPlayCounts.Add(dailyPlays);
+                    days.Add(day.ToString("dd/MM"));
                 }
 
                 ViewBag.DailyStats = dailyStats;
-                ViewBag.DailyPlayCounts = dailyStats.Select(d => d.PlayCount).ToList();
-                ViewBag.Days = dailyStats.Select(d => d.Date).ToList();
+                ViewBag.DailyPlayCounts = dailyPlayCounts;
+                ViewBag.Days = days;
+
+                // Log để kiểm tra
+                Console.WriteLine($"Daily Stats Count: {dailyStats.Count}");
+                Console.WriteLine($"Daily Play Counts: {string.Join(", ", dailyPlayCounts)}");
+                Console.WriteLine($"Days: {string.Join(", ", days)}");
             }
             catch (Exception error)
             {
                 Console.WriteLine($"Lỗi khi tạo thống kê ngày: {error.Message}");
+                ViewBag.Error = $"Có lỗi xảy ra khi tải dữ liệu thống kê ngày: {error.Message}";
             }
         }
 
@@ -172,44 +203,47 @@ namespace TunePhere.Controllers
                     .ToList();
 
                 var monthlyStats = new List<MonthlyStats>();
+                var playCounts = new List<int>();
+                var months = new List<string>();
 
                 foreach (var month in last6Months)
                 {
                     var startDate = new DateTime(month.Year, month.Month, 1);
                     var endDate = startDate.AddMonths(1).AddDays(-1);
 
-                    // Lấy số lượt nghe trong tháng
-                    var monthlyPlays = await _context.PlayHistories
-                        .Where(ph => ph.PlayedAt >= startDate && ph.PlayedAt <= endDate)
-                        .CountAsync();
+                    // Lấy tổng PlayCount của các bài hát được upload trong tháng
+                    var songsInMonth = await _context.Songs
+                        .Where(s => s.UploadDate >= startDate && s.UploadDate <= endDate)
+                        .ToListAsync();
 
-                    // Lấy số người dùng hoạt động trong tháng
-                    var activeUsers = await _context.PlayHistories
-                        .Where(ph => ph.PlayedAt >= startDate && ph.PlayedAt <= endDate)
-                        .Select(ph => ph.UserId)
+                    var monthlyPlays = songsInMonth.Sum(s => s.PlayCount);
+
+                    // Lấy số người dùng hoạt động (distinct users có bài hát được upload trong tháng)
+                    var activeUsers = await _context.Songs
+                        .Where(s => s.UploadDate >= startDate && s.UploadDate <= endDate)
+                        .Select(s => s.ArtistId)
                         .Distinct()
                         .CountAsync();
 
                     // Lấy số bài hát mới trong tháng
-                    var newSongs = await _context.Songs
-                        .Where(s => s.UploadDate >= startDate && s.UploadDate <= endDate)
-                        .CountAsync();
+                    var newSongs = songsInMonth.Count;
 
                     // Tính thời gian nghe trung bình
-                    var avgListeningTime = await _context.PlayHistories
-                        .Where(ph => ph.PlayedAt >= startDate && ph.PlayedAt <= endDate)
-                        .Select(ph => ph.Song.Duration.TotalMinutes)
-                        .DefaultIfEmpty(0)
-                        .AverageAsync();
+                    double avgListeningTime = 0;
+                    if (songsInMonth.Any())
+                    {
+                        avgListeningTime = songsInMonth.Average(s => s.Duration.TotalMinutes);
+                    }
 
                     // Tính % tăng trưởng so với tháng trước
                     var previousMonth = month.AddMonths(-1);
                     var previousMonthStart = new DateTime(previousMonth.Year, previousMonth.Month, 1);
                     var previousMonthEnd = previousMonthStart.AddMonths(1).AddDays(-1);
 
-                    var previousMonthPlays = await _context.PlayHistories
-                        .Where(ph => ph.PlayedAt >= previousMonthStart && ph.PlayedAt <= previousMonthEnd)
-                        .CountAsync();
+                    var previousMonthSongs = await _context.Songs
+                        .Where(s => s.UploadDate >= previousMonthStart && s.UploadDate <= previousMonthEnd)
+                        .ToListAsync();
+                    var previousMonthPlays = previousMonthSongs.Sum(s => s.PlayCount);
 
                     double growthPercent = 0;
                     if (previousMonthPlays > 0)
@@ -226,15 +260,24 @@ namespace TunePhere.Controllers
                         AverageListeningTime = (int)avgListeningTime,
                         Growth = growthPercent
                     });
+
+                    playCounts.Add(monthlyPlays);
+                    months.Add(month.ToString("MM/yyyy"));
                 }
 
                 ViewBag.MonthlyStats = monthlyStats;
-                ViewBag.PlayCounts = monthlyStats.Select(m => m.PlayCount).ToList();
-                ViewBag.Months = monthlyStats.Select(m => m.Month).ToList();
+                ViewBag.PlayCounts = playCounts;
+                ViewBag.Months = months;
+
+                // Log để kiểm tra
+                Console.WriteLine($"Monthly Stats Count: {monthlyStats.Count}");
+                Console.WriteLine($"Play Counts: {string.Join(", ", playCounts)}");
+                Console.WriteLine($"Months: {string.Join(", ", months)}");
             }
             catch (Exception error)
             {
                 Console.WriteLine($"Lỗi khi tạo thống kê tháng: {error.Message}");
+                ViewBag.Error = $"Có lỗi xảy ra khi tải dữ liệu thống kê tháng: {error.Message}";
             }
         }
         // Chỉ truy cập được endpoint này nếu chưa có tài khoản admin
