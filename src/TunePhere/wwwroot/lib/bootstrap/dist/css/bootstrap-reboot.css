@@ -8,7 +8,8 @@
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+    box-sizing: border-box;
+    color: #6c50a1;
 }
 
 @media (prefers-reduced-motion: no-preference) {
