@@ -17,14 +17,37 @@
     <script src="~/js/loginheader.js"></script>
 </head>
 <body>
-    <div class="container sign-up-mode"> <!-- Thêm class sign-up-mode để hiển thị form đăng ký -->
+    <!-- Thông báo lỗi -->
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="error-overlay" id="errorOverlay">
+            <div class="error-message">
+                <div class="error-content">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div class="error-text">
+                        @foreach (var modelState in ViewData.ModelState.Values)
+                        {
+                            foreach (var error in modelState.Errors)
+                            {
+                                <p>@error.ErrorMessage</p>
+                            }
+                        }
+                    </div>
+                    <button class="close-error" onclick="closeErrorMessage()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="container sign-up-mode">
         <div class="particle"></div>
         <div class="forms-container">
             <div class="signin-signup">
-                <!-- Form đăng nhập (ẩn sẵn do có class sign-up-mode) -->
+                <!-- Form đăng nhập -->
                 <form id="account" asp-page="./Login" method="post" class="sign-in-form">
                     <h2 class="title">Đăng nhập</h2>
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     
                     <div class="input-field">
                         <i class="fas fa-user"></i>
@@ -56,29 +79,28 @@
                     </div>
                 </form>
 
-                <!-- Form đăng ký (hiển thị sẵn do có class sign-up-mode) -->
-                <form id="registerForm" method="post" class="sign-up-form">
+                <!-- Form đăng ký -->
+                <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="sign-up-form">
                     <h2 class="title">Đăng ký</h2>
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     
                     <div class="input-field">
                         <i class="fas fa-user"></i>
-                        <input asp-for="Input.FullName" type="text" placeholder="Họ tên" required />
+                        <input asp-for="Input.FullName" type="text" placeholder="Họ tên" />
                     </div>
                     <div class="input-field">
                         <i class="fas fa-envelope"></i>
-                        <input asp-for="Input.Email" type="email" placeholder="Email" required />
+                        <input asp-for="Input.Email" type="email" placeholder="Email" />
                     </div>
                     <div class="input-field">
                         <i class="fas fa-lock"></i>
-                        <input asp-for="Input.Password" type="password" placeholder="Mật khẩu" required />
+                        <input asp-for="Input.Password" type="password" placeholder="Mật khẩu" />
                     </div>
                     <div class="input-field">
                         <i class="fas fa-lock"></i>
-                        <input asp-for="Input.ConfirmPassword" type="password" placeholder="Xác nhận mật khẩu" required />
+                        <input asp-for="Input.ConfirmPassword" type="password" placeholder="Xác nhận mật khẩu" />
                     </div>
                     
-                    <button id="registerSubmit" type="submit" class="btn solid">
+                    <button type="submit" class="btn solid">
                         <i class="fas fa-headphones-alt"></i>
                         Đăng ký
                     </button>
@@ -133,5 +155,38 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    
+    <script>
+        function closeErrorMessage() {
+            const overlay = document.getElementById('errorOverlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.remove();
+                    // Clear form fields
+                    document.querySelectorAll('input').forEach(input => {
+                        if (input.type !== 'submit' && input.type !== 'button') {
+                            input.value = '';
+                        }
+                    });
+                    // Reset validation state
+                    if (typeof $ !== 'undefined') {
+                        $('form').each(function() {
+                            $(this).data('validator', null);
+                            $.validator.unobtrusive.parse($(this));
+                        });
+                    }
+                }, 300);
+            }
+        }
+
+        // Thêm animation khi ẩn overlay
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('errorOverlay');
+            if (overlay) {
+                overlay.style.transition = 'opacity 0.3s ease';
+            }
+        });
+    </script>
 </body>
 </html>
