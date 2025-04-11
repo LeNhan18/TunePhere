@@ -22,6 +22,7 @@ using TunePhere.Models;
 
 namespace TunePhere.Areas.Identity.Pages.Account
 {
+    [AllowAnonymous]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<AppUser> _signInManager;
@@ -75,8 +76,16 @@ namespace TunePhere.Areas.Identity.Pages.Account
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Vui lòng nhập họ tên")]
+            [Display(Name = "Họ tên")]
+            public string FullName { get; set; }
+
+            /// <summary>
+            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+            ///     directly from your code. This API may change or be removed in future releases.
+            /// </summary>
+            [Required(ErrorMessage = "Vui lòng nhập email")]
+            [EmailAddress(ErrorMessage = "Email không hợp lệ")]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
@@ -84,28 +93,22 @@ namespace TunePhere.Areas.Identity.Pages.Account
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [Required(ErrorMessage = "Vui lòng nhập mật khẩu")]
+            [StringLength(100, ErrorMessage = "Mật khẩu phải có ít nhất {2} ký tự.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
+            [Display(Name = "Mật khẩu")]
             public string Password { get; set; }
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
+            [Required(ErrorMessage = "Vui lòng xác nhận mật khẩu")]
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Display(Name = "Xác nhận mật khẩu")]
+            [Compare("Password", ErrorMessage = "Mật khẩu xác nhận không khớp.")]
             public string ConfirmPassword { get; set; }
-            
-            /// <summary>
-            ///     Tên đầy đủ của người dùng
-            /// </summary>
-            [Display(Name = "Họ và tên")]
-            public string FullName { get; set; }
         }
-
 
         public async Task OnGetAsync(string returnUrl = null)
         {
@@ -117,20 +120,11 @@ namespace TunePhere.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
-
-                // Tự động điền FullName từ email hoặc từ Input nếu được cung cấp
-                if (!string.IsNullOrEmpty(Input.FullName))
-                {
-                    user.FullName = Input.FullName;
-                }
-                else
-                {
-                    var emailParts = Input.Email.Split('@');
-                    user.FullName = emailParts[0]; // Lấy phần trước @ làm tên
-                }
+                user.FullName = Input.FullName;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -139,9 +133,6 @@ namespace TunePhere.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
-
-                    // Gán vai trò "User" cho người dùng mới đăng ký
-                    await _userManager.AddToRoleAsync(user, "User");
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -152,8 +143,8 @@ namespace TunePhere.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    await _emailSender.SendEmailAsync(Input.Email, "Xác nhận email",
+                        $"Vui lòng xác nhận tài khoản của bạn bằng cách <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>bấm vào đây</a>.");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
@@ -171,7 +162,24 @@ namespace TunePhere.Areas.Identity.Pages.Account
                 }
             }
 
-            // If we got this far, something failed, redisplay form
+            // Kiểm tra và thêm thông báo lỗi cụ thể
+            if (Input.Password != null && Input.Password.Length < 6)
+            {
+                ModelState.AddModelError("Input.Password", "Mật khẩu phải có ít nhất 6 ký tự.");
+            }
+
+            if (Input.Password != Input.ConfirmPassword)
+            {
+                ModelState.AddModelError("Input.ConfirmPassword", "Mật khẩu xác nhận không khớp.");
+            }
+
+            // Kiểm tra email đã tồn tại
+            var existingUser = await _userManager.FindByEmailAsync(Input.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Input.Email", "Email này đã được sử dụng. Vui lòng chọn email khác.");
+            }
+
             return Page();
         }
 
