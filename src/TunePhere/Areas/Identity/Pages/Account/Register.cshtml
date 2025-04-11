@@ -17,20 +17,25 @@
     <script src="~/js/loginheader.js"></script>
 </head>
 <body>
-    <!-- Thông báo lỗi toàn cục -->
+    <!-- Thông báo lỗi -->
     @if (!ViewData.ModelState.IsValid)
     {
-        <div class="floating-error-message">
-            <div class="error-content">
-                <i class="fas fa-exclamation-circle"></i>
-                <div class="error-text">
-                    @foreach (var modelState in ViewData.ModelState.Values)
-                    {
-                        foreach (var error in modelState.Errors)
+        <div class="error-overlay" id="errorOverlay">
+            <div class="error-message">
+                <div class="error-content">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div class="error-text">
+                        @foreach (var modelState in ViewData.ModelState.Values)
                         {
-                            <p>@error.ErrorMessage</p>
+                            foreach (var error in modelState.Errors)
+                            {
+                                <p>@error.ErrorMessage</p>
+                            }
                         }
-                    }
+                    </div>
+                    <button class="close-error" onclick="closeErrorMessage()">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -150,5 +155,38 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    
+    <script>
+        function closeErrorMessage() {
+            const overlay = document.getElementById('errorOverlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.remove();
+                    // Clear form fields
+                    document.querySelectorAll('input').forEach(input => {
+                        if (input.type !== 'submit' && input.type !== 'button') {
+                            input.value = '';
+                        }
+                    });
+                    // Reset validation state
+                    if (typeof $ !== 'undefined') {
+                        $('form').each(function() {
+                            $(this).data('validator', null);
+                            $.validator.unobtrusive.parse($(this));
+                        });
+                    }
+                }, 300);
+            }
+        }
+
+        // Thêm animation khi ẩn overlay
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('errorOverlay');
+            if (overlay) {
+                overlay.style.transition = 'opacity 0.3s ease';
+            }
+        });
+    </script>
 </body>
 </html>
