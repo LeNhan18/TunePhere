@@ -136,7 +136,15 @@
                 <button type="submit" class="spotify-primary-button">
                     <span>Tạo Album</span>
                 </button>
-                <a href="@Url.Action("Index", "Albums")" class="spotify-secondary-button">Hủy</a>
+                @if (ViewBag.Artists != null && ViewBag.Artists.Count > 0)
+                {
+                    var artist = ViewBag.Artists[0];
+                    <a href="@Url.Action("Index", "Albums", new { artistId = artist.ArtistId })" class="spotify-secondary-button">Hủy</a>
+                }
+                else
+                {
+                    <a href="@Url.Action("Index", "Home")" class="spotify-secondary-button">Hủy</a>
+                }
             </div>
         </form>
     </div>
