@@ -1,0 +1,364 @@
+﻿/* TunePhere Theme - Add Song */
+
+:root {
+    --primary-color: #8B5CF6;
+    --primary-hover: #7B2CBF;
+    --primary-light: #A78BFA;
+    --bg-dark: #121212;
+    --bg-darker: #0a0a0a;
+    --bg-card: #1A1A1A;
+    --bg-card-hover: #282828;
+    --text-bright: #FFFFFF;
+    --text-main: #E0E0E0;
+    --text-secondary: #b3b3b3;
+    --border-color: #333333;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Container */
+.tunephere-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+/* Header */
+.tunephere-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.tunephere-back-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(139, 92, 246, 0.15);
+    border-radius: 50%;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.tunephere-back-btn:hover {
+    background: rgba(139, 92, 246, 0.3);
+    transform: scale(1.05);
+}
+
+.tunephere-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin: 0;
+}
+
+/* Content */
+.tunephere-content {
+    background-color: var(--bg-card);
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: var(--shadow);
+}
+
+/* Form Layout */
+.tunephere-form-layout {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+/* Media Upload */
+.tunephere-media-upload {
+    flex: 0 0 280px;
+}
+
+.tunephere-music-cover {
+    width: 280px;
+    height: 280px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 2px dashed var(--primary-light);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.tunephere-music-cover:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(139, 92, 246, 0.1);
+}
+
+.tunephere-music-cover i {
+    color: var(--primary-color);
+    transition: all 0.3s;
+}
+
+.tunephere-music-cover:hover i {
+    transform: scale(1.1);
+}
+
+.tunephere-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tunephere-music-cover:hover .tunephere-overlay {
+    opacity: 1;
+}
+
+.tunephere-overlay i {
+    font-size: 48px;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.tunephere-overlay span {
+    color: var(--text-bright);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.tunephere-upload-hint {
+    margin-top: 12px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.tunephere-upload-hint.file-selected {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.hidden-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Form Fields */
+.tunephere-form-fields {
+    flex: 1;
+}
+
+.tunephere-form-group {
+    margin-bottom: 24px;
+}
+
+.tunephere-label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--text-main);
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.tunephere-input {
+    width: 100%;
+    padding: 14px 16px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-bright);
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.tunephere-input:focus {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
+}
+
+.tunephere-input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Form Actions */
+.tunephere-form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 40px;
+}
+
+.tunephere-primary-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 32px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 10px rgba(123, 44, 191, 0.3);
+}
+
+.tunephere-primary-button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(123, 44, 191, 0.4);
+}
+
+.tunephere-primary-button i {
+    font-size: 1rem;
+}
+
+.tunephere-secondary-button {
+    background-color: transparent;
+    color: var(--text-bright);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 30px;
+    padding: 12px 32px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tunephere-secondary-button:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(139, 92, 246, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .tunephere-form-layout {
+        flex-direction: column;
+    }
+
+    .tunephere-media-upload {
+        margin: 0 auto 30px;
+    }
+
+    .tunephere-music-cover {
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 600px) {
+    .tunephere-container {
+        padding: 0 15px;
+    }
+
+    .tunephere-content {
+        padding: 20px;
+    }
+
+    .tunephere-form-actions {
+        flex-direction: column;
+    }
+
+    .tunephere-primary-button,
+    .tunephere-secondary-button {
+        width: 100%;
+    }
+
+    .tunephere-header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Custom dropdown styling */
+.tunephere-input[name="Genre"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238B5CF6' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 15px) center;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+.tunephere-input[name="Genre"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
+}
+
+/* Custom select options styling */
+.tunephere-input[name="Genre"] option {
+    background-color: #222;
+    color: var(--text-main);
+    padding: 10px;
+}
+
+.tunephere-input[name="Genre"] option:hover,
+.tunephere-input[name="Genre"] option:focus {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Styling for when dropdown is open */
+.tunephere-input[name="Genre"]:focus {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Darken dropdown box to match TunePhere theme */
+.tunephere-input[name="Genre"] {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.tunephere-input[name="Genre"]:hover {
+    border-color: var(--primary-light);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Highlighted dropdown option */
+.tunephere-input[name="Genre"] option:checked,
+.tunephere-input[name="Genre"] option:selected {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 500;
+}
