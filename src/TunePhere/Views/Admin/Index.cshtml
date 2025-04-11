@@ -4,6 +4,7 @@
 }
 
 <link rel="stylesheet" href="~/css/admin-dashboard.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="dashboard-container">
     @if (ViewBag.Error != null)
@@ -223,6 +224,7 @@
             </div>
         </div>
 
+        <!-- Top bài hát phổ biến -->
         <div class="col-xl-4 col-lg-5">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -242,8 +244,8 @@
                         <table class="table mb-0">
                             <thead>
                                 <tr>
-                                    <th>Tên bài hát</th>
-                                    <th class="text-end">Lượt nghe</th>
+                                    <th class="px-4">Tên bài hát</th>
+                                    <th class="text-end px-4">Lượt nghe</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -252,14 +254,14 @@
                                     @foreach (var song in ViewBag.TopSongs)
                                     {
                                         <tr class="song-row">
-                                            <td>
+                                            <td class="px-4">
                                                 <div class="d-flex align-items-center">
-                                                    <i class="fas fa-music me-3 text-secondary"></i>
-                                                    <div>@song.Title</div>
+                                                    <i class="fas fa-music me-3 text-purple"></i>
+                                                    <div class="song-title text-white">@song.Title</div>
                                                 </div>
                                             </td>
-                                            <td class="text-end">
-                                                <span class="play-count">@song.PlayCount</span>
+                                            <td class="text-end px-4">
+                                                <span class="play-count text-white">@song.PlayCount.ToString("N0")</span>
                                             </td>
                                         </tr>
                                     }
@@ -281,7 +283,7 @@
     </div>
 
     <!-- Thống kê chi tiết lượt nghe theo tháng -->
-    <div class="row">
+    <div class="row mb-4">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -298,7 +300,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table custom-table">
                             <thead>
                                 <tr>
                                     <th>Tháng</th>
@@ -317,8 +319,8 @@
                                         <tr>
                                             <td>@stat.Month</td>
                                             <td>@stat.PlayCount.ToString("N0")</td>
-                                            <td>@stat.ActiveUsers</td>
-                                            <td>@stat.NewSongs</td>
+                                            <td>@stat.ActiveUsers.ToString("N0")</td>
+                                            <td>@stat.NewSongs.ToString("N0")</td>
                                             <td>@stat.AverageListeningTime</td>
                                             <td>
                                                 @if (stat.Growth > 0)
@@ -358,7 +360,7 @@
     </div>
 
     <!-- Thống kê chi tiết lượt nghe theo ngày -->
-    <div class="row mb-4">
+    <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -375,7 +377,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table custom-table">
                             <thead>
                                 <tr>
                                     <th>Ngày</th>
@@ -396,8 +398,8 @@
                                             <td>@stat.Date</td>
                                             <td>@stat.DayOfWeek</td>
                                             <td>@stat.PlayCount.ToString("N0")</td>
-                                            <td>@stat.ActiveUsers</td>
-                                            <td>@stat.NewSongs</td>
+                                            <td>@stat.ActiveUsers.ToString("N0")</td>
+                                            <td>@stat.NewSongs.ToString("N0")</td>
                                             <td>@stat.AverageListeningTime</td>
                                             <td>
                                                 @if (stat.Growth > 0)
@@ -438,136 +440,244 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
-        // Định dạng số với dấu phân cách hàng nghìn
-        function formatNumber(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
-            // Khởi tạo biểu đồ thống kê lượt nghe theo ngày
-            initDailyChart();
-            
-            // Khởi tạo biểu đồ thống kê lượt nghe theo tháng
-            initMonthlyChart();
+            const purple = '#8b5cf6';
+            const purpleLight = 'rgba(139, 92, 246, 0.1)';
+            const purpleAlpha = 'rgba(139, 92, 246, 0.8)';
 
-            // Animation cho các số liệu thống kê
-            animateCounters();
-        });
-
-        // Cấu hình chung cho biểu đồ
-        const chartOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        color: '#f8fafc',  // Màu chữ cho chú thích
-                        font: {
-                            size: 14,
-                            weight: '500'
+            // Cấu hình chung cho biểu đồ
+            const defaultOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#f8fafc',
+                            font: {
+                                size: 14,
+                                weight: '500'
+                            }
                         }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#cbd5e1',
+                        borderColor: purple,
+                        borderWidth: 1,
+                        padding: 15,
+                        displayColors: false
                     }
                 },
-                title: {
-                    display: true,
-                    color: '#f8fafc',  // Màu chữ cho tiêu đề
-                    font: {
-                        size: 16,
-                        weight: '600'
+                scales: {
+                    x: {
+                        grid: {
+                            color: purpleLight,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#f8fafc',
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: purpleLight,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#f8fafc',
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            }
+                        }
                     }
                 }
-            },
-            scales: {
-                x: {
-                    grid: {
-                        color: 'rgba(248, 250, 252, 0.1)'  // Màu đường lưới trục x
-                    },
-                    ticks: {
-                        color: '#f8fafc',  // Màu chữ cho nhãn trục x
-                        font: {
-                            size: 12,
-                            weight: '500'
-                        }
-                    }
-                },
-                y: {
-                    grid: {
-                        color: 'rgba(248, 250, 252, 0.1)'  // Màu đường lưới trục y
-                    },
-                    ticks: {
-                        color: '#f8fafc',  // Màu chữ cho nhãn trục y
-                        font: {
-                            size: 12,
-                            weight: '500'
-                        }
-                    }
+            };
+
+            // Biểu đồ thống kê theo ngày
+            const dailyCtx = document.getElementById('dailyListeningChart');
+            if (dailyCtx) {
+                const dailyData = @Html.Raw(Json.Serialize(ViewBag.DailyPlayCounts ?? new int[] {}));
+                const dailyLabels = @Html.Raw(Json.Serialize(ViewBag.Days ?? new string[] {}));
+
+                if (dailyData && dailyLabels && dailyData.length > 0 && dailyLabels.length > 0) {
+                    new Chart(dailyCtx, {
+                        type: 'line',
+                        data: {
+                            labels: dailyLabels,
+                            datasets: [{
+                                label: 'Lượt nghe',
+                                data: dailyData,
+                                borderColor: purple,
+                                backgroundColor: purpleLight,
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: '#ffffff',
+                                pointBorderColor: purple,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }]
+                        },
+                        options: defaultOptions
+                    });
+                } else {
+                    dailyCtx.style.display = 'none';
+                    const noDataMessage = document.createElement('div');
+                    noDataMessage.className = 'no-data-message';
+                    noDataMessage.innerHTML = '<i class="fas fa-info-circle"></i> Chưa có dữ liệu thống kê';
+                    dailyCtx.parentNode.appendChild(noDataMessage);
                 }
             }
-        };
 
-        // Khởi tạo biểu đồ ngày
-        const dailyCtx = document.getElementById('dailyListeningChart').getContext('2d');
-        new Chart(dailyCtx, {
-            type: 'line',
-            data: {
-                labels: @Html.Raw(Json.Serialize(ViewBag.Days)),
-                datasets: [{
-                    label: 'Lượt nghe',
-                    data: @Html.Raw(Json.Serialize(ViewBag.DailyPlayCounts)),
-                    borderColor: '#8b5cf6',
-                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: chartOptions
+            // Biểu đồ thống kê theo tháng
+            const monthlyCtx = document.getElementById('monthlyListeningChart');
+            if (monthlyCtx) {
+                const monthlyData = @Html.Raw(Json.Serialize(ViewBag.PlayCounts ?? new int[] {}));
+                const monthlyLabels = @Html.Raw(Json.Serialize(ViewBag.Months ?? new string[] {}));
+
+                if (monthlyData && monthlyLabels && monthlyData.length > 0 && monthlyLabels.length > 0) {
+                    new Chart(monthlyCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: monthlyLabels,
+                            datasets: [{
+                                label: 'Lượt nghe',
+                                data: monthlyData,
+                                backgroundColor: purpleAlpha,
+                                borderColor: purple,
+                                borderWidth: 1,
+                                borderRadius: 4
+                            }]
+                        },
+                        options: defaultOptions
+                    });
+                } else {
+                    monthlyCtx.style.display = 'none';
+                    const noDataMessage = document.createElement('div');
+                    noDataMessage.className = 'no-data-message';
+                    noDataMessage.innerHTML = '<i class="fas fa-info-circle"></i> Chưa có dữ liệu thống kê';
+                    monthlyCtx.parentNode.appendChild(noDataMessage);
+                }
+            }
         });
-
-        // Khởi tạo biểu đồ tháng
-        const monthlyCtx = document.getElementById('monthlyListeningChart').getContext('2d');
-        new Chart(monthlyCtx, {
-            type: 'bar',
-            data: {
-                labels: @Html.Raw(Json.Serialize(ViewBag.Months)),
-                datasets: [{
-                    label: 'Lượt nghe',
-                    data: @Html.Raw(Json.Serialize(ViewBag.PlayCounts)),
-                    backgroundColor: 'rgba(139, 92, 246, 0.8)',
-                    borderColor: '#8b5cf6',
-                    borderWidth: 1,
-                    borderRadius: 4
-                }]
-            },
-            options: chartOptions
-        });
-
-        // Hiệu ứng đếm số
-        function animateCounters() {
-            const statValues = document.querySelectorAll('.stat-value');
-
-            statValues.forEach(element => {
-                const finalValue = parseInt(element.textContent.replace(/,/g, ''));
-                let startValue = 0;
-                const duration = 1500;
-                const increment = Math.ceil(finalValue / (duration / 20));
-                let currentValue = 0;
-
-                const counter = setInterval(() => {
-                    currentValue += increment;
-                    if(currentValue >= finalValue) {
-                        element.textContent = finalValue.toLocaleString();
-                        clearInterval(counter);
-                    } else {
-                        element.textContent = currentValue.toLocaleString();
-                    }
-                }, 20);
-            });
-        }
     </script>
 }
+
+<style>
+    .text-purple {
+        color: #8b5cf6;
+    }
+    .song-row {
+        transition: all 0.3s ease;
+    }
+    .song-row:hover {
+        background-color: rgba(139, 92, 246, 0.1);
+    }
+    .song-title {
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+    .play-count {
+        font-weight: 500;
+        color: #8b5cf6;
+    }
+    .table > :not(caption) > * > * {
+        padding: 1rem 0;
+        background-color: transparent;
+        border-bottom-color: rgba(139, 92, 246, 0.1);
+    }
+    .table thead th {
+        font-weight: 600;
+        color: #f8fafc;
+        border-bottom: 2px solid rgba(139, 92, 246, 0.2);
+    }
+    .custom-table {
+        margin-bottom: 0;
+    }
+
+    .custom-table thead th {
+        background-color: rgba(139, 92, 246, 0.1);
+        color: #f8fafc;
+        font-weight: 600;
+        border-bottom: 2px solid rgba(139, 92, 246, 0.2);
+        padding: 1rem;
+    }
+
+    .custom-table tbody td {
+        padding: 1rem;
+        color: #f8fafc;
+        border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+        font-size: 0.95rem;
+    }
+
+    .custom-table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: rgba(139, 92, 246, 0.1);
+    }
+
+    .growth-positive {
+        color: #10b981;
+        font-weight: 500;
+    }
+
+    .growth-negative {
+        color: #ef4444;
+        font-weight: 500;
+    }
+
+    .growth-neutral {
+        color: #94a3b8;
+        font-weight: 500;
+    }
+
+    .table-responsive {
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .card {
+        background-color: #1e293b;
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .card-header {
+        background-color: #1e293b;
+        border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+        padding: 1.25rem;
+    }
+
+    .card-header h6 {
+        color: #f8fafc;
+        font-size: 1rem;
+    }
+
+    .dropdown-item {
+        color: #f8fafc;
+        padding: 0.5rem 1rem;
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(139, 92, 246, 0.1);
+        color: #8b5cf6;
+    }
+
+    .dropdown-item i {
+        margin-right: 0.5rem;
+        color: #8b5cf6;
+    }
+</style>
