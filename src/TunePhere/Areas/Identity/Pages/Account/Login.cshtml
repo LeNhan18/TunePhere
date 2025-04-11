@@ -24,7 +24,7 @@
                 <form id="account" method="post" class="sign-in-form">
                     <h2 class="title">Đăng nhập</h2>
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    
+
                     <div class="input-field">
                         <i class="fas fa-user"></i>
                         <input asp-for="Input.Email" type="email" placeholder="Email" />
@@ -33,17 +33,17 @@
                         <i class="fas fa-lock"></i>
                         <input asp-for="Input.Password" type="password" placeholder="Mật khẩu" />
                     </div>
-                    
+
                     <div class="checkbox-field">
                         <input asp-for="Input.RememberMe" type="checkbox" />
                         <label asp-for="Input.RememberMe">Ghi nhớ đăng nhập?</label>
                     </div>
-                    
+
                     <button id="login-submit" type="submit" class="btn solid">
                         <i class="fas fa-headphones-alt"></i>
                         Đăng nhập
                     </button>
-                    
+
                     <p class="social-text">Hoặc đăng nhập với</p>
                     <div class="social-media">
                         @{
@@ -85,7 +85,7 @@
                 <form id="registerForm" asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="sign-up-form">
                     <h2 class="title">Đăng ký</h2>
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    
+
                     <div class="input-field">
                         <i class="fas fa-user"></i>
                         <input type="text" name="Input.FullName" placeholder="Họ tên" required />
@@ -102,11 +102,11 @@
                         <i class="fas fa-lock"></i>
                         <input type="password" name="Input.ConfirmPassword" placeholder="Xác nhận mật khẩu" required />
                     </div>
-                    
+
                     <button id="sign-in-btn" class="btn transparent">
                         <i class="fas fa-headphones-alt"></i> Đăng Nhập
                     </button>
-                    
+
                     <p class="social-text">Hoặc đăng ký với</p>
                     <div class="social-media">
                         @{

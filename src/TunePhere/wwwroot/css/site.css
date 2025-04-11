@@ -500,3 +500,38 @@ audio {
     max-height: 250px;
   }
 }
+
+.validation-message {
+    color: #ff4d4d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+    position: absolute;
+    bottom: -1.25rem;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 77, 77, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    animation: fadeIn 0.3s ease;
+}
+
+.input-field {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.text-danger {
+    color: #ff4d4d !important;
+}
