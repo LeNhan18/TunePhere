@@ -7,115 +7,99 @@
     var albumId = Model;
 }
 
+<link rel="stylesheet" href="~/css/add-song-album.css?v=@DateTime.Now.Ticks" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-<style>
-    .container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
+<div class="tunephere-container">
+    <div class="tunephere-header">
+        <div class="header-left">
+            <a href="@Url.Action("Details", "Albums", new { id = albumId })" class="tunephere-back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1>Thêm bài hát mới vào album</h1>
+        </div>
+    </div>
 
-    h1 {
-        font-size: 2rem;
-        margin-bottom: 2rem;
-        color: white;
-    }
-
-    .form-container {
-        background: #222;
-        border-radius: 8px;
-        padding: 2rem;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 0.5rem;
-        color: #b3b3b3;
-        font-size: 0.9rem;
-    }
-
-    input[type="text"],
-    input[type="file"] {
-        width: 100%;
-        padding: 0.75rem;
-        border: none;
-        background: rgba(255,255,255,.1);
-        border-radius: 4px;
-        color: white;
-    }
-
-    input[type="file"] {
-        padding: 0.5rem;
-        cursor: pointer;
-    }
-
-    .btn-submit {
-        background: #7B2CBF;
-        color: black;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 4px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        font-size: 1rem;
-    }
-
-        .btn-submit:hover {
-            background: #7b2cbf;
-        }
-
-    .btn-cancel {
-        background: transparent;
-        color: white;
-        border: 1px solid #b3b3b3;
-        padding: 0.75rem 1.5rem;
-        border-radius: 4px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s;
-        margin-right: 1rem;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-        .btn-cancel:hover {
-            border-color: white;
-        }
-
-    .button-group {
-        display: flex;
-        margin-top: 2rem;
-    }
-</style>
-
-<div class="container">
-    <h1>Thêm bài hát mới vào album</h1>
-
-    <div class="form-container">
-        <form asp-action="AddSong" method="post" enctype="multipart/form-data">
+    <div class="tunephere-content">
+        <form asp-action="AddSong" method="post" enctype="multipart/form-data" class="tunephere-form">
             <input type="hidden" name="albumId" value="@albumId">
 
-            <div class="form-group">
-                <label for="Title">Tên bài hát</label>
-                <input type="text" id="Title" name="Title" required>
+            <div class="tunephere-form-layout">
+                <div class="tunephere-media-upload">
+                    <div class="tunephere-music-cover">
+                        <i class="fas fa-music" style="font-size: 48px;"></i>
+                        <div class="tunephere-overlay">
+                            <i class="fas fa-file-audio"></i>
+                            <span>Chọn file nhạc</span>
+                        </div>
+                    </div>
+                    <input type="file" id="AudioFile" name="AudioFile" class="hidden-input" accept="audio/*" required />
+                    <div class="tunephere-upload-hint">Click vào icon để chọn file</div>
+                </div>
+
+                <div class="tunephere-form-fields">
+                    <div class="tunephere-form-group">
+                        <label for="Title" class="tunephere-label">Tên bài hát</label>
+                        <input type="text" id="Title" name="Title" class="tunephere-input" placeholder="Nhập tên bài hát" required>
+                    </div>
+
+                    <div class="tunephere-form-group">
+                        <label for="Genre" class="tunephere-label">Thể loại</label>
+                        <select name="Genre" id="Genre" class="tunephere-input">
+                            <option value="">Chọn thể loại (không bắt buộc)</option>
+                            <option value="Pop">Pop</option>
+                            <option value="Rock">Rock</option>
+                            <option value="Hip Hop">Hip Hop</option>
+                            <option value="R&B">R&B</option>
+                            <option value="Jazz">Jazz</option>
+                            <option value="Classical">Classical</option>
+                            <option value="Electronic">Electronic</option>
+                            <option value="Folk">Folk</option>
+                            <option value="Country">Country</option>
+                            <option value="Other">Khác</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
-
-            <div class="form-group">
-                <label for="AudioFile">File nhạc</label>
-                <input type="file" id="AudioFile" name="AudioFile" accept="audio/*" required>
-            </div>
-
-            <div class="button-group">
-                <a href="@Url.Action("Details", new { id = albumId })" class="btn-cancel">Hủy</a>
-                <button type="submit" class="btn-submit">Thêm bài hát</button>
+            <div class="tunephere-form-actions">
+                <button type="submit" class="tunephere-primary-button">
+                    <i class="fas fa-plus"></i>
+                    <span>Thêm bài hát</span>
+                </button>
+                <a href="@Url.Action("Details", "Albums", new { id = albumId })" class="tunephere-secondary-button">
+                    <span>Hủy</span>
+                </a>
             </div>
         </form>
     </div>
-</div> 
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Xử lý upload file nhạc
+            const musicCover = document.querySelector('.tunephere-music-cover');
+            const audioInput = document.getElementById('AudioFile');
+
+            musicCover.addEventListener('click', function() {
+                audioInput.click();
+            });
+
+            // Hiển thị tên file đã chọn
+            audioInput.addEventListener('change', function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    const fileName = e.target.files[0].name;
+                    // Tự động điền tên bài hát từ tên file nếu chưa nhập
+                    const titleInput = document.getElementById('Title');
+                    if (!titleInput.value) {
+                        titleInput.value = fileName.split('.').slice(0, -1).join('.');
+                    }
+                    // Hiển thị tên file đã chọn
+                    document.querySelector('.tunephere-upload-hint').textContent = fileName;
+                    document.querySelector('.tunephere-upload-hint').classList.add('file-selected');
+                }
+            });
+        });
+    </script>
+} 
