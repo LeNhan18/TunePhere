@@ -1,10 +1,14 @@
 ﻿@model IEnumerable<TunePhere.Models.ListeningRoom>
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<TunePhere.Models.AppUser> UserManager
 
 @{
     ViewData["Title"] = "Phòng Nghe Nhạc";
+    var currentUserId = UserManager.GetUserId(User);
+    var isAdmin = User.IsInRole("Administrator");
 }
 
-<link rel="stylesheet" href="~/css/listeningRoom.css" />
+<link rel="stylesheet" href="~/css/listeningRoom.css?v=@DateTime.Now.Ticks" />
 
 <div class="listening-room">
     <div class="room-header">
@@ -20,7 +24,15 @@
         </a>
     </div>
 
-    @if (!Model.Any())
+    @{
+        // Lọc danh sách phòng: hiển thị tất cả các phòng hoạt động 
+        // và chỉ hiển thị phòng không hoạt động cho admin hoặc người tạo
+        var filteredRooms = Model.Where(room => 
+            room.IsActive || isAdmin || room.CreatorId == currentUserId
+        ).ToList();
+    }
+
+    @if (!filteredRooms.Any())
     {
         <div class="text-center py-5">
             <i class="fas fa-music fa-3x text-muted mb-3"></i>
@@ -35,11 +47,11 @@
     else
     {
         <div class="rooms-grid">
-            @foreach (var room in Model)
+            @foreach (var room in filteredRooms)
             {
                 <div class="room-card">
-                    <div class="d-flex">
-                        <h3>@room.Title</h3>
+                    <div class="room-card-header">
+                        <h3 title="@room.Title">@room.Title</h3>
                         <span class="room-status @(room.IsActive ? "status-active" : "status-inactive")">
                             @(room.IsActive ? "Đang Hoạt Động" : "Không Hoạt Động")
                         </span>
@@ -48,7 +60,7 @@
                     <div class="room-meta">
                         <div>
                             <i class="fas fa-user"></i>
-                            <span>@room.Creator?.UserName</span>
+                            <span title="@room.Creator?.UserName">@room.Creator?.UserName</span>
                         </div>
                         <div>
                             <i class="fas fa-clock"></i>
@@ -58,7 +70,7 @@
                         {
                             <div>
                                 <i class="fas fa-play"></i>
-                                <span>@room.CurrentSong.Title</span>
+                                <span title="@room.CurrentSong.Title">@room.CurrentSong.Title</span>
                             </div>
                         }
                         <div>
@@ -68,10 +80,13 @@
                     </div>
 
                     <div class="room-actions mt-3">
-                        <a asp-action="Join" asp-route-id="@room.RoomId" class="btn-action btn-join">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Tham Gia
-                        </a>
+                        @if (room.IsActive)
+                        {
+                            <a asp-action="Join" asp-route-id="@room.RoomId" class="btn-action btn-join">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Tham Gia
+                            </a>
+                        }
                         <a asp-action="Details" asp-route-id="@room.RoomId" class="btn-action btn-details">
                             <i class="fas fa-info-circle"></i>
                             Chi Tiết
