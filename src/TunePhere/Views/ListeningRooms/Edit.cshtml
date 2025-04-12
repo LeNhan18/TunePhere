@@ -4,64 +4,73 @@
     ViewData["Title"] = "Chỉnh Sửa Phòng";
 }
 
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-body">
-                    <h2 class="card-title text-center mb-4">Chỉnh Sửa Phòng Nghe Nhạc</h2>
-                    
-                    <form asp-action="Edit">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        <input type="hidden" asp-for="RoomId" />
-                        <input type="hidden" asp-for="CreatorId" />
-                        <input type="hidden" asp-for="CreatedAt" />
-                        
-                        <div class="mb-3">
-                            <label asp-for="Title" class="form-label">Tên Phòng</label>
-                            <input asp-for="Title" class="form-control" placeholder="Nhập tên phòng" />
-                            <span asp-validation-for="Title" class="text-danger"></span>
-                        </div>
+<link rel="stylesheet" href="~/css/listeningroom-edit.css?v=@DateTime.Now.Ticks" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-                        <div class="mb-3">
-                            <label asp-for="CurrentSongId" class="form-label">Bài Hát Đang Phát</label>
-                            <select asp-for="CurrentSongId" class="form-select" asp-items="ViewBag.CurrentSongId">
-                                <option value="">-- Chọn bài hát --</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
-                                <label asp-for="IsActive" class="form-check-label">Phòng Hoạt Động</label>
-                            </div>
-                        </div>
-
-                        <div class="card bg-light mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <i class="fas fa-info-circle"></i> Thông Tin Bổ Sung
-                                </h5>
-                                <p class="card-text mb-1">
-                                    <strong>Người tạo:</strong> @Model.Creator?.UserName
-                                </p>
-                                <p class="card-text mb-0">
-                                    <strong>Ngày tạo:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Lưu Thay Đổi
-                            </button>
-                            <a asp-action="Index" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left"></i> Quay Lại
-                            </a>
-                        </div>
-                    </form>
+<div class="tunephere-container">
+    <div class="tunephere-card">
+        <div class="tunephere-card-header">
+            <h2 class="tunephere-card-title">
+                <i class="fas fa-edit"></i>
+                Chỉnh Sửa Phòng Nghe Nhạc
+            </h2>
+        </div>
+        
+        <div class="tunephere-card-body">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="tunephere-validation-summary"></div>
+                <input type="hidden" asp-for="RoomId" />
+                <input type="hidden" asp-for="CreatorId" />
+                <input type="hidden" asp-for="CreatedAt" />
+                
+                <div class="tunephere-form-group">
+                    <label asp-for="Title" class="tunephere-label">Tên Phòng</label>
+                    <input asp-for="Title" class="tunephere-input" placeholder="Nhập tên phòng" />
+                    <span asp-validation-for="Title" class="tunephere-error"></span>
                 </div>
-            </div>
+
+                <div class="tunephere-form-group">
+                    <label asp-for="CurrentSongId" class="tunephere-label">Bài Hát Đang Phát</label>
+                    <select asp-for="CurrentSongId" class="tunephere-select" asp-items="ViewBag.CurrentSongId">
+                        <option value="">-- Chọn bài hát --</option>
+                    </select>
+                    <span asp-validation-for="CurrentSongId" class="tunephere-error"></span>
+                </div>
+
+                <div class="tunephere-checkbox-group">
+                    <label class="tunephere-switch">
+                        <input asp-for="IsActive" type="checkbox" />
+                        <span class="tunephere-slider"></span>
+                    </label>
+                    <span class="tunephere-switch-label">Phòng Hoạt Động</span>
+                </div>
+
+                <div class="tunephere-info-card">
+                    <h3 class="tunephere-info-title">
+                        <i class="fas fa-info-circle"></i>
+                        Thông Tin Bổ Sung
+                    </h3>
+                    <div class="tunephere-info-item">
+                        <span class="tunephere-info-label">Người tạo:</span>
+                        <span class="tunephere-info-value">@Model.Creator?.UserName</span>
+                    </div>
+                    <div class="tunephere-info-item">
+                        <span class="tunephere-info-label">Ngày tạo:</span>
+                        <span class="tunephere-info-value">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                </div>
+
+                <div class="tunephere-actions">
+                    <button type="submit" class="tunephere-button tunephere-button-primary">
+                        <i class="fas fa-save"></i>
+                        Lưu Thay Đổi
+                    </button>
+                    <a asp-action="Index" class="tunephere-button tunephere-button-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Quay Lại
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -69,17 +78,3 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
-
-<style>
-    .card {
-        border: none;
-        border-radius: 15px;
-    }
-    .btn {
-        border-radius: 20px;
-        padding: 0.5em 1.5em;
-    }
-    .form-control, .form-select {
-        border-radius: 10px;
-    }
-</style>

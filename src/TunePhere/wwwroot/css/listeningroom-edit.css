@@ -1,0 +1,291 @@
+﻿namespace TunePhere.wwwroot.css
+{
+    public class listening_edit
+    {
+    }
+}
+
+/* TunePhere Theme - Listening Room Edit */
+
+:root {
+    --primary-color: #8B5CF6;
+    --primary-hover: #7B2CBF;
+    --primary-light: #A78BFA;
+    --primary-transparent: rgba(139, 92, 246, 0.15);
+    --bg-dark: #121212;
+    --bg-darker: #0a0a0a;
+    --bg-card: #1A1A1A;
+    --bg-card-hover: #282828;
+    --text-bright: #FFFFFF;
+    --text-main: #E0E0E0;
+    --text-secondary: #b3b3b3;
+    --border-color: #333333;
+    --error-color: #EF4444;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.tunephere-container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 0 20px;
+   margin-top: 120px;
+}
+
+.tunephere-card {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s;
+}
+
+.tunephere-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.tunephere-card-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.tunephere-card-title {
+    color: var(--text-bright);
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.tunephere-card-title i {
+    color: var(--primary-color);
+}
+
+.tunephere-card-body {
+    padding: 20px;
+}
+
+.tunephere-form-group {
+    margin-bottom: 25px;
+}
+
+.tunephere-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.tunephere-input, 
+.tunephere-select {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px 15px;
+    color: var(--text-bright);
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.tunephere-input:focus,
+.tunephere-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.tunephere-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.tunephere-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238B5CF6' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 15px) center;
+    padding-right: 40px;
+}
+
+.tunephere-select option {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+}
+
+.tunephere-checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.tunephere-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.tunephere-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.tunephere-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border-color);
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.tunephere-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: var(--text-main);
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .tunephere-slider {
+    background-color: var(--primary-color);
+}
+
+input:focus + .tunephere-slider {
+    box-shadow: 0 0 1px var(--primary-color);
+}
+
+input:checked + .tunephere-slider:before {
+    transform: translateX(26px);
+}
+
+.tunephere-switch-label {
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.tunephere-info-card {
+    background-color: rgba(139, 92, 246, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 25px;
+    border-left: 3px solid var(--primary-color);
+}
+
+.tunephere-info-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary-light);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.tunephere-info-item {
+    display: flex;
+    margin-bottom: 8px;
+}
+
+.tunephere-info-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-right: 8px;
+}
+
+.tunephere-info-value {
+    color: var(--text-bright);
+}
+
+.tunephere-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.tunephere-button {
+    border: none;
+    border-radius: 30px;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.tunephere-button-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.tunephere-button-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(123, 44, 191, 0.4);
+}
+
+.tunephere-button-secondary {
+    background-color: transparent;
+    color: var(--text-bright);
+    border: 1px solid var(--border-color);
+}
+
+.tunephere-button-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.tunephere-error {
+    color: var(--error-color);
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+.tunephere-validation-summary {
+    color: var(--error-color);
+    background-color: rgba(239, 68, 68, 0.1);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border-left: 3px solid var(--error-color);
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .tunephere-container {
+        padding: 0 15px;
+    }
+    
+    .tunephere-card-title {
+        font-size: 1.4rem;
+    }
+}
