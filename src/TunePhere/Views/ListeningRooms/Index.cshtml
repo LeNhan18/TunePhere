@@ -4,7 +4,7 @@
     ViewData["Title"] = "Phòng Nghe Nhạc";
 }
 
-<link rel="stylesheet" href="~/css/listeningRoom.css" />
+<link rel="stylesheet" href="~/css/listeningRoom.css?v=@DateTime.Now.Ticks" />
 
 <div class="listening-room">
     <div class="room-header">
@@ -38,8 +38,8 @@
             @foreach (var room in Model)
             {
                 <div class="room-card">
-                    <div class="d-flex">
-                        <h3>@room.Title</h3>
+                    <div class="room-card-header">
+                        <h3 title="@room.Title">@room.Title</h3>
                         <span class="room-status @(room.IsActive ? "status-active" : "status-inactive")">
                             @(room.IsActive ? "Đang Hoạt Động" : "Không Hoạt Động")
                         </span>
@@ -48,7 +48,7 @@
                     <div class="room-meta">
                         <div>
                             <i class="fas fa-user"></i>
-                            <span>@room.Creator?.UserName</span>
+                            <span title="@room.Creator?.UserName">@room.Creator?.UserName</span>
                         </div>
                         <div>
                             <i class="fas fa-clock"></i>
@@ -58,7 +58,7 @@
                         {
                             <div>
                                 <i class="fas fa-play"></i>
-                                <span>@room.CurrentSong.Title</span>
+                                <span title="@room.CurrentSong.Title">@room.CurrentSong.Title</span>
                             </div>
                         }
                         <div>
@@ -68,10 +68,13 @@
                     </div>
 
                     <div class="room-actions mt-3">
-                        <a asp-action="Join" asp-route-id="@room.RoomId" class="btn-action btn-join">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Tham Gia
-                        </a>
+                        @if (room.IsActive)
+                        {
+                            <a asp-action="Join" asp-route-id="@room.RoomId" class="btn-action btn-join">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Tham Gia
+                            </a>
+                        }
                         <a asp-action="Details" asp-route-id="@room.RoomId" class="btn-action btn-details">
                             <i class="fas fa-info-circle"></i>
                             Chi Tiết
