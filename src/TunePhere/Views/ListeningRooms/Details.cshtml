@@ -1,7 +1,16 @@
 ﻿@model TunePhere.Models.ListeningRoom
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<TunePhere.Models.AppUser> UserManager
 
 @{
     ViewData["Title"] = "Chi Tiết Phòng Nghe Nhạc";
+    
+    // Lấy ID người dùng hiện tại và kiểm tra vai trò Admin
+    var currentUserId = UserManager.GetUserId(User);
+    var isAdmin = User.IsInRole("Administrator");
+    
+    // Kiểm tra xem người dùng có quyền chỉnh sửa/xóa không
+    var canEditDelete = isAdmin || (Model.CreatorId == currentUserId);
 }
 
 <link rel="stylesheet" href="~/css/listeningroom-details.css?v=@DateTime.Now.Ticks" />
@@ -122,17 +131,23 @@
                         <span>Tham Gia</span>
                     </a>
                 }
-                <a asp-action="Edit" asp-route-id="@Model.RoomId" class="tunephere-btn tunephere-btn-primary">
-                    <i class="fas fa-edit"></i>
-                    <span>Chỉnh Sửa</span>
-                </a>
+                
+                @if (canEditDelete)
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.RoomId" class="tunephere-btn tunephere-btn-primary">
+                        <i class="fas fa-edit"></i>
+                        <span>Chỉnh Sửa</span>
+                    </a>
+                    
+                    <a asp-action="Delete" asp-route-id="@Model.RoomId" class="tunephere-btn tunephere-btn-danger">
+                        <i class="fas fa-trash"></i>
+                        <span>Xóa Phòng</span>
+                    </a>
+                }
+                
                 <a asp-action="Index" class="tunephere-btn">
                     <i class="fas fa-arrow-left"></i>
                     <span>Quay Lại</span>
-                </a>
-                <a asp-action="Delete" asp-route-id="@Model.RoomId" class="tunephere-btn tunephere-btn-danger">
-                    <i class="fas fa-trash"></i>
-                    <span>Xóa Phòng</span>
                 </a>
             </div>
         </div>
