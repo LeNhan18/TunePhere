@@ -4,176 +4,65 @@
     ViewData["Title"] = "Xóa Phòng Nghe Nhạc";
 }
 
-<div class="container py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a asp-action="Index" class="text-decoration-none">
-                    <i class="fas fa-headphones-alt me-1"></i>Phòng Nghe Nhạc
-                </a>
-            </li>
-            <li class="breadcrumb-item active">Xóa Phòng</li>
-        </ol>
-    </nav>
+<link rel="stylesheet" href="~/css/listeningroom-delete.css?v=@DateTime.Now.Ticks" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 rounded-lg">
-                <div class="card-body text-center p-5">
-                    <div class="mb-4">
-                        <i class="fas fa-exclamation-triangle text-danger fa-3x"></i>
-                    </div>
-                    
-                    <h2 class="card-title mb-4">Xác Nhận Xóa Phòng</h2>
-                    
-                    <p class="text-muted mb-4">
-                        Bạn có chắc chắn muốn xóa phòng "<strong>@Model.Title</strong>"?<br>
-                        Hành động này không thể hoàn tác.
-                    </p>
+<div class="tunephere-container">
+    <div class="tunephere-breadcrumb">
+        <a asp-action="Index">
+            <i class="fas fa-headphones-alt me-1"></i>
+            <span>Phòng Nghe Nhạc</span>
+        </a>
+        <span class="divider">/</span>
+        <span class="current">Xóa Phòng</span>
+    </div>
 
-                    <div class="alert alert-warning">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Lưu ý:</strong> Tất cả người tham gia sẽ bị xóa khỏi phòng.
-                    </div>
-
-                    <div class="room-info mb-4">
-                        <div class="info-item">
-                            <small class="text-muted">Người tạo</small>
-                            <p class="mb-2">@Model.Creator?.UserName</p>
-                        </div>
-                        <div class="info-item">
-                            <small class="text-muted">Thời gian tạo</small>
-                            <p class="mb-2">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
-                        </div>
-                        <div class="info-item">
-                            <small class="text-muted">Số người tham gia</small>
-                            <p class="mb-0">@(Model.Participants?.Count ?? 0) người</p>
-                        </div>
-                    </div>
-
-                    <form asp-action="Delete" class="d-flex gap-2 justify-content-center">
-                        <input type="hidden" asp-for="RoomId" />
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash me-2"></i>Xóa Phòng
-                        </button>
-                        <a asp-action="Index" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-2"></i>Quay Lại
-                        </a>
-                    </form>
+    <div class="tunephere-delete-container">
+        <div class="tunephere-card">
+            <div class="tunephere-card-body text-center">
+                <div class="tunephere-warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
+
+                <h2 class="tunephere-card-title">Xác Nhận Xóa Phòng</h2>
+
+                <p class="tunephere-delete-text">
+                    Bạn có chắc chắn muốn xóa phòng "<strong>@Model.Title</strong>"?<br>
+                    Hành động này không thể hoàn tác.
+                </p>
+
+                <div class="tunephere-alert">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Lưu ý: Tất cả người tham gia sẽ bị xóa khỏi phòng.</span>
+                </div>
+
+                <div class="tunephere-room-info">
+                    <div class="tunephere-info-item">
+                        <span class="tunephere-info-label">Người tạo</span>
+                        <p class="tunephere-info-value">@Model.Creator?.UserName</p>
+                    </div>
+                    <div class="tunephere-info-item">
+                        <span class="tunephere-info-label">Thời gian tạo</span>
+                        <p class="tunephere-info-value">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                    <div class="tunephere-info-item">
+                        <span class="tunephere-info-label">Số người tham gia</span>
+                        <p class="tunephere-info-value">@(Model.Participants?.Count ?? 0) người</p>
+                    </div>
+                </div>
+
+                <form asp-action="Delete" class="tunephere-actions">
+                    <input type="hidden" asp-for="RoomId" />
+                    <button type="submit" class="tunephere-btn tunephere-btn-danger">
+                        <i class="fas fa-trash"></i>
+                        <span>Xóa Phòng</span>
+                    </button>
+                    <a asp-action="Index" class="tunephere-btn tunephere-btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Quay Lại</span>
+                    </a>
+                </form>
             </div>
         </div>
     </div>
 </div>
-
-@section Styles {
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <link href="~/css/listening-rooms.css" rel="stylesheet">
-    <style>
-        .room-info {
-            background-color: #f8f9fa;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-        }
-        .room-info:hover {
-            background-color: #f0f0f0;
-            transform: scale(1.02);
-        }
-        .info-item {
-            text-align: center;
-            padding: 0.5rem;
-            transition: all 0.3s ease;
-        }
-        .info-item:hover {
-            transform: translateY(-3px);
-            background-color: rgba(var(--bs-primary-rgb), 0.05);
-            border-radius: 0.5rem;
-        }
-        .info-item small {
-            display: block;
-            margin-bottom: 0.25rem;
-            transition: color 0.2s ease;
-        }
-        .info-item:hover small {
-            color: var(--bs-primary) !important;
-        }
-        .alert {
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-            border-left: 4px solid var(--bs-warning);
-        }
-        .alert:hover {
-            transform: translateX(5px);
-        }
-        .btn {
-            padding: 0.5rem 1.5rem;
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        .btn:active {
-            transform: translateY(0);
-        }
-        .btn i {
-            transition: transform 0.2s ease;
-        }
-        .btn:hover i {
-            transform: scale(1.1);
-        }
-        .card {
-            transition: all 0.3s ease;
-        }
-        .card:hover {
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
-        }
-        .fa-exclamation-triangle {
-            animation: pulse 2s infinite;
-        }
-      <style>
-                @@keyframes pulse {
-            0%
-
-        {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.05);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-
-        }</style>
-        <style>
-                @@keyframes slideIn {
-            from
-
-        {
-            opacity: 0;
-            transform: translateX(-20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        }
-
-        .breadcrumb-item {
-            animation: slideIn 0.3s ease-out forwards;
-        }
-
-            .breadcrumb-item:nth-child(2) {
-                animation-delay: 0.1s;
-            }</style>
-       
-    </style>
-}

@@ -1,0 +1,289 @@
+﻿/* TunePhere Theme - Listening Room Delete */
+
+:root {
+    --primary-color: #8B5CF6;
+    --primary-hover: #7B2CBF;
+    --primary-light: #A78BFA;
+    --primary-transparent: rgba(139, 92, 246, 0.15);
+    --bg-dark: #121212;
+    --bg-darker: #0a0a0a;
+    --bg-card: #1A1A1A;
+    --bg-card-hover: #282828;
+    --text-bright: #FFFFFF;
+    --text-main: #E0E0E0;
+    --text-secondary: #b3b3b3;
+    --border-color: #333333;
+    --danger-color: #EF4444;
+    --danger-hover: #DC2626;
+    --warning-color: #F59E0B;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.tunephere-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Breadcrumb */
+.tunephere-breadcrumb {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tunephere-breadcrumb a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tunephere-breadcrumb a:hover {
+    color: var(--primary-hover);
+}
+
+.tunephere-breadcrumb .divider {
+    margin: 0 10px;
+    color: var(--text-secondary);
+}
+
+.tunephere-breadcrumb .current {
+    color: var(--text-secondary);
+}
+
+/* Delete container */
+.tunephere-delete-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Card */
+.tunephere-card {
+    background-color: var(--bg-card);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s;
+}
+
+.tunephere-card:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+}
+
+.tunephere-card-body {
+    padding: 40px 30px;
+}
+
+.tunephere-card-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin: 15px 0 25px;
+    text-align: center;
+}
+
+/* Warning icon */
+.tunephere-warning-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.tunephere-warning-icon i {
+    font-size: 56px;
+    color: var(--danger-color);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Delete text */
+.tunephere-delete-text {
+    color: var(--text-main);
+    font-size: 1.05rem;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.tunephere-delete-text strong {
+    color: var(--text-bright);
+    font-weight: 600;
+}
+
+/* Alert */
+.tunephere-alert {
+    background-color: rgba(245, 158, 11, 0.15);
+    border-left: 4px solid var(--warning-color);
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s;
+}
+
+.tunephere-alert:hover {
+    transform: translateX(5px);
+    background-color: rgba(245, 158, 11, 0.2);
+}
+
+.tunephere-alert i {
+    color: var(--warning-color);
+    font-size: 1.25rem;
+}
+
+.tunephere-alert span {
+    color: var(--text-main);
+    font-size: 0.95rem;
+}
+
+/* Room info */
+.tunephere-room-info {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    transition: all 0.3s;
+}
+
+.tunephere-room-info:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    transform: scale(1.02);
+}
+
+.tunephere-info-item {
+    text-align: center;
+    padding: 10px;
+    transition: all 0.3s;
+    border-radius: 8px;
+}
+
+.tunephere-info-item:hover {
+    background-color: var(--primary-transparent);
+    transform: translateY(-5px);
+}
+
+.tunephere-info-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+}
+
+.tunephere-info-item:hover .tunephere-info-label {
+    color: var(--primary-light);
+}
+
+.tunephere-info-value {
+    color: var(--text-bright);
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Actions */
+.tunephere-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.tunephere-btn {
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    border: none;
+}
+
+.tunephere-btn i {
+    transition: transform 0.2s;
+}
+
+.tunephere-btn:hover i {
+    transform: scale(1.2);
+}
+
+.tunephere-btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.tunephere-btn-danger:hover {
+    background-color: var(--danger-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+}
+
+.tunephere-btn-secondary {
+    background-color: transparent;
+    color: var(--text-bright);
+    border: 1px solid var(--border-color);
+}
+
+.tunephere-btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .tunephere-room-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .tunephere-actions {
+        flex-direction: column;
+    }
+    
+    .tunephere-card-body {
+        padding: 30px 20px;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
