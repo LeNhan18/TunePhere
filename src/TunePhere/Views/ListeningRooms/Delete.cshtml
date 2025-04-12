@@ -1,82 +1,68 @@
 ﻿@model TunePhere.Models.ListeningRoom
 
 @{
-    ViewData["Title"] = "Chỉnh Sửa Phòng";
+    ViewData["Title"] = "Xóa Phòng Nghe Nhạc";
 }
 
-<link rel="stylesheet" href="~/css/listeningroom-edit.css?v=@DateTime.Now.Ticks" />
+<link rel="stylesheet" href="~/css/listeningroom-delete.css?v=@DateTime.Now.Ticks" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <div class="tunephere-container">
-    <div class="tunephere-card">
-        <div class="tunephere-card-header">
-            <h2 class="tunephere-card-title">
-                <i class="fas fa-edit"></i>
-                Chỉnh Sửa Phòng Nghe Nhạc
-            </h2>
-        </div>
+    <div class="tunephere-breadcrumb">
+        <a asp-action="Index">
+            <i class="fas fa-headphones-alt me-1"></i>
+            <span>Phòng Nghe Nhạc</span>
+        </a>
+        <span class="divider">/</span>
+        <span class="current">Xóa Phòng</span>
+    </div>
 
-        <div class="tunephere-card-body">
-            <form asp-action="Edit" method="post">
-                <div asp-validation-summary="ModelOnly" class="tunephere-validation-summary"></div>
-                <input type="hidden" asp-for="RoomId" />
-                <input type="hidden" asp-for="CreatorId" />
-                <input type="hidden" asp-for="CreatedAt" />
-
-                <div class="tunephere-form-group">
-                    <label asp-for="Title" class="tunephere-label">Tên Phòng</label>
-                    <input asp-for="Title" class="tunephere-input" placeholder="Nhập tên phòng" />
-                    <span asp-validation-for="Title" class="tunephere-error"></span>
+    <div class="tunephere-delete-container">
+        <div class="tunephere-card">
+            <div class="tunephere-card-body text-center">
+                <div class="tunephere-warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
 
-                <div class="tunephere-form-group">
-                    <label asp-for="CurrentSongId" class="tunephere-label">Bài Hát Đang Phát</label>
-                    <select asp-for="CurrentSongId" class="tunephere-select" asp-items="ViewBag.CurrentSongId">
-                        <option value="">-- Chọn bài hát --</option>
-                    </select>
-                    <span asp-validation-for="CurrentSongId" class="tunephere-error"></span>
+                <h2 class="tunephere-card-title">Xác Nhận Xóa Phòng</h2>
+
+                <p class="tunephere-delete-text">
+                    Bạn có chắc chắn muốn xóa phòng "<strong>@Model.Title</strong>"?<br>
+                    Hành động này không thể hoàn tác.
+                </p>
+
+                <div class="tunephere-alert">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Lưu ý: Tất cả người tham gia sẽ bị xóa khỏi phòng.</span>
                 </div>
 
-                <div class="tunephere-checkbox-group">
-                    <label class="tunephere-switch">
-                        <input asp-for="IsActive" type="checkbox" />
-                        <span class="tunephere-slider"></span>
-                    </label>
-                    <span class="tunephere-switch-label">Phòng Hoạt Động</span>
-                </div>
-
-                <div class="tunephere-info-card">
-                    <h3 class="tunephere-info-title">
-                        <i class="fas fa-info-circle"></i>
-                        Thông Tin Bổ Sung
-                    </h3>
+                <div class="tunephere-room-info">
                     <div class="tunephere-info-item">
-                        <span class="tunephere-info-label">Người tạo:</span>
-                        <span class="tunephere-info-value">@Model.Creator?.UserName</span>
+                        <span class="tunephere-info-label">Người tạo</span>
+                        <p class="tunephere-info-value">@Model.Creator?.UserName</p>
                     </div>
                     <div class="tunephere-info-item">
-                        <span class="tunephere-info-label">Ngày tạo:</span>
-                        <span class="tunephere-info-value">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        <span class="tunephere-info-label">Thời gian tạo</span>
+                        <p class="tunephere-info-value">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                    <div class="tunephere-info-item">
+                        <span class="tunephere-info-label">Số người tham gia</span>
+                        <p class="tunephere-info-value">@(Model.Participants?.Count ?? 0) người</p>
                     </div>
                 </div>
 
-                <div class="tunephere-actions">
-                    <button type="submit" class="tunephere-button tunephere-button-primary">
-                        <i class="fas fa-save"></i>
-                        Lưu Thay Đổi
+                <form asp-action="Delete" class="tunephere-actions">
+                    <input type="hidden" asp-for="RoomId" />
+                    <button type="submit" class="tunephere-btn tunephere-btn-danger">
+                        <i class="fas fa-trash"></i>
+                        <span>Xóa Phòng</span>
                     </button>
-                    <a asp-action="Index" class="tunephere-button tunephere-button-secondary">
+                    <a asp-action="Index" class="tunephere-btn tunephere-btn-secondary">
                         <i class="fas fa-arrow-left"></i>
-                        Quay Lại
+                        <span>Quay Lại</span>
                     </a>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}
