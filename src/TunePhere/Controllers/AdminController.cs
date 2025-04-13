@@ -121,40 +121,49 @@ namespace TunePhere.Controllers
 
                 foreach (var day in last15Days)
                 {
-                    // Lấy tổng PlayCount của các bài hát được upload trong ngày
-                    var songsInDay = await _context.Songs
-                        .Where(s => s.UploadDate.Date == day.Date)
+                    // Lấy tổng PlayCount của các bài hát được nghe trong ngày
+                    var songsPlayedToday = await _context.PlayHistories
+                        .Where(p => p.PlayedAt.Date == day.Date)
+                        .Include(p => p.Song)
+                        .Select(p => p.Song)
+                        .Distinct()
                         .ToListAsync();
 
-                    var dailyPlays = songsInDay.Sum(s => s.PlayCount);
+                    var dailyPlays = songsPlayedToday.Sum(s => s.PlayCount);
                     Console.WriteLine($"Date: {day.ToString("dd/MM/yyyy")}, Plays: {dailyPlays}");
 
-                    // Lấy số người dùng hoạt động (distinct users có bài hát được upload trong ngày)
-                    var activeUsers = await _context.Songs
-                        .Where(s => s.UploadDate.Date == day.Date)
-                        .Select(s => s.ArtistId)
+                    // Lấy số người dùng hoạt động (distinct users có lịch sử nghe nhạc trong ngày)
+                    var activeUsers = await _context.PlayHistories
+                        .Where(p => p.PlayedAt.Date == day.Date)
+                        .Select(p => p.UserId)
                         .Distinct()
                         .CountAsync();
 
                     Console.WriteLine($"Active Users: {activeUsers}");
 
                     // Lấy số bài hát mới upload trong ngày
-                    var newSongs = songsInDay.Count;
+                    var newSongs = await _context.Songs
+                        .Where(s => s.UploadDate.Date == day.Date)
+                        .CountAsync();
                     Console.WriteLine($"New Songs: {newSongs}");
 
                     // Tính thời gian nghe trung bình (phút)
                     double avgListeningTime = 0;
-                    if (songsInDay.Any())
+                    if (songsPlayedToday.Any())
                     {
-                        avgListeningTime = songsInDay.Average(s => s.Duration.TotalMinutes);
+                        avgListeningTime = songsPlayedToday.Average(s => s.Duration.TotalMinutes);
                     }
                     Console.WriteLine($"Average Listening Time: {avgListeningTime} minutes");
 
                     // Tính % tăng trưởng so với ngày trước
-                    var previousDaySongs = await _context.Songs
-                        .Where(s => s.UploadDate.Date == day.AddDays(-1).Date)
+                    var songsPlayedYesterday = await _context.PlayHistories
+                        .Where(p => p.PlayedAt.Date == day.AddDays(-1).Date)
+                        .Include(p => p.Song)
+                        .Select(p => p.Song)
+                        .Distinct()
                         .ToListAsync();
-                    var previousDayPlays = previousDaySongs.Sum(s => s.PlayCount);
+
+                    var previousDayPlays = songsPlayedYesterday.Sum(s => s.PlayCount);
 
                     double growthPercent = 0;
                     if (previousDayPlays > 0)
