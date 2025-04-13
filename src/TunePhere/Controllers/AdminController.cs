@@ -121,18 +121,14 @@ namespace TunePhere.Controllers
 
                 foreach (var day in last15Days)
                 {
-                    // Lấy tổng PlayCount của các bài hát được nghe trong ngày
-                    var songsPlayedToday = await _context.PlayHistories
-                        .Where(p => p.PlayedAt.Date == day.Date)
-                        .Include(p => p.Song)
-                        .Select(p => p.Song)
-                        .Distinct()
-                        .ToListAsync();
+                    // Đếm số lượt nghe trong ngày dựa trên LastPlayDate
+                    var dailyPlays = await _context.Songs
+                        .Where(s => s.LastPlayDate.HasValue && s.LastPlayDate.Value.Date == day.Date)
+                        .SumAsync(s => s.PlayCount);
 
-                    var dailyPlays = songsPlayedToday.Sum(s => s.PlayCount);
                     Console.WriteLine($"Date: {day.ToString("dd/MM/yyyy")}, Plays: {dailyPlays}");
 
-                    // Lấy số người dùng hoạt động (distinct users có lịch sử nghe nhạc trong ngày)
+                    // Lấy số người dùng hoạt động trong ngày
                     var activeUsers = await _context.PlayHistories
                         .Where(p => p.PlayedAt.Date == day.Date)
                         .Select(p => p.UserId)
@@ -149,6 +145,10 @@ namespace TunePhere.Controllers
 
                     // Tính thời gian nghe trung bình (phút)
                     double avgListeningTime = 0;
+                    var songsPlayedToday = await _context.Songs
+                        .Where(s => s.LastPlayDate.HasValue && s.LastPlayDate.Value.Date == day.Date)
+                        .ToListAsync();
+
                     if (songsPlayedToday.Any())
                     {
                         avgListeningTime = songsPlayedToday.Average(s => s.Duration.TotalMinutes);
@@ -156,14 +156,9 @@ namespace TunePhere.Controllers
                     Console.WriteLine($"Average Listening Time: {avgListeningTime} minutes");
 
                     // Tính % tăng trưởng so với ngày trước
-                    var songsPlayedYesterday = await _context.PlayHistories
-                        .Where(p => p.PlayedAt.Date == day.AddDays(-1).Date)
-                        .Include(p => p.Song)
-                        .Select(p => p.Song)
-                        .Distinct()
-                        .ToListAsync();
-
-                    var previousDayPlays = songsPlayedYesterday.Sum(s => s.PlayCount);
+                    var previousDayPlays = await _context.Songs
+                        .Where(s => s.LastPlayDate.HasValue && s.LastPlayDate.Value.Date == day.AddDays(-1).Date)
+                        .SumAsync(s => s.PlayCount);
 
                     double growthPercent = 0;
                     if (previousDayPlays > 0)

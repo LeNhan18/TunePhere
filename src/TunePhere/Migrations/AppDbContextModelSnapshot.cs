@@ -663,6 +663,9 @@ namespace TunePhere.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LastPlayDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("LikeCount")
                         .HasColumnType("int");
 
