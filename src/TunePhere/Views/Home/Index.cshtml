@@ -229,7 +229,7 @@
                             </div>
                         </div>
                         <h3 class="song-title">@album.AlbumName</h3>
-                        <p class="artist-name">@album.Artists.ArtistName</p>
+                        <p class="artist-name">@(album.Artists?.ArtistName ?? "Không xác định")</p>
                     </div>
                 }
             </div>
@@ -542,7 +542,7 @@
     }
 
     document.getElementById('videoButton').onclick = function() {
-        if (currentSong?.videoUrl) {
+        if (currentSong && currentSong.videoUrl) {
             showVideo(currentSong.videoUrl);
         }
     };
