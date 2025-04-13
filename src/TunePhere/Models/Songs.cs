@@ -40,6 +40,7 @@ namespace TunePhere.Models
         [Display(Name ="Số thứ tự")]
 
         public int PlayCount { get; set; } = 0; // Số lượt nghe
+        public DateTime? LastPlayDate { get; set; } // Thời điểm nghe gần nhất
         public int LikeCount { get; set; } = 0;
         [NotMapped]
         public bool IsLiked { get; set; }
@@ -84,6 +85,7 @@ namespace TunePhere.Models
             PlayCount = 0;
             LikeCount = 0;
             FileType = ".mp3"; // Mặc định là mp3
+            LastPlayDate = null;
         }
     }
 }

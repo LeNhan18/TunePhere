@@ -743,6 +743,7 @@ namespace TunePhere.Controllers
             if (artist == null || artist.ArtistId != song.ArtistId)
             {
                 song.PlayCount++;
+                song.LastPlayDate = DateTime.Now; // Cập nhật thời điểm nghe gần nhất
                 await _context.SaveChangesAsync();
             }
 
