@@ -742,12 +742,24 @@ namespace TunePhere.Controllers
 
             if (artist == null || artist.ArtistId != song.ArtistId)
             {
+                // Kiểm tra nếu đây là lượt nghe đầu tiên trong ngày hoặc đã qua ngày mới
+                var today = DateTime.Today;
+                if (song.LastPlayDate == null || song.LastPlayDate.Value.Date < today)
+                {
+                    song.DailyPlayCount = 0; // Reset số lượt nghe trong ngày
+                }
+
                 song.PlayCount++;
-                song.LastPlayDate = DateTime.Now; // Cập nhật thời điểm nghe gần nhất
+                song.DailyPlayCount++;
+                song.LastPlayDate = DateTime.Now;
+
                 await _context.SaveChangesAsync();
             }
 
-            return Ok(new { playCount = song.PlayCount });
+            return Ok(new { 
+                playCount = song.PlayCount,
+                dailyPlayCount = song.DailyPlayCount 
+            });
         }
 
         // GET: Songs/Search

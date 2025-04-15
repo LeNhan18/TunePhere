@@ -244,11 +244,11 @@
             userIsAdmin: '@User.IsInRole("Admin")' === 'True',
             userIsOwner: '@(Model.Artists?.userId == User.FindFirstValue(ClaimTypes.NameIdentifier))' === 'True'
         };
-        
+
         // Debug thông tin
         console.log("View data fromFavorites:", '@ViewData["FromFavorites"]');
         console.log("View data FavoritesCurrentIndex:", '@ViewData["FavoritesCurrentIndex"]');
-        
+
         // Thêm thông tin danh sách yêu thích nếu có
         @if (ViewData["FavoritesSongs"] != null)
         {
@@ -264,7 +264,7 @@
             @:window.favoritesData = null;
             @:console.log("No favorites data available");
         }
-        
+
         // Thêm thông tin playlist nếu có
         @if (ViewData["PlaylistSongs"] != null)
         {
@@ -280,7 +280,7 @@
         {
             @:window.playlistData = null;
         }
-        
+
         // Thêm thông tin album nếu có
         @if (ViewData["AlbumSongs"] != null)
         {
@@ -444,8 +444,9 @@
         {
             // Xử lý url để lấy phần mở rộng
             string ext = System.IO.Path.GetExtension(url)?.ToLowerInvariant() ?? "";
-            
-            switch (ext) {
+
+            switch (ext)
+            {
                 case ".mp3": return "audio/mpeg";
                 case ".m4a": return "audio/mp4";
                 case ".wav": return "audio/wav";
