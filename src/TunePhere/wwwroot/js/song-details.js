@@ -334,29 +334,30 @@ function playAudio() {
 }
 
 // Hàm tăng lượt nghe
-function incrementPlayCount(songId) {
-    // Lấy token CSRF từ meta tag
-    const token = document.querySelector('meta[name="__RequestVerificationToken"]').content;
+async function incrementPlayCount(songId) {
+    try {
+        const response = await fetch(`/Songs/IncrementPlayCount/${songId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
 
-    fetch(`/Songs/IncrementPlayCount/${songId}`, {
-        method: 'POST',
-        headers: {
-            'RequestVerificationToken': token
+        if (response.ok) {
+            const data = await response.json();
+            const playCountElement = document.getElementById('playCount');
+            const dailyPlaysElement = document.getElementById('dailyPlays');
+            
+            if (playCountElement) {
+                playCountElement.textContent = data.playCount;
+            }
+            if (dailyPlaysElement) {
+                dailyPlaysElement.textContent = data.dailyPlayCount;
+            }
         }
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Đã tăng lượt nghe:', data.playCount);
-
-            // Cập nhật số lượt nghe trên giao diện nếu có
-            const playCountElements = document.querySelectorAll('.stat-item span');
-            playCountElements.forEach(element => {
-                if (element.parentElement.querySelector('i.fa-play')) {
-                    element.textContent = `${data.playCount} lượt nghe`;
-                }
-            });
-        })
-        .catch(error => console.error('Lỗi khi tăng lượt nghe:', error));
+    } catch (error) {
+        console.error('Error incrementing play count:', error);
+    }
 }
 
 // Đảm bảo hàm updatePlayPauseButton làm việc chính xác
