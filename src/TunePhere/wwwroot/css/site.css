@@ -499,6 +499,22 @@ audio {
   .participant-list {
     max-height: 250px;
   }
+
+  .main-container {
+    flex-direction: column;
+    height: auto;
+  }
+  .sidebar {
+    width: 100%;
+    min-width: unset;
+    max-width: unset;
+    padding: 12px 8px;
+    position: relative;
+    z-index: 10;
+  }
+  .content {
+    padding: 1rem;
+  }
 }
 
 .validation-message {
@@ -534,4 +550,1831 @@ audio {
 
 .text-danger {
     color: #ff4d4d !important;
+}
+
+/* Responsive Design */
+:root {
+    --container-padding: 15px;
+    --container-max-width: 1200px;
+}
+
+/* Base styles cho mobile */
+.container {
+    width: 100%;
+    padding: var(--container-padding);
+    margin: 0 auto;
+}
+
+/* Responsive Typography */
+html {
+    font-size: 16px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 18px;
+    }
+}
+
+/* Responsive Grid Layout */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: var(--container-padding);
+}
+
+/* Responsive Flexbox Layout */
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.flex-item {
+    flex: 1 1 300px;
+}
+
+/* Responsive Images */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Responsive Navigation */
+.nav-menu {
+    display: none;
+}
+
+.mobile-menu-button {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .nav-menu {
+        display: flex;
+    }
+    
+    .mobile-menu-button {
+        display: none;
+    }
+}
+
+/* Responsive Tables */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+    table {
+        display: block;
+    }
+    
+    thead {
+        display: none;
+    }
+    
+    tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+    }
+    
+    td {
+        display: block;
+        text-align: right;
+    }
+    
+    td::before {
+        content: attr(data-label);
+        float: left;
+        font-weight: bold;
+    }
+}
+
+/* Responsive Forms */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .form-row {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .form-group {
+        flex: 1;
+    }
+}
+
+/* Responsive Cards */
+.card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+}
+
+/* Responsive Audio Player */
+.audio-player {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.audio-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+@media (max-width: 768px) {
+    .audio-controls {
+        flex-direction: column;
+    }
+}
+
+/* Responsive Playlist */
+.playlist {
+    width: 100%;
+}
+
+.playlist-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+@media (max-width: 768px) {
+    .playlist-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .playlist-item-info {
+        margin-top: 10px;
+    }
+}
+
+/* Responsive Search */
+.search-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px;
+}
+
+@media (min-width: 768px) {
+    .search-container {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .search-input {
+        flex: 1;
+    }
+}
+
+/* Responsive Footer */
+.footer {
+    padding: 2rem 1rem;
+}
+
+.footer-content {
+    display: grid;
+    gap: 2rem;
+}
+
+@media (min-width: 768px) {
+    .footer-content {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Responsive Modals */
+.modal {
+    width: 90%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+    .modal {
+        width: 70%;
+    }
+}
+
+/* Responsive Loading States */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+}
+
+@media (min-width: 768px) {
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* Responsive Album Grid */
+.album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+@media (max-width: 768px) {
+    .album-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        padding: 15px;
+    }
+}
+
+/* Responsive Song List */
+.song-list {
+    width: 100%;
+}
+
+.song-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+@media (max-width: 768px) {
+    .song-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .song-item-info {
+        margin-top: 10px;
+    }
+}
+
+/* Responsive Artist Profile */
+.artist-profile {
+    display: grid;
+    gap: 20px;
+    padding: 20px;
+}
+
+@media (min-width: 768px) {
+    .artist-profile {
+        grid-template-columns: 300px 1fr;
+    }
+}
+
+/* Responsive Comments Section */
+.comments-section {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.comment {
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+    .comment {
+        padding: 10px;
+    }
+}
+
+/* Responsive Player Controls */
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+}
+
+@media (max-width: 768px) {
+    .player-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* Responsive Lyrics Display */
+.lyrics-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+@media (max-width: 768px) {
+    .lyrics-container {
+        padding: 10px;
+    }
+}
+
+/* Responsive User Profile */
+.user-profile {
+    display: grid;
+    gap: 20px;
+    padding: 20px;
+}
+
+@media (min-width: 768px) {
+    .user-profile {
+        grid-template-columns: 250px 1fr;
+    }
+}
+
+/* Responsive Playlist Management */
+.playlist-management {
+    display: grid;
+    gap: 20px;
+    padding: 20px;
+}
+
+@media (min-width: 768px) {
+    .playlist-management {
+        grid-template-columns: 300px 1fr;
+    }
+}
+
+/* Responsive Search Results */
+.search-results {
+    display: grid;
+    gap: 20px;
+    padding: 20px;
+}
+
+@media (min-width: 768px) {
+    .search-results {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+/* Responsive Notifications */
+.notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    max-width: 300px;
+}
+
+@media (max-width: 768px) {
+    .notification {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
+}
+
+/* Responsive Settings Panel */
+.settings-panel {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+@media (max-width: 768px) {
+    .settings-panel {
+        padding: 15px;
+    }
+}
+
+/* Responsive Upload Form */
+.upload-form {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+@media (max-width: 768px) {
+    .upload-form {
+        padding: 15px;
+    }
+}
+
+/* Responsive Statistics */
+.statistics {
+    display: grid;
+    gap: 20px;
+    padding: 20px;
+}
+
+@media (min-width: 768px) {
+    .statistics {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+/* Responsive Charts */
+.chart-container {
+    width: 100%;
+    height: 300px;
+    margin: 20px 0;
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        height: 200px;
+    }
+}
+
+/* Responsive Tooltips */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+@media (max-width: 768px) {
+    .tooltip {
+        display: block;
+        margin: 5px 0;
+    }
+}
+
+/* Responsive Dropdowns */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+@media (max-width: 768px) {
+    .dropdown-content {
+        width: 100%;
+        left: 0;
+    }
+}
+
+/* Responsive Tabs */
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+@media (max-width: 768px) {
+    .tabs {
+        flex-direction: column;
+    }
+}
+
+/* Responsive Accordion */
+.accordion {
+    width: 100%;
+}
+
+.accordion-item {
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    .accordion-content {
+        padding: 10px;
+    }
+}
+
+/* Responsive Carousel */
+.carousel {
+    width: 100%;
+    overflow: hidden;
+}
+
+.carousel-item {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .carousel-controls {
+        display: none;
+    }
+}
+
+/* Responsive Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 20px 0;
+}
+
+@media (max-width: 768px) {
+    .pagination {
+        flex-wrap: wrap;
+    }
+}
+
+/* Responsive Breadcrumbs */
+.breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 10px 0;
+}
+
+@media (max-width: 768px) {
+    .breadcrumbs {
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Progress Bars */
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: #4CAF50;
+    transition: width 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .progress-bar {
+        height: 15px;
+    }
+}
+
+/* Responsive Badges */
+.badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    background: #4CAF50;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .badge {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+    }
+}
+
+/* Responsive Alerts */
+.alert {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+@media (max-width: 768px) {
+    .alert {
+        padding: 10px;
+    }
+}
+
+/* Responsive Buttons */
+.button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    transition: background 0.3s ease;
+}
+
+.button:hover {
+    background: #45a049;
+}
+
+@media (max-width: 768px) {
+    .button {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+
+/* Responsive Input Groups */
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    .input-group {
+        flex-direction: column;
+    }
+}
+
+/* Responsive Checkboxes and Radio Buttons */
+.checkbox-group, .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.checkbox-item, .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+@media (max-width: 768px) {
+    .checkbox-group, .radio-group {
+        flex-direction: column;
+    }
+}
+
+/* Responsive Select Boxes */
+.select-box {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background: white;
+}
+
+@media (max-width: 768px) {
+    .select-box {
+        font-size: 16px;
+    }
+}
+
+/* Responsive Text Areas */
+.text-area {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    resize: vertical;
+}
+
+@media (max-width: 768px) {
+    .text-area {
+        min-height: 80px;
+    }
+}
+
+/* Responsive File Upload */
+.file-upload {
+    width: 100%;
+    padding: 20px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    text-align: center;
+    background: #f9f9f9;
+}
+
+@media (max-width: 768px) {
+    .file-upload {
+        padding: 15px;
+    }
+}
+
+/* Responsive Drag and Drop */
+.drag-drop {
+    width: 100%;
+    height: 200px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9f9f9;
+}
+
+@media (max-width: 768px) {
+    .drag-drop {
+        height: 150px;
+    }
+}
+
+/* Responsive Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .loading-overlay {
+        background: rgba(0, 0, 0, 0.7);
+    }
+    
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border-width: 4px;
+    }
+}
+
+/* Responsive Error Messages */
+.error-message {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #fee;
+    color: #c00;
+    border: 1px solid #fcc;
+}
+
+@media (max-width: 768px) {
+    .error-message {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Success Messages */
+.success-message {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #efe;
+    color: #0c0;
+    border: 1px solid #cfc;
+}
+
+@media (max-width: 768px) {
+    .success-message {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Warning Messages */
+.warning-message {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #ffe;
+    color: #c80;
+    border: 1px solid #fec;
+}
+
+@media (max-width: 768px) {
+    .warning-message {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Info Messages */
+.info-message {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #eef;
+    color: #00c;
+    border: 1px solid #cef;
+}
+
+@media (max-width: 768px) {
+    .info-message {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Tooltips */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    width: 120px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+@media (max-width: 768px) {
+    .tooltip .tooltip-text {
+        width: 100px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Responsive Popovers */
+.popover {
+    position: relative;
+    display: inline-block;
+}
+
+.popover .popover-content {
+    visibility: hidden;
+    width: 200px;
+    background-color: #fff;
+    color: #333;
+    text-align: center;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 768px) {
+    .popover .popover-content {
+        width: 150px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Dropdowns */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+@media (max-width: 768px) {
+    .dropdown-content {
+        width: 100%;
+        left: 0;
+    }
+}
+
+/* Responsive Tabs */
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    .tabs {
+        flex-direction: column;
+    }
+    
+    .tab {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Responsive Accordion */
+.accordion {
+    width: 100%;
+}
+
+.accordion-item {
+    margin-bottom: 10px;
+}
+
+.accordion-header {
+    padding: 15px;
+    background: #f5f5f5;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    .accordion-header {
+        padding: 10px;
+    }
+}
+
+/* Responsive Carousel */
+.carousel {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.carousel-item {
+    width: 100%;
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .carousel-controls {
+        display: none;
+    }
+}
+
+/* Responsive Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 20px 0;
+}
+
+.pagination-item {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .pagination {
+        flex-wrap: wrap;
+    }
+    
+    .pagination-item {
+        padding: 3px 8px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Breadcrumbs */
+.breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 10px 0;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .breadcrumbs {
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Progress Bars */
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: #4CAF50;
+    transition: width 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .progress-bar {
+        height: 15px;
+    }
+}
+
+/* Responsive Badges */
+.badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    background: #4CAF50;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .badge {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+    }
+}
+
+/* Responsive Alerts */
+.alert {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+@media (max-width: 768px) {
+    .alert {
+        padding: 10px;
+    }
+}
+
+/* Responsive Buttons */
+.button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    transition: background 0.3s ease;
+}
+
+.button:hover {
+    background: #45a049;
+}
+
+@media (max-width: 768px) {
+    .button {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+
+/* Responsive Input Groups */
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    .input-group {
+        flex-direction: column;
+    }
+}
+
+/* Responsive Checkboxes and Radio Buttons */
+.checkbox-group, .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.checkbox-item, .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+@media (max-width: 768px) {
+    .checkbox-group, .radio-group {
+        flex-direction: column;
+    }
+}
+
+/* Responsive Select Boxes */
+.select-box {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background: white;
+}
+
+@media (max-width: 768px) {
+    .select-box {
+        font-size: 16px;
+    }
+}
+
+/* Responsive Text Areas */
+.text-area {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    resize: vertical;
+}
+
+@media (max-width: 768px) {
+    .text-area {
+        min-height: 80px;
+    }
+}
+
+/* Responsive File Upload */
+.file-upload {
+    width: 100%;
+    padding: 20px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    text-align: center;
+    background: #f9f9f9;
+}
+
+@media (max-width: 768px) {
+    .file-upload {
+        padding: 15px;
+    }
+}
+
+/* Responsive Drag and Drop */
+.drag-drop {
+    width: 100%;
+    height: 200px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9f9f9;
+}
+
+@media (max-width: 768px) {
+    .drag-drop {
+        height: 150px;
+    }
+}
+
+/* Responsive Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .loading-overlay {
+        background: rgba(0, 0, 0, 0.7);
+    }
+    
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border-width: 4px;
+    }
+}
+
+/* Responsive Error Messages */
+.error-message {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #fee;
+    color: #c00;
+    border: 1px solid #fcc;
+}
+
+@media (max-width: 768px) {
+    .error-message {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Success Messages */
+.success-message {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #efe;
+    color: #0c0;
+    border: 1px solid #cfc;
+}
+
+@media (max-width: 768px) {
+    .success-message {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Warning Messages */
+.warning-message {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #ffe;
+    color: #c80;
+    border: 1px solid #fec;
+}
+
+@media (max-width: 768px) {
+    .warning-message {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Info Messages */
+.info-message {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #eef;
+    color: #00c;
+    border: 1px solid #cef;
+}
+
+@media (max-width: 768px) {
+    .info-message {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Tooltips */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    width: 120px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+@media (max-width: 768px) {
+    .tooltip .tooltip-text {
+        width: 100px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Responsive Popovers */
+.popover {
+    position: relative;
+    display: inline-block;
+}
+
+.popover .popover-content {
+    visibility: hidden;
+    width: 200px;
+    background-color: #fff;
+    color: #333;
+    text-align: center;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 768px) {
+    .popover .popover-content {
+        width: 150px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Dropdowns */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+@media (max-width: 768px) {
+    .dropdown-content {
+        width: 100%;
+        left: 0;
+    }
+}
+
+/* Responsive Tabs */
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    .tabs {
+        flex-direction: column;
+    }
+    
+    .tab {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Responsive Accordion */
+.accordion {
+    width: 100%;
+}
+
+.accordion-item {
+    margin-bottom: 10px;
+}
+
+.accordion-header {
+    padding: 15px;
+    background: #f5f5f5;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    .accordion-header {
+        padding: 10px;
+    }
+}
+
+/* Responsive Carousel */
+.carousel {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.carousel-item {
+    width: 100%;
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .carousel-controls {
+        display: none;
+    }
+}
+
+/* Responsive Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 20px 0;
+}
+
+.pagination-item {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .pagination {
+        flex-wrap: wrap;
+    }
+    
+    .pagination-item {
+        padding: 3px 8px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Breadcrumbs */
+.breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 10px 0;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .breadcrumbs {
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Progress Bars */
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: #4CAF50;
+    transition: width 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .progress-bar {
+        height: 15px;
+    }
+}
+
+/* Responsive Badges */
+.badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    background: #4CAF50;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .badge {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+    }
+}
+
+/* Responsive Alerts */
+.alert {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+@media (max-width: 768px) {
+    .alert {
+        padding: 10px;
+    }
+}
+
+/* Responsive Buttons */
+.button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    transition: background 0.3s ease;
+}
+
+.button:hover {
+    background: #45a049;
+}
+
+@media (max-width: 768px) {
+    .button {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+
+/* Responsive Input Groups */
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    .input-group {
+        flex-direction: column;
+    }
+}
+
+/* Responsive Checkboxes and Radio Buttons */
+.checkbox-group, .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.checkbox-item, .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+@media (max-width: 768px) {
+    .checkbox-group, .radio-group {
+        flex-direction: column;
+    }
+}
+
+/* Responsive Select Boxes */
+.select-box {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background: white;
+}
+
+@media (max-width: 768px) {
+    .select-box {
+        font-size: 16px;
+    }
+}
+
+/* Responsive Text Areas */
+.text-area {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    resize: vertical;
+}
+
+@media (max-width: 768px) {
+    .text-area {
+        min-height: 80px;
+    }
+}
+
+/* Responsive File Upload */
+.file-upload {
+    width: 100%;
+    padding: 20px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    text-align: center;
+    background: #f9f9f9;
+}
+
+@media (max-width: 768px) {
+    .file-upload {
+        padding: 15px;
+    }
+}
+
+/* Responsive Drag and Drop */
+.drag-drop {
+    width: 100%;
+    height: 200px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9f9f9;
+}
+
+@media (max-width: 768px) {
+    .drag-drop {
+        height: 150px;
+    }
+}
+
+/* Responsive Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .loading-overlay {
+        background: rgba(0, 0, 0, 0.7);
+    }
+    
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border-width: 4px;
+    }
+}
+
+/* Responsive Error Messages */
+.error-message {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #fee;
+    color: #c00;
+    border: 1px solid #fcc;
+}
+
+@media (max-width: 768px) {
+    .error-message {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Success Messages */
+.success-message {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #efe;
+    color: #0c0;
+    border: 1px solid #cfc;
+}
+
+@media (max-width: 768px) {
+    .success-message {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Warning Messages */
+.warning-message {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #ffe;
+    color: #c80;
+    border: 1px solid #fec;
+}
+
+@media (max-width: 768px) {
+    .warning-message {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Info Messages */
+.info-message {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #eef;
+    color: #00c;
+    border: 1px solid #cef;
+}
+
+@media (max-width: 768px) {
+    .info-message {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
 }
