@@ -1,0 +1,90 @@
+@model TunePhere.Models.SongMood
+
+@{
+    ViewData["Title"] = "Phân tích cảm xúc bài hát";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Phân tích cảm xúc bài hát</h3>
+        </div>
+        <div class="card-body">
+            <h4 class="card-title">@Model.Song.Title</h4>
+            <div class="alert alert-info">
+                <h5>Cảm xúc: @Model.Mood</h5>
+                <p>@Model.Description</p>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h5>Chỉ số chi tiết:</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Mức độ tích cực
+                            <span class="badge bg-primary rounded-pill">@(Model.Valence * 100)%</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Năng lượng
+                            <span class="badge bg-success rounded-pill">@(Model.Energy * 100)%</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Khả năng nhảy múa
+                            <span class="badge bg-info rounded-pill">@(Model.Danceability * 100)%</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Tempo
+                            <span class="badge bg-warning rounded-pill">@Model.Tempo BPM</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Thang âm
+                            <span class="badge bg-secondary rounded-pill">@Model.Mode</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Biểu đồ cảm xúc</h5>
+                            <canvas id="moodChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('moodChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Tích cực', 'Năng lượng', 'Nhảy múa', 'Tempo', 'Mode'],
+                datasets: [{
+                    label: 'Chỉ số bài hát',
+                    data: [
+                        @Model.Valence * 100,
+                        @Model.Energy * 100,
+                        @Model.Danceability * 100,
+                        @Model.Tempo / 2, // Chuẩn hóa tempo
+                        @(Model.Mode.ToLower() == "major" ? 100 : 0)
+                    ],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    </script>
+} 
