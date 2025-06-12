@@ -199,8 +199,6 @@ body {
 }
 
 .bg-success {
-  background: linear-gradient(45deg, #48228f, #391b7e) !important;
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
     background: linear-gradient(45deg, #48228f, #391b7e) !important;
     box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
 }
