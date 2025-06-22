@@ -2636,3 +2636,221 @@ input, textarea, select {
     background: #4CAF50;
     transition: width 0.3s ease;
 }
+@media (max-width: 768px) {
+    .progress-bar {
+        height: 15px;
+    }
+}
+
+/* Responsive Badges */
+.badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    background: #4CAF50;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .badge {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+    }
+}
+
+/* Responsive Alerts */
+.alert {
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+@media (max-width: 768px) {
+    .alert {
+        padding: 10px;
+    }
+}
+
+/* Responsive Buttons */
+.button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    transition: background 0.3s ease;
+}
+
+    .button:hover {
+        background: #45a049;
+    }
+
+@media (max-width: 768px) {
+    .button {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+
+/* Responsive Input Groups */
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+    .input-group input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+@media (max-width: 768px) {
+    .input-group {
+        flex-direction: column;
+    }
+}
+
+/* Responsive Checkboxes and Radio Buttons */
+.checkbox-group, .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.checkbox-item, .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+@media (max-width: 768px) {
+    .checkbox-group, .radio-group {
+        flex-direction: column;
+    }
+}
+
+/* Responsive Select Boxes */
+.select-box {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background: white;
+}
+
+@media (max-width: 768px) {
+    .select-box {
+        font-size: 16px;
+    }
+}
+
+/* Responsive Text Areas */
+.text-area {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    resize: vertical;
+}
+
+@media (max-width: 768px) {
+    .text-area {
+        min-height: 80px;
+    }
+}
+
+/* Responsive File Upload */
+.file-upload {
+    width: 100%;
+    padding: 20px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    text-align: center;
+    background: #f9f9f9;
+}
+
+@media (max-width: 768px) {
+    .file-upload {
+        padding: 15px;
+    }
+}
+
+/* Responsive Drag and Drop */
+.drag-drop {
+    width: 100%;
+    height: 200px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9f9f9;
+}
+
+@media (max-width: 768px) {
+    .drag-drop {
+        height: 150px;
+    }
+}
+
+/* Responsive Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .loading-overlay {
+        background: rgba(0, 0, 0, 0.7);
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border-width: 4px;
+    }
+}
