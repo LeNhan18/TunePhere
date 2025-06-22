@@ -2416,7 +2416,6 @@ input, textarea, select {
         font-size: 0.9rem;
     }
 }
-
 /* Responsive Info Messages */
 .info-message {
     padding: 15px;
@@ -2430,6 +2429,65 @@ input, textarea, select {
 @media (max-width: 768px) {
     .info-message {
         padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Responsive Tooltips */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    width: 120px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+@media (max-width: 768px) {
+    .tooltip .tooltip-text {
+        width: 100px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Responsive Popovers */
+.popover {
+    position: relative;
+    display: inline-block;
+}
+
+.popover .popover-content {
+    visibility: hidden;
+    width: 200px;
+    background-color: #fff;
+    color: #333;
+    text-align: center;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 768px) {
+    .popover .popover-content {
+        width: 150px;
         font-size: 0.9rem;
     }
 }
