@@ -16,6 +16,7 @@ namespace TunePhere.Models
         public string? ImageUrl { get; set; } // Đường dẫn ảnh đại diện
 
         public string? CoverImage { get; set; } // Đường dẫn ảnh nền
+        public bool IsArtist { get; set; } = false;
 
         // Các thuộc tính điều hướng (Navigation properties)
         public virtual ICollection<ListeningRoom> ListeningRooms { get; set; } // Danh sách phòng do người dùng tạo

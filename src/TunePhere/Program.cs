@@ -7,6 +7,8 @@ using TunePhere.Repository.IMPRepository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
 using TunePhere.Hubs;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +59,7 @@ builder.Services.AddScoped<IListeningRoomParticipantRepository, EFListeningRoomP
 builder.Services.AddScoped<IChatMessageRepository, EFChatMessageRepository>();
 builder.Services.AddScoped<IPlayHistoryRepository, EFPlayHistoryRepository>();
 builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
+builder.Services.AddScoped<TunePhere.Services.FirebaseAuthService>();
 
 builder.Services.AddSignalR();
 
@@ -110,6 +113,15 @@ using (var scope = app.Services.CreateScope())
     {
         await userManager.AddToRoleAsync(adminUser, "Administrator");
     }
+}
+
+// Khởi tạo FirebaseApp nếu chưa có
+if (FirebaseApp.DefaultInstance == null)
+{
+    FirebaseApp.Create(new AppOptions()
+    {
+        Credential = GoogleCredential.FromFile("firebase-config.json")
+    });
 }
 
 app.UseHttpsRedirection();
