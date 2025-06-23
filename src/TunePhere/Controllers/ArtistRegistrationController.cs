@@ -40,6 +40,13 @@ namespace TunePhere.Controllers
                 return NotFound("Không tìm thấy thông tin người dùng.");
             }
 
+            // Kiểm tra trạng thái thanh toán
+            if (!user.IsArtist)
+            {
+                TempData["ErrorMessage"] = "Bạn cần thanh toán phí đăng ký nghệ sĩ trước!";
+                return RedirectToAction("ArtistRegistrationPayment", "Payment");
+            }
+
             // Kiểm tra xem user đã là nghệ sĩ chưa
             var existingArtist = await _context.Artists.FirstOrDefaultAsync(a => a.userId == user.Id);
             if (existingArtist != null)
@@ -115,4 +122,4 @@ namespace TunePhere.Controllers
             }
         }
     }
-} 
+}

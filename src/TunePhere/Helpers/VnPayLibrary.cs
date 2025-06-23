@@ -31,6 +31,11 @@ namespace TunePhere.Helpers
 
             string signData = string.Join('&', _requestData.Select(kv => kv.Key + "=" + kv.Value));
             string vnp_SecureHash = HmacSHA512(hashSecret, signData);
+
+            // Log signData và vnp_SecureHash để debug lỗi chữ ký
+            Console.WriteLine($"[VNPAY] signData: {signData}");
+            Console.WriteLine($"[VNPAY] vnp_SecureHash: {vnp_SecureHash}");
+
             return baseUrl + "?" + data + "&vnp_SecureHash=" + vnp_SecureHash;
         }
 
