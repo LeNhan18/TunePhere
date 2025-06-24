@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using TunePhere.Models;
+using Stripe;
+using TunePhere.Helpers;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace TunePhere.Controllers
 {
@@ -13,21 +17,25 @@ namespace TunePhere.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly AppDbContext _context;
+        private readonly IOptions<StripeSettings> _stripeSettings;
 
         public ArtistRegistrationController(
             UserManager<AppUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            AppDbContext context)
+            AppDbContext context,
+            IOptions<StripeSettings> stripeSettings)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _context = context;
+            _stripeSettings = stripeSettings;
         }
 
         // GET: ArtistRegistration
         public IActionResult Register()
         {
-            return View();
+            ViewBag.StripePublicKey = _stripeSettings.Value.PublicKey;
+            return View("~/Views/ArtistRegistration/Register.cshtml");
         }
 
         [HttpPost]
@@ -43,8 +51,23 @@ namespace TunePhere.Controllers
             // Kiểm tra trạng thái thanh toán
             if (!user.IsArtist)
             {
+                // Tạo payment intent cho Stripe
+                StripeHelper.Initialize(_stripeSettings.Value.SecretKey);
+                var clientSecret = await StripeHelper.CreatePaymentIntent(480000);
+                
+                if (string.IsNullOrEmpty(clientSecret))
+                {
+                    TempData["ErrorMessage"] = "Không thể tạo yêu cầu thanh toán. Vui lòng thử lại.";
+                    return View("~/Views/ArtistRegistration/Register.cshtml");
+                }
+
+                // Lưu thông tin payment intent vào ViewBag
+                ViewBag.PaymentIntentClientSecret = clientSecret;
+                ViewBag.StripePublicKey = _stripeSettings.Value.PublicKey;
+                
                 TempData["ErrorMessage"] = "Bạn cần thanh toán phí đăng ký nghệ sĩ trước!";
-                return RedirectToAction("ArtistRegistrationPayment", "Payment");
+                return View("~/Views/ArtistRegistration/Register.cshtml");
+            }
             }
 
             // Kiểm tra xem user đã là nghệ sĩ chưa

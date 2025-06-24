@@ -3,10 +3,10 @@ using System;
 using System.Threading.Tasks;
 using TunePhere.Models;
 using Microsoft.AspNetCore.Identity;
-using System.Net.Http;
-using Newtonsoft.Json;
-using System.Text;
+using Stripe;
 using TunePhere.Helpers;
+using Newtonsoft.Json;
+using Microsoft.Extensions.Options;
 
 namespace TunePhere.Controllers
 {
@@ -16,20 +16,40 @@ namespace TunePhere.Controllers
         private readonly IConfiguration _configuration;
         private readonly AppDbContext _context;
 
+        private readonly IOptions<StripeSettings> _stripeSettings;
+
         public PaymentController(
             UserManager<AppUser> userManager,
             IConfiguration configuration,
-            AppDbContext context)
+            AppDbContext context,
+            IOptions<StripeSettings> stripeSettings)
         {
             _userManager = userManager;
             _configuration = configuration;
             _context = context;
+            _stripeSettings = stripeSettings;
         }
 
         [HttpGet]
         public IActionResult ArtistRegistrationPayment()
         {
+            ViewBag.StripePublicKey = _configuration["Stripe:PublicKey"];
             return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePaymentIntent(decimal amount)
+        {
+            StripeHelper.Initialize(_stripeSettings.Value.SecretKey);
+            try
+            {
+                var clientSecret = await StripeHelper.CreatePaymentIntent(amount);
+                return Json(new { client_secret = clientSecret });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = new { message = ex.Message } });
+            }
         }
 
         [HttpPost]
@@ -40,87 +60,55 @@ namespace TunePhere.Controllers
             return Redirect(vnpayUrl);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ProcessMono()
-        {
-            var amount = 480000;
-            var monoUrl = await CreateMonoPaymentUrl(amount);
-            return Redirect(monoUrl);
-        }
-
+   
         private string CreateVnPayUrl(int amount)
         {
-            var vnpayTmnCode = _configuration["VnPay:TmnCode"];
-            var vnpayHashSecret = _configuration["VnPay:HashSecret"];
-            var vnpayUrl = _configuration["VnPay:BaseUrl"];
+            var vnpayTmnCode = "your_vnpay_tmncode";
+            var vnpayHashSecret = "your_vnpay_hashsecret";
+            var vnpayUrl = "your_vnpay_url";
 
+            // Sử dụng action PaymentCallback làm returnUrl
             var returnUrl = Url.Action("PaymentCallback", "Payment", null, Request.Scheme);
-            
             var orderInfo = $"Thanh toan dang ky tai khoan nghe si - {DateTime.Now:yyyyMMddHHmmss}";
             var ticketId = DateTime.Now.Ticks.ToString();
-            
+
             var vnpay = new VnPayLibrary();
-            
             vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
             vnpay.AddRequestData("vnp_Command", "pay");
             vnpay.AddRequestData("vnp_TmnCode", vnpayTmnCode);
             vnpay.AddRequestData("vnp_Amount", (amount * 100).ToString());
             vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
             vnpay.AddRequestData("vnp_CurrCode", "VND");
-            vnpay.AddRequestData("vnp_IpAddr", HttpContext.Connection.RemoteIpAddress?.ToString());
+            vnpay.AddRequestData("vnp_IpAddr", HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1");
             vnpay.AddRequestData("vnp_Locale", "vn");
             vnpay.AddRequestData("vnp_OrderInfo", orderInfo);
             vnpay.AddRequestData("vnp_OrderType", "other");
             vnpay.AddRequestData("vnp_ReturnUrl", returnUrl);
             vnpay.AddRequestData("vnp_TxnRef", ticketId);
 
-            var paymentUrl = vnpay.CreateRequestUrl(vnpayUrl, vnpayHashSecret);
-            
-            return paymentUrl;
+            return vnpay.CreateRequestUrl(vnpayUrl, vnpayHashSecret);
         }
 
-        private async Task<string> CreateMonoPaymentUrl(int amount)
-        {
-            var monoApiKey = _configuration["Mono:ApiKey"];
-            var monoBaseUrl = _configuration["Mono:BaseUrl"];
-
-            using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {monoApiKey}");
-
-                var payload = new
-                {
-                    amount = amount,
-                    description = "Thanh toan dang ky tai khoan nghe si",
-                    redirectUrl = Url.Action("PaymentCallback", "Payment", null, Request.Scheme),
-                    orderInfo = new
-                    {
-                        orderId = DateTime.Now.Ticks.ToString(),
-                        orderType = "ARTIST_REGISTRATION"
-                    }
-                };
-
-                var content = new StringContent(
-                    JsonConvert.SerializeObject(payload),
-                    Encoding.UTF8,
-                    "application/json"
-                );
-
-                var response = await client.PostAsync($"{monoBaseUrl}/v1/payment/init", content);
-                var result = await response.Content.ReadFromJsonAsync<MonoPaymentResponse>();
-                
-                return result.PaymentUrl;
-            }
-        }
-
+        
         [HttpGet]
         public async Task<IActionResult> PaymentCallback([FromQuery] Dictionary<string, string> parameters)
         {
             var userId = _userManager.GetUserId(User);
-            var user = await _userManager.FindByIdAsync(userId);
+            if (string.IsNullOrEmpty(userId))
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy thông tin người dùng!";
+                return RedirectToAction("ArtistRegistrationPayment");
+            }
 
-            if (parameters.ContainsKey("vnp_ResponseCode") && parameters["vnp_ResponseCode"] == "00" ||
-                parameters.ContainsKey("status") && parameters["status"] == "success")
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "Người dùng không tồn tại!";
+                return RedirectToAction("ArtistRegistrationPayment");
+            }
+
+            // Kiểm tra thanh toán Stripe
+            if (parameters.ContainsKey("status") && parameters["status"] == "success")
             {
                 // Cập nhật trạng thái người dùng thành nghệ sĩ
                 user.IsArtist = true;
@@ -130,14 +118,33 @@ namespace TunePhere.Controllers
                 var artist = new Artists
                 {
                     userId = userId,
-                    ArtistName = user.UserName,
-                  
+                    ArtistName = user.UserName
                 };
                 _context.Artists.Add(artist);
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] = "Thanh toán thành công! Bạn đã trở thành nghệ sĩ.";
-                return RedirectToAction("ArtistDashboard", "Artists");
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Kiểm tra thanh toán VNPay
+            if (parameters.ContainsKey("vnp_ResponseCode") && parameters["vnp_ResponseCode"] == "00")
+            {
+                // Cập nhật trạng thái người dùng thành nghệ sĩ
+                user.IsArtist = true;
+                await _userManager.UpdateAsync(user);
+
+                // Thêm vào bảng Artists
+                var artist = new Artists
+                {
+                    userId = userId,
+                    ArtistName = user.UserName
+                };
+                _context.Artists.Add(artist);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Thanh toán thành công! Bạn đã trở thành nghệ sĩ.";
+                return RedirectToAction("Index", "Home");
             }
 
             TempData["ErrorMessage"] = "Thanh toán thất bại! Vui lòng thử lại.";

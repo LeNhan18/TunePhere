@@ -5,6 +5,26 @@
 }
 
 <link rel="stylesheet" href="~/css/register-artist.css" asp-append-version="true" />
+<script src="https://js.stripe.com/v3/"></script>
+
+@{
+    var errorMessage = TempData["ErrorMessage"] as string;
+    var successMessage = TempData["Message"] as string;
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success">
+        @successMessage
+    </div>
+}
 
 <div class="container-fluid p-0">
     <!-- Header -->
@@ -37,13 +57,21 @@
                                 </div>
                             }
 
-                            <form asp-action="Register" method="post" enctype="multipart/form-data">
+                            <form id="payment-form" asp-action="Register" method="post" enctype="multipart/form-data">
                                 <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
 
                                 <div class="mb-4">
                                     <label asp-for="ArtistName" class="form-label">Tên nghệ danh</label>
                                     <input asp-for="ArtistName" class="form-control" placeholder="Nhập tên nghệ danh của bạn" required />
                                     <span asp-validation-for="ArtistName" class="validation-message"></span>
+                                </div>
+
+                                <div class="mb-4">
+                                    <div class="payment-section">
+                                        <h5>Thanh toán phí đăng ký nghệ sĩ (480,000 VND)</h5>
+                                        <div id="card-element" class="stripe-card-field"></div>
+                                        <div id="card-errors" class="text-danger"></div>
+                                    </div>
                                 </div>
 
                                 <div class="mb-4">
@@ -86,11 +114,16 @@
                                     </div>
                                 </div>
 
-                                <div class="text-center mt-5">
-                                    <button type="submit" class="btn-register">
-                                        <i class="fas fa-music me-2"></i>
-                                        Đăng ký trở thành nghệ sĩ
-                                    </button>
+                                <div class="payment-section mt-4">
+                                    <h4>Thanh toán phí đăng ký</h4>
+                                    <div class="payment-form">
+                                        <div id="card-element" class="mb-3"></div>
+                                        <div id="card-errors" class="text-danger"></div>
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-credit-card me-2"></i>
+                                            Thanh toán 480.000 VND
+                                        </button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -102,6 +135,66 @@
 </div>
 
 @section Scripts {
+    <link rel="stylesheet" href="~/css/stripe-payment.css" />
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stripe = Stripe('@ViewBag.StripePublicKey');
+            const elements = stripe.elements();
+            const cardElement = elements.create('card');
+            cardElement.mount('#card-element');
+
+            document.getElementById('payment-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const clientSecret = '@ViewBag.PaymentIntentClientSecret';
+                const publicKey = '@ViewBag.StripePublicKey';
+                
+                if (!clientSecret) {
+                    document.getElementById('card-errors').textContent = 'Không tìm thấy thông tin thanh toán. Vui lòng thử lại.';
+                    return;
+                }
+
+                if (!publicKey) {
+                    document.getElementById('card-errors').textContent = 'Không tìm thấy khóa công khai Stripe. Vui lòng thử lại.';
+                    return;
+                }
+
+                try {
+                    const result = await stripe.createPaymentMethod({
+                        type: 'card',
+                        card: cardElement,
+                    });
+
+                    if (!result || !result.paymentMethod) {
+                        document.getElementById('card-errors').textContent = 'Không thể tạo phương thức thanh toán.';
+                        return;
+                    }
+
+                    const paymentMethod = result.paymentMethod;
+                    
+                    const confirmation = await stripe.confirmCardPayment(clientSecret, {
+                        payment_method: paymentMethod.id
+                    });
+
+                    if (!confirmation || confirmation.error) {
+                        document.getElementById('card-errors').textContent = confirmation.error?.message || 'Đã xảy ra lỗi khi xác nhận thanh toán.';
+                        return;
+                    }
+
+                    if (confirmation.paymentIntent && confirmation.paymentIntent.status === 'succeeded') {
+                        // Thanh toán thành công, redirect đến trang xác nhận
+                        window.location.href = '/Payment/PaymentCallback?status=success';
+                    } else {
+                        document.getElementById('card-errors').textContent = 'Thanh toán không thành công. Vui lòng thử lại.';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    document.getElementById('card-errors').textContent = error.message || 'Đã xảy ra lỗi. Vui lòng thử lại.';
+                }
+            });
+        });
+    </script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

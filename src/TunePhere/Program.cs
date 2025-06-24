@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity.UI;
 using TunePhere.Hubs;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +63,9 @@ builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
 builder.Services.AddScoped<TunePhere.Services.FirebaseAuthService>();
 
 builder.Services.AddSignalR();
+
+// Cấu hình Stripe
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
 var app = builder.Build();
 
