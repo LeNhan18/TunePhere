@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Identity.UI;
 using TunePhere.Hubs;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using TunePhere.Models.Momo;
+using TunePhere.Services.Momo;
+using TunePhere.Services.VNPAY;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +66,16 @@ builder.Services.AddScoped<TunePhere.Services.FirebaseAuthService>();
 
 builder.Services.AddSignalR();
 
+// Register HttpClient factory for external API services
+builder.Services.AddHttpClient();
+
+// VNPay service registration
+builder.Services.AddScoped<IVnPayService, VnPayService>();
+
+// MoMo configuration & service registration
+builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
+builder.Services.AddScoped<IMomoService, MomoService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -72,6 +85,7 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 
 using (var scope = app.Services.CreateScope())
 {
