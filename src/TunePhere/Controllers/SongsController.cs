@@ -569,160 +569,57 @@ namespace TunePhere.Controllers
         {
             try
             {
-                // Sử dụng transaction để đảm bảo tính nhất quán
-                using var transaction = await _context.Database.BeginTransactionAsync();
-
-                var song = await _context.Songs
-                    .Include(s => s.Artists)
-                    .Include(s => s.Lyrics)
-                    .FirstOrDefaultAsync(m => m.SongId == id);
-
-                if (song == null)
-                {
-                    return NotFound();
-                }
-
-                // Kiểm tra quyền sở hữu
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null || song.Artists?.userId != user.Id)
-                {
-                    return Forbid();
-                }
-
-                // 1. Xóa tất cả lịch sử nghe nhạc liên quan đến bài hát
-                var playHistories = await _context.PlayHistories
-                    .Where(ph => ph.SongId == id)
-                    .ToListAsync();
+                // 1. Lấy toàn bộ PlayHistories liên quan và detach/xóa từng bản ghi
+                var playHistories = await _context.PlayHistories.Where(ph => ph.SongId == id).ToListAsync();
                 if (playHistories.Any())
                 {
-                    _context.PlayHistories.RemoveRange(playHistories);
+                    foreach (var ph in playHistories)
+                    {
+                        _context.Entry(ph).State = EntityState.Deleted;
+                    }
                     await _context.SaveChangesAsync();
                 }
 
-                // 2. Xóa tất cả playlist songs liên quan đến bài hát
-                var playlistSongs = await _context.PlaylistSongs
-                    .Where(ps => ps.SongId == id)
-                    .ToListAsync();
+                // 2. Xóa các entity khác liên quan
+                var playlistSongs = await _context.PlaylistSongs.Where(ps => ps.SongId == id).ToListAsync();
                 if (playlistSongs.Any())
                 {
                     _context.PlaylistSongs.RemoveRange(playlistSongs);
-                    await _context.SaveChangesAsync();
                 }
 
-                // 3. Xóa tất cả remixes liên quan đến bài hát
-                var remixes = await _context.Remixes
-                    .Where(r => r.OriginalSongId == id)
-                    .ToListAsync();
-                if (remixes.Any())
-                {
-                    _context.Remixes.RemoveRange(remixes);
-                    await _context.SaveChangesAsync();
-                }
-
-                // 4. Xóa tất cả lyrics của bài hát
-                var lyrics = await _context.Lyrics
-                    .Where(l => l.SongId == id)
-                    .ToListAsync();
+                var lyrics = await _context.Lyrics.Where(l => l.SongId == id).ToListAsync();
                 if (lyrics.Any())
                 {
                     _context.Lyrics.RemoveRange(lyrics);
-                    await _context.SaveChangesAsync();
                 }
 
-                // 5. Xóa tất cả UserFavoriteSongs liên quan đến bài hát
-                var userFavorites = await _context.UserFavoriteSongs
-                    .Where(f => f.SongId == id)
-                    .ToListAsync();
-                if (userFavorites.Any())
+                var favoriteSongs = await _context.UserFavoriteSongs.Where(fs => fs.SongId == id).ToListAsync();
+                if (favoriteSongs.Any())
                 {
-                    _context.UserFavoriteSongs.RemoveRange(userFavorites);
-                    await _context.SaveChangesAsync();
+                    _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
                 }
 
-                // 6. Xóa tất cả ChatMessages liên quan đến phòng nghe nhạc có bài hát này
-                var listeningRooms = await _context.ListeningRooms
-                    .Where(lr => lr.CurrentSongId == id)
-                    .ToListAsync();
-                
-                foreach (var room in listeningRooms)
+                var remixes = await _context.Remixes.Where(r => r.OriginalSongId == id).ToListAsync();
+                if (remixes.Any())
                 {
-                    // Xóa tất cả tin nhắn trong phòng
-                    var chatMessages = await _context.ChatMessages
-                        .Where(cm => cm.RoomId == room.RoomId)
-                        .ToListAsync();
-                    if (chatMessages.Any())
-                    {
-                        _context.ChatMessages.RemoveRange(chatMessages);
-                        await _context.SaveChangesAsync();
-                    }
-
-                    // Xóa tất cả người tham gia phòng
-                    var participants = await _context.ListeningRoomParticipants
-                        .Where(p => p.RoomId == room.RoomId)
-                        .ToListAsync();
-                    if (participants.Any())
-                    {
-                        _context.ListeningRoomParticipants.RemoveRange(participants);
-                        await _context.SaveChangesAsync();
-                    }
-
-                    // Xóa phòng nghe nhạc
-                    _context.ListeningRooms.Remove(room);
-                    await _context.SaveChangesAsync();
+                    _context.Remixes.RemoveRange(remixes);
                 }
 
-                // 7. Xóa file nhạc
-                if (!string.IsNullOrEmpty(song.FileUrl))
-                {
-                    var audioPath = Path.Combine(_environment.WebRootPath, song.FileUrl.TrimStart('/'));
-                    if (System.IO.File.Exists(audioPath))
-                    {
-                        System.IO.File.Delete(audioPath);
-                    }
-                }
-
-                // 8. Kiểm tra xem ảnh bìa có đang được sử dụng bởi bài hát khác hoặc album không
-                if (!string.IsNullOrEmpty(song.ImageUrl))
-                {
-                    // Kiểm tra các bài hát khác có dùng ảnh này không
-                    bool imageIsUsedElsewhere = await _context.Songs
-                        .Where(s => s.SongId != id && s.ImageUrl == song.ImageUrl)
-                        .AnyAsync();
-
-                    // Kiểm tra có album nào đang dùng ảnh này không
-                    if (!imageIsUsedElsewhere)
-                    {
-                        imageIsUsedElsewhere = await _context.Albums
-                            .Where(a => a.ImageUrl == song.ImageUrl)
-                            .AnyAsync();
-                    }
-
-                    // Chỉ xóa file ảnh nếu không có nơi nào khác đang sử dụng
-                    if (!imageIsUsedElsewhere)
-                    {
-                        var imagePath = Path.Combine(_environment.WebRootPath, song.ImageUrl.TrimStart('/'));
-                        if (System.IO.File.Exists(imagePath))
-                        {
-                            System.IO.File.Delete(imagePath);
-                        }
-                    }
-                }
-
-                // 9. Xóa bài hát
-                _context.Songs.Remove(song);
                 await _context.SaveChangesAsync();
 
-                // Hoàn thành transaction
-                await transaction.CommitAsync();
+                // 3. Xóa bài hát
+                var song = await _context.Songs.FindAsync(id);
+                if (song != null)
+                {
+                    _context.Songs.Remove(song);
+                    await _context.SaveChangesAsync();
+                }
 
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                // Log lỗi và hiển thị thông báo
-                _logger.LogError(ex, "Lỗi khi xóa bài hát: {Message}", ex.Message);
-                TempData["Error"] = "Không thể xóa bài hát. Vui lòng thử lại sau.";
-                return RedirectToAction(nameof(Index));
+                return Problem($"Có lỗi xảy ra khi xóa bài hát: {ex.Message}");
             }
         }
 

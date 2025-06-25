@@ -12,16 +12,16 @@ namespace TunePhere.Models
         [Required]
         public int PlaylistId { get; set; }
 
-        [Required]
-        public int SongId { get; set; }
-
-        public int Order { get; set; }
-
         [ForeignKey("PlaylistId")]
         public virtual Playlist Playlist { get; set; }
 
+        [Required]
+        public int SongId { get; set; }
+
         [ForeignKey("SongId")]
         public virtual Song Song { get; set; }
+
+        public int Order { get; set; }
 
         [Required]
         public string? AddedByUserId { get; set; } // Người thêm bài hát
