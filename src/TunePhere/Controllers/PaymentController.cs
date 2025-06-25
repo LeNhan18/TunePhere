@@ -1,29 +1,45 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+
+using Microsoft.EntityFrameworkCore;
 using System;
+
+
 using System.Threading.Tasks;
 using TunePhere.Models;
-using Microsoft.AspNetCore.Identity;
-using System.Net.Http;
-using Newtonsoft.Json;
-using System.Text;
-using TunePhere.Helpers;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using TunePhere.Models.Momo;
+using TunePhere.Models.VNPAY;
+using TunePhere.Services.Momo;
+using TunePhere.Services.VNPAY;
 
 namespace TunePhere.Controllers
 {
+    [Authorize]
     public class PaymentController : Controller
     {
+        private const double ArtistRegistrationFee = 480000d; // 480.000 VNĐ
+
         private readonly UserManager<AppUser> _userManager;
-        private readonly IConfiguration _configuration;
-        private readonly AppDbContext _context;
+        private readonly AppDbContext _db;
+        private readonly IMomoService _momoService;
+        private readonly IVnPayService _vnPayService;
+        private readonly ILogger<PaymentController> _logger;
 
         public PaymentController(
             UserManager<AppUser> userManager,
-            IConfiguration configuration,
-            AppDbContext context)
+            AppDbContext db,
+            IMomoService momoService,
+            IVnPayService vnPayService,
+            ILogger<PaymentController> logger)
         {
             _userManager = userManager;
-            _configuration = configuration;
-            _context = context;
+            _db = db;
+            _momoService = momoService;
+            _vnPayService = vnPayService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -35,113 +51,148 @@ namespace TunePhere.Controllers
         [HttpPost]
         public async Task<IActionResult> ProcessVnPay()
         {
-            var amount = 480000; // 480,000 VND
-            var vnpayUrl = CreateVnPayUrl(amount);
+            var amount = ArtistRegistrationFee;
+            var user = await _userManager.GetUserAsync(User);
+            var paymentInfo = new PaymentInformationModel
+            {
+                Amount = amount,
+                Name = user.FullName ?? user.UserName,
+                OrderDescription = "Đăng ký tài khoản nghệ sĩ",
+                OrderType = "other"
+            };
+            var vnpayUrl = _vnPayService.CreatePaymentUrl(paymentInfo, HttpContext);
             return Redirect(vnpayUrl);
         }
 
         [HttpPost]
-        public async Task<IActionResult> ProcessMono()
+        public async Task<IActionResult> ProcessMomo()
         {
-            var amount = 480000;
-            var monoUrl = await CreateMonoPaymentUrl(amount);
-            return Redirect(monoUrl);
-        }
-
-        private string CreateVnPayUrl(int amount)
-        {
-            var vnpayTmnCode = _configuration["VnPay:TmnCode"];
-            var vnpayHashSecret = _configuration["VnPay:HashSecret"];
-            var vnpayUrl = _configuration["VnPay:BaseUrl"];
-
-            var returnUrl = Url.Action("PaymentCallback", "Payment", null, Request.Scheme);
-            
-            var orderInfo = $"Thanh toan dang ky tai khoan nghe si - {DateTime.Now:yyyyMMddHHmmss}";
-            var ticketId = DateTime.Now.Ticks.ToString();
-            
-            var vnpay = new VnPayLibrary();
-            
-            vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
-            vnpay.AddRequestData("vnp_Command", "pay");
-            vnpay.AddRequestData("vnp_TmnCode", vnpayTmnCode);
-            vnpay.AddRequestData("vnp_Amount", (amount * 100).ToString());
-            vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
-            vnpay.AddRequestData("vnp_CurrCode", "VND");
-            vnpay.AddRequestData("vnp_IpAddr", HttpContext.Connection.RemoteIpAddress?.ToString());
-            vnpay.AddRequestData("vnp_Locale", "vn");
-            vnpay.AddRequestData("vnp_OrderInfo", orderInfo);
-            vnpay.AddRequestData("vnp_OrderType", "other");
-            vnpay.AddRequestData("vnp_ReturnUrl", returnUrl);
-            vnpay.AddRequestData("vnp_TxnRef", ticketId);
-
-            var paymentUrl = vnpay.CreateRequestUrl(vnpayUrl, vnpayHashSecret);
-            
-            return paymentUrl;
-        }
-
-        private async Task<string> CreateMonoPaymentUrl(int amount)
-        {
-            var monoApiKey = _configuration["Mono:ApiKey"];
-            var monoBaseUrl = _configuration["Mono:BaseUrl"];
-
-            using (var client = new HttpClient())
+            try
             {
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {monoApiKey}");
-
-                var payload = new
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
                 {
-                    amount = amount,
-                    description = "Thanh toan dang ky tai khoan nghe si",
-                    redirectUrl = Url.Action("PaymentCallback", "Payment", null, Request.Scheme),
-                    orderInfo = new
-                    {
-                        orderId = DateTime.Now.Ticks.ToString(),
-                        orderType = "ARTIST_REGISTRATION"
-                    }
+                    return Unauthorized();
+                }
+
+                var amount = 480000; // 480,000 VND
+                 var orderInfo = new OrderInfoModel
+                {
+                    FullName = user.FullName ?? user.UserName,
+                    OrderInfo = "Dang ky tai khoan nghe si", // Không dấu để tránh lỗi MoMo
+                    Amount = amount,
+                    ReturnUrl = Url.Action("PaymentCallback", "Payment", null, Request.Scheme),
+                    NotifyUrl = Url.Action("PaymentCallback", "Payment", null, Request.Scheme),
+                    Lang = "vi",
+                    IpAddr = HttpContext.Connection.RemoteIpAddress?.ToString()
                 };
 
-                var content = new StringContent(
-                    JsonConvert.SerializeObject(payload),
-                    Encoding.UTF8,
-                    "application/json"
-                );
+                var response = await _momoService.CreatePaymentAsync(orderInfo);
+                if (response != null && !string.IsNullOrEmpty(response.PayUrl))
+                {
+                    return Redirect(response.PayUrl);
+                }
 
-                var response = await client.PostAsync($"{monoBaseUrl}/v1/payment/init", content);
-                var result = await response.Content.ReadFromJsonAsync<MonoPaymentResponse>();
-                
-                return result.PaymentUrl;
+                TempData["ErrorMessage"] = "Không thể khởi tạo thanh toán. Vui lòng thử lại sau.";
+                return RedirectToAction("ArtistRegistrationPayment");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing MoMo payment");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.";
+                return RedirectToAction("ArtistRegistrationPayment");
             }
         }
 
         [HttpGet]
-        public async Task<IActionResult> PaymentCallback([FromQuery] Dictionary<string, string> parameters)
+        public async Task<IActionResult> PaymentCallback()
         {
-            var userId = _userManager.GetUserId(User);
-            var user = await _userManager.FindByIdAsync(userId);
-
-            if (parameters.ContainsKey("vnp_ResponseCode") && parameters["vnp_ResponseCode"] == "00" ||
-                parameters.ContainsKey("status") && parameters["status"] == "success")
+            try
             {
-                // Cập nhật trạng thái người dùng thành nghệ sĩ
+                var userId = _userManager.GetUserId(User);
+                var user = await _userManager.FindByIdAsync(userId);
+                
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+
+                // Xác thực callback từ VNPAY
+                if (Request.Query.ContainsKey("vnp_ResponseCode"))
+                {
+                    var response = _vnPayService.PaymentExecute(Request.Query);
+                    if (response.Success && response.VnPayResponseCode == "00")
+                    {
+                        await ProcessSuccessfulPayment(user);
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = $"Thanh toán không thành công: {response.VnPayResponseCode}";
+                        return RedirectToAction("ArtistRegistrationPayment");
+                    }
+                }
+                // Check for MoMo response
+                else if (Request.Query.ContainsKey("resultCode") && 
+                        Request.Query["resultCode"] == "0")
+                {
+                    await ProcessSuccessfulPayment(user);
+                    return RedirectToAction("Index", "Home");
+                }
+                // Process MoMo IPN (server-to-server)
+                else if (Request.Method == "POST" && 
+                        Request.HasFormContentType && 
+                        Request.Form.ContainsKey("partnerCode"))
+                {
+                    var result = _momoService.PaymentExecuteAsync(Request.Form);
+                    if (result.Success)
+                    {
+                        await ProcessSuccessfulPayment(user);
+                        return Ok(new { Status = 0, Message = "Success" });
+                    }
+                    return BadRequest(new { Status = 1, Message = "Invalid payment" });
+                }
+
+                TempData["ErrorMessage"] = "Thanh toán không thành công. Vui lòng thử lại.";
+                return RedirectToAction("ArtistRegistrationPayment");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in payment callback");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi xử lý thanh toán. Vui lòng liên hệ hỗ trợ.";
+                return RedirectToAction("ArtistRegistrationPayment");
+            }
+        }
+
+        private async Task ProcessSuccessfulPayment(AppUser user)
+        {
+            // Update user to artist
+            if (!user.IsArtist)
+            {
                 user.IsArtist = true;
                 await _userManager.UpdateAsync(user);
-
-                // Thêm vào bảng Artists
-                var artist = new Artists
-                {
-                    userId = userId,
-                    ArtistName = user.UserName,
-                  
-                };
-                _context.Artists.Add(artist);
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = "Thanh toán thành công! Bạn đã trở thành nghệ sĩ.";
-                return RedirectToAction("ArtistDashboard", "Artists");
             }
 
-            TempData["ErrorMessage"] = "Thanh toán thất bại! Vui lòng thử lại.";
-            return RedirectToAction("ArtistRegistrationPayment");
+            // Đảm bảo role 'Artist' cho user nếu có sử dụng role
+            if (_userManager != null && !(await _userManager.IsInRoleAsync(user, "Artist")))
+            {
+                await _userManager.AddToRoleAsync(user, "Artist");
+            }
+
+            // Add to Artists table if not exists
+            var existingArtist = await _db.Artists.FirstOrDefaultAsync(a => a.userId == user.Id);
+            if (existingArtist == null)
+            {
+                var artist = new Artists
+                {
+                    userId = user.Id,
+                    ArtistName = user.UserName
+                };
+                _db.Artists.Add(artist);
+                await _db.SaveChangesAsync();
+            }
+
+            TempData["SuccessMessage"] = "Thanh toán thành công! Bạn đã trở thành nghệ sĩ.";
         }
     }
 

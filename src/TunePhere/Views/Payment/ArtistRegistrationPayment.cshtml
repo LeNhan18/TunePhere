@@ -22,17 +22,17 @@
     <div class="payment-methods">
         <h3>Chọn phương thức thanh toán:</h3>
         <div class="payment-buttons">
-            <form asp-action="ProcessVnPay" method="post">
-                <button type="submit" class="btn btn-vnpay">
-                    <img src="/images/vnpay-logo.png" alt="VNPay" />
-                    Thanh toán qua VNPay
+            <form asp-action="ProcessVnPay" method="post" class="payment-form">
+                <button type="submit" class="btn btn-payment btn-vnpay">
+                    <img src="/images/vnpay-logo.png" alt="VNPay" class="payment-logo" />
+                    <span>Thanh toán qua VNPay</span>
                 </button>
             </form>
 
-            <form asp-action="ProcessMono" method="post">
-                <button type="submit" class="btn btn-mono">
-                    <img src="/images/mono-logo.png" alt="Mono" />
-                    Thanh toán qua Mono
+            <form asp-action="ProcessMomo" method="post" class="payment-form">
+                <button type="submit" class="btn btn-payment btn-momo">
+                    <img src="/images/momo-logo.png" alt="MoMo" class="payment-logo" />
+                    <span>Thanh toán qua MoMo</span>
                 </button>
             </form>
         </div>
@@ -40,8 +40,15 @@
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger">
-            @TempData["ErrorMessage"]
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+        </div>
+    }
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
         </div>
     }
 </div>
@@ -62,7 +69,7 @@
 
 .price {
     font-size: 2.5em;
-    color: #1DB954;
+        color: rgb(103, 64, 183);
     font-weight: bold;
     margin: 20px 0;
 }
@@ -83,7 +90,7 @@
 
 .payment-benefits li:before {
     content: "✓";
-    color: #1DB954;
+    color:rgb(103, 64, 183);
     margin-right: 10px;
 }
 
@@ -93,9 +100,64 @@
 
 .payment-buttons {
     display: flex;
-    gap: 20px;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 400px;
+    margin: 20px auto 0;
+}
+
+.payment-form {
+    width: 100%;
+}
+
+.btn-payment {
+    display: flex;
+    align-items: center;
     justify-content: center;
-    margin-top: 20px;
+    width: 100%;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-payment:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-payment:active {
+    transform: translateY(0);
+}
+
+.payment-logo {
+    width: 28px;
+    height: 28px;
+    margin-right: 12px;
+    object-fit: contain;
+}
+
+.btn-vnpay {
+    background-color: #00B14F;
+    color: white;
+}
+
+.btn-momo {
+    background-color: #A50064;
+    color: white;
+}
+
+.btn-vnpay:hover {
+    background-color: #009944;
+}
+
+.btn-momo:hover {
+    background-color: #8A0056;
 }
 
 .btn {
