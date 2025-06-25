@@ -26,7 +26,7 @@ namespace TunePhere.Controllers
         private readonly AppDbContext _context;
 
         public AdminController(
-            UserManager<AppUser> userManager, 
+            UserManager<AppUser> userManager,
             RoleManager<IdentityRole> roleManager,
             ISongRepository songRepository,
             IPlaylistRepository playlistRepository,
@@ -362,7 +362,8 @@ namespace TunePhere.Controllers
                 return Json(new { success = false });
             }
 
-            return Json(new { 
+            return Json(new
+            {
                 success = true,
                 id = user.Id,
                 fullName = user.FullName,
@@ -631,14 +632,18 @@ namespace TunePhere.Controllers
             try
             {
                 var artists = await _artistRepository.GetAllAsync();
-                return Json(new { success = true, data = artists.Select(a => new { 
-                    id = a.ArtistId,
-                    name = a.ArtistName,
-                    imageUrl = a.ImageUrl,
-                    coverImageUrl = a.CoverImageUrl,
-                    bio = a.Bio,
-                    followersCount = a.GetFollowersCount()
-                })});
+                return Json(new
+                {
+                    success = true,
+                    data = artists.Select(a => new {
+                        id = a.ArtistId,
+                        name = a.ArtistName,
+                        imageUrl = a.ImageUrl,
+                        coverImageUrl = a.CoverImageUrl,
+                        bio = a.Bio,
+                        followersCount = a.GetFollowersCount()
+                    })
+                });
             }
             catch (Exception error)
             {
@@ -659,7 +664,7 @@ namespace TunePhere.Controllers
             {
                 // Xử lý upload ảnh
                 string imageUrl = await UploadFile(image, "images/songs");
-                
+
                 // Xử lý upload audio
                 string fileUrl = await UploadFile(audioFile, "audio");
 
