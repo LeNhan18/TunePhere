@@ -7,6 +7,20 @@
     var artist = firstSong?.Artists;
 }
 
+<h2>@ViewData["Title"]</h2>
+
+<div class="mb-3">
+    <label for="moodFilter" class="form-label">Lọc theo mood:</label>
+    <select id="moodFilter" class="form-select" style="width: 200px; display: inline-block;">
+        <option value="">-- Chọn mood --</option>
+        <option value="happy">Vui vẻ</option>
+        <option value="sad">Buồn</option>
+        <option value="chill">Chill</option>
+        <option value="energetic">Sôi động</option>
+        <option value="relax">Thư giãn</option>
+        <!-- Thêm các mood khác nếu muốn -->
+    </select>
+</div>
 
 <div class="container-fluid p-0">
     <!-- Header với ảnh nghệ sĩ -->
@@ -31,7 +45,7 @@
         </div>
 
         <!-- Danh sách bài hát -->
-        <div class="song-list">
+        <div id="songsList">
             <table class="table table-hover">
                 <thead>
                     <tr class="text-muted">
@@ -92,7 +106,6 @@
         </div>
     </div>
 </div>
-
 
 @section Styles {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -275,4 +288,34 @@
                 background: var(--accent-color-hover);
             }
     </style>
+}
+
+@section Scripts {
+<script>
+    document.getElementById('moodFilter').addEventListener('change', function() {
+        var mood = this.value;
+        var songsList = document.getElementById('songsList');
+        if (!mood) {
+            location.reload(); // Nếu không chọn mood, reload lại trang để hiển thị tất cả
+            return;
+        }
+        fetch('/Songs/SearchByMood?mood=' + encodeURIComponent(mood))
+            .then(response => response.json())
+            .then(data => {
+                let html = '';
+                if (data.length === 0) {
+                    html = '<div>Không có bài hát nào với mood này.</div>';
+                } else {
+                    data.forEach(song => {
+                        html += `<div class='song-item mb-2'>
+                            <img src='${song.imageUrl}' alt='${song.title}' style='width:40px;height:40px;object-fit:cover;vertical-align:middle;'>
+                            <span class='ms-2'><b>${song.title}</b> - ${song.artistName}</span>
+                            ${song.mood ? `<span class='badge bg-info text-dark ms-2'>${song.mood}</span>` : ''}
+                        </div>`;
+                    });
+                }
+                songsList.innerHTML = html;
+            });
+    });
+</script>
 }

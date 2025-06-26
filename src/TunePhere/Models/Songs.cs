@@ -53,6 +53,8 @@ namespace TunePhere.Models
         public bool IsActive { get; set; } = true;
         public string? VideoUrl { get; set; }
 
+        public string? Mood { get; set; } // Mood của bài hát (vui, buồn, sôi động...)
+
         [JsonIgnore]
         public virtual Artists? Artists { get; set; }
         

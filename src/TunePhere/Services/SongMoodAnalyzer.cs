@@ -1,9 +1,36 @@
+using System.Net.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using TunePhere.Models;
 
 namespace TunePhere.Services
 {
     public class SongMoodAnalyzer
     {
+        private readonly string _apiToken = "a88cc52df3a8d82cbfdfa0ead0f77a34";
+
+        public async Task<string?> AnalyzeSongMoodAsync(string filePath)
+        {
+            using (var client = new HttpClient())
+            using (var form = new MultipartFormDataContent())
+            {
+                form.Add(new StringContent(_apiToken), "api_token");
+                form.Add(new StringContent("recognize"), "return");
+                var fileContent = new ByteArrayContent(System.IO.File.ReadAllBytes(filePath));
+                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("audio/mpeg");
+                form.Add(fileContent, "file", "song.mp3");
+
+                var response = await client.PostAsync("https://api.audd.io/", form);
+                var result = await response.Content.ReadAsStringAsync();
+
+                // Parse kết quả JSON để lấy thông tin mood (nếu có)
+                var json = JObject.Parse(result);
+                var mood = json["result"]?["mood"]?.ToString();
+
+                return mood; // Có thể là null nếu API không trả về mood
+            }
+        }
+
         public SongMood AnalyzeMood(float valence, float energy, float danceability, float tempo, string mode)
         {
             var mood = new SongMood
