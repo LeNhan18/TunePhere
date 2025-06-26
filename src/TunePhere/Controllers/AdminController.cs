@@ -455,14 +455,97 @@ namespace TunePhere.Controllers
 
                 try
                 {
-                    // 1. Xóa PlayHistories trước
+                    // Bước 1: Xóa PlayHistories của user
                     var playHistories = await _context.PlayHistories
                         .Where(p => p.UserId == id)
                         .ToListAsync();
                     _context.PlayHistories.RemoveRange(playHistories);
-                    await _context.SaveChangesAsync();
 
-                    // 2. Xóa các bản ghi liên quan đến Artists và Songs
+                    // Bước 2: Lấy tất cả ListeningRooms mà user tạo ra
+                    var userRooms = await _context.ListeningRooms
+                        .Where(r => r.CreatorId == id)
+                        .Select(r => r.RoomId)
+                        .ToListAsync();
+
+                    // Bước 3: Xóa TẤT CẢ ChatMessages trong các rooms mà user tạo ra
+                    if (userRooms.Any())
+                    {
+                        var allChatMessagesInUserRooms = await _context.ChatMessages
+                            .Where(m => userRooms.Contains(m.RoomId.Value))
+                            .ToListAsync();
+                        _context.ChatMessages.RemoveRange(allChatMessagesInUserRooms);
+                    }
+
+                    // Bước 4: Xóa các ChatMessages mà user gửi (trong các room khác)
+                    var userChatMessages = await _context.ChatMessages
+                        .Where(m => m.SenderId == id && !userRooms.Contains(m.RoomId.Value))
+                        .ToListAsync();
+                    _context.ChatMessages.RemoveRange(userChatMessages);
+
+                    // Bước 5: Xóa ListeningRoomParticipants trước khi xóa ListeningRooms
+                    var roomParticipants = await _context.ListeningRoomParticipants
+                        .Where(p => p.UserId == id)
+                        .ToListAsync();
+                    _context.ListeningRoomParticipants.RemoveRange(roomParticipants);
+
+                    // Xóa participants trong các room mà user tạo ra
+                    if (userRooms.Any())
+                    {
+                        var allParticipantsInUserRooms = await _context.ListeningRoomParticipants
+                            .Where(p => userRooms.Contains(p.RoomId))
+                            .ToListAsync();
+                        _context.ListeningRoomParticipants.RemoveRange(allParticipantsInUserRooms);
+                    }
+
+                    // Bước 6: Bây giờ mới xóa ListeningRooms
+                    var rooms = await _context.ListeningRooms
+                        .Where(r => r.CreatorId == id)
+                        .ToListAsync();
+                    _context.ListeningRooms.RemoveRange(rooms);
+
+                    // Bước 7: Xóa PlaylistSongs trước khi xóa Playlists
+                    var playlistSongs = await _context.PlaylistSongs
+                        .Where(ps => ps.Playlist.UserId == id)
+                        .ToListAsync();
+                    _context.PlaylistSongs.RemoveRange(playlistSongs);
+
+                    // Bước 8: Xóa Playlists
+                    var playlists = await _context.Playlists
+                        .Where(p => p.UserId == id)
+                        .ToListAsync();
+                    _context.Playlists.RemoveRange(playlists);
+
+                    // Bước 9: Xóa UserFavoriteSongs
+                    var userFavoriteSongs = await _context.UserFavoriteSongs
+                        .Where(f => f.UserId == id)
+                        .ToListAsync();
+                    _context.UserFavoriteSongs.RemoveRange(userFavoriteSongs);
+
+                    // Bước 10: Xóa UserFollowers
+                    var followers = await _context.UserFollowers
+                        .Where(f => f.FollowerId == id || f.FollowingId == id)
+                        .ToListAsync();
+                    _context.UserFollowers.RemoveRange(followers);
+
+                    // Bước 11: Xóa ArtistFollowers
+                    var artistFollowers = await _context.ArtistFollowers
+                        .Where(f => f.UserId == id)
+                        .ToListAsync();
+                    _context.ArtistFollowers.RemoveRange(artistFollowers);
+
+                    // Bước 12: Xóa Remixes
+                    var remixes = await _context.Remixes
+                        .Where(r => r.UserId == id)
+                        .ToListAsync();
+                    _context.Remixes.RemoveRange(remixes);
+
+                    // Bước 13: Xóa UserPreferences
+                    var preferences = await _context.UserPreferences
+                        .Where(p => p.UserId == id)
+                        .ToListAsync();
+                    _context.UserPreferences.RemoveRange(preferences);
+
+                    // Bước 14: Xử lý Artists và Songs
                     var artists = await _context.Artists.Where(a => a.userId == id).ToListAsync();
                     foreach (var artist in artists)
                     {
@@ -473,107 +556,53 @@ namespace TunePhere.Controllers
 
                         foreach (var song in songs)
                         {
-                            // 2.1 Xóa PlayHistories của các bài hát
+                            // Xóa PlayHistories của các bài hát (nếu còn sót)
                             var songPlayHistories = await _context.PlayHistories
                                 .Where(ph => ph.SongId == song.SongId)
                                 .ToListAsync();
                             _context.PlayHistories.RemoveRange(songPlayHistories);
 
-                            // 2.2 Xóa Lyrics
+                            // Xóa Lyrics
                             var lyrics = await _context.Lyrics
                                 .Where(l => l.SongId == song.SongId)
                                 .ToListAsync();
                             _context.Lyrics.RemoveRange(lyrics);
 
-                            // 2.3 Xóa PlaylistSongs
-                            var playlistSongs = await _context.PlaylistSongs
+                            // Xóa PlaylistSongs (nếu còn sót)
+                            var remainingPlaylistSongs = await _context.PlaylistSongs
                                 .Where(ps => ps.SongId == song.SongId)
                                 .ToListAsync();
-                            _context.PlaylistSongs.RemoveRange(playlistSongs);
+                            _context.PlaylistSongs.RemoveRange(remainingPlaylistSongs);
 
-                            // 2.4 Xóa UserFavoriteSongs
-                            var favoriteSongs = await _context.UserFavoriteSongs
+                            // Xóa UserFavoriteSongs (nếu còn sót)
+                            var remainingFavoriteSongs = await _context.UserFavoriteSongs
                                 .Where(fs => fs.SongId == song.SongId)
                                 .ToListAsync();
-                            _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
+                            _context.UserFavoriteSongs.RemoveRange(remainingFavoriteSongs);
                         }
 
-                        // 2.5 Xóa Songs
+                        // Xóa Songs
                         _context.Songs.RemoveRange(songs);
 
-                        // 2.6 Xóa Albums
+                        // Xóa Albums
                         var albums = await _context.Albums
                             .Where(a => a.ArtistId == artist.ArtistId)
                             .ToListAsync();
                         _context.Albums.RemoveRange(albums);
                     }
 
-                    // 2.7 Xóa Artists
+                    // Xóa Artists
                     _context.Artists.RemoveRange(artists);
 
-                    // 3. Xóa các bản ghi khác liên quan đến user
-                    // 3.1 UserPreferences
-                    var preferences = await _context.UserPreferences
-                        .Where(p => p.UserId == id)
-                        .ToListAsync();
-                    _context.UserPreferences.RemoveRange(preferences);
-
-                    // 3.2 UserFavoriteSongs
-                    var userFavoriteSongs = await _context.UserFavoriteSongs
-                        .Where(f => f.UserId == id)
-                        .ToListAsync();
-                    _context.UserFavoriteSongs.RemoveRange(userFavoriteSongs);
-
-                    // 3.3 UserFollowers
-                    var followers = await _context.UserFollowers
-                        .Where(f => f.FollowerId == id || f.FollowingId == id)
-                        .ToListAsync();
-                    _context.UserFollowers.RemoveRange(followers);
-
-                    // 3.4 ArtistFollowers
-                    var artistFollowers = await _context.ArtistFollowers
-                        .Where(f => f.UserId == id)
-                        .ToListAsync();
-                    _context.ArtistFollowers.RemoveRange(artistFollowers);
-
-                    // 3.5 ListeningRoomParticipants
-                    var roomParticipants = await _context.ListeningRoomParticipants
-                        .Where(p => p.UserId == id)
-                        .ToListAsync();
-                    _context.ListeningRoomParticipants.RemoveRange(roomParticipants);
-
-                    // 3.6 ListeningRooms
-                    var rooms = await _context.ListeningRooms
-                        .Where(r => r.CreatorId == id)
-                        .ToListAsync();
-                    _context.ListeningRooms.RemoveRange(rooms);
-
-                    // 3.7 Playlists và PlaylistSongs
-                    var playlists = await _context.Playlists
-                        .Where(p => p.UserId == id)
-                        .ToListAsync();
-                    _context.Playlists.RemoveRange(playlists);
-
-                    // 3.8 Remixes
-                    var remixes = await _context.Remixes
-                        .Where(r => r.UserId == id)
-                        .ToListAsync();
-                    _context.Remixes.RemoveRange(remixes);
-
-                    // 3.9 ChatMessages
-                    var chatMessages = await _context.ChatMessages
-                        .Where(m => m.SenderId == id)
-                        .ToListAsync();
-                    _context.ChatMessages.RemoveRange(chatMessages);
-
+                    // Lưu tất cả thay đổi
                     await _context.SaveChangesAsync();
 
-                    // 4. Cuối cùng xóa user
+                    // Bước cuối: Xóa user
                     var result = await _userManager.DeleteAsync(user);
                     if (result.Succeeded)
                     {
                         await transaction.CommitAsync();
-                        return Json(new { success = true });
+                        return Json(new { success = true, message = "Xóa người dùng thành công" });
                     }
 
                     await transaction.RollbackAsync();
@@ -762,40 +791,66 @@ namespace TunePhere.Controllers
                 }
 
                 using var transaction = await _context.Database.BeginTransactionAsync();
-
                 try
                 {
-                    // Cập nhật PlayHistories - set SongId thành null
-                    var playHistories = await _context.PlayHistories.Where(p => p.SongId == id).ToListAsync();
-                    foreach (var history in playHistories)
-                    {
-                        history.SongId = 0;
-                    }
+                    // 1. Xóa PlayHistories thay vì set SongId = 0
+                    // Việc set SongId = 0 có thể gây vấn đề với foreign key constraint
+                    var playHistories = await _context.PlayHistories
+                        .Where(p => p.SongId == id)
+                        .ToListAsync();
+                    _context.PlayHistories.RemoveRange(playHistories);
 
-                    // Xóa PlaylistSongs liên quan
-                    var playlistSongs = await _context.PlaylistSongs.Where(ps => ps.SongId == id).ToListAsync();
+                    // 2. Xóa PlaylistSongs liên quan
+                    var playlistSongs = await _context.PlaylistSongs
+                        .Where(ps => ps.SongId == id)
+                        .ToListAsync();
                     _context.PlaylistSongs.RemoveRange(playlistSongs);
 
-                    // Xóa Lyrics liên quan
-                    var lyrics = await _context.Lyrics.Where(l => l.SongId == id).ToListAsync();
+                    // 3. Xóa Lyrics liên quan
+                    var lyrics = await _context.Lyrics
+                        .Where(l => l.SongId == id)
+                        .ToListAsync();
                     _context.Lyrics.RemoveRange(lyrics);
 
-                    // Xóa UserFavoriteSongs liên quan
-                    var favoriteSongs = await _context.UserFavoriteSongs.Where(f => f.SongId == id).ToListAsync();
+                    // 4. Xóa UserFavoriteSongs liên quan
+                    var favoriteSongs = await _context.UserFavoriteSongs
+                        .Where(f => f.SongId == id)
+                        .ToListAsync();
                     _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
 
-                    // Lưu các thay đổi
+
+                    // Xóa các bản ghi khác có thể tham chiếu đến Song (nếu có)
+                    // Ví dụ: ListeningRoomCurrentSong, QueueSongs, etc.
+                    var listeningRooms = await _context.ListeningRooms
+                        .Where(lr => lr.CurrentSongId == id)
+                        .ToListAsync();
+                    foreach (var room in listeningRooms)
+                    {
+                        room.CurrentSongId = null; // Set về null thay vì xóa room
+                    }
+
+                    // 6. Lưu tất cả thay đổi trước khi xóa file và song
                     await _context.SaveChangesAsync();
 
-                    // Xóa file ảnh và audio
-                    DeleteFile(song.ImageUrl);
-                    DeleteFile(song.FileUrl);
+                    // 7. Xóa file ảnh và audio (lưu đường dẫn trước khi xóa song)
+                    string fileUrl = song.FileUrl;
+                    string imageUrl = song.ImageUrl; // Nếu có
 
-                    // Xóa bài hát
+                    // 8. Xóa bài hát cuối cùng
                     await _songRepository.DeleteAsync(id);
 
+                    // 9. Xóa file sau khi đã xóa thành công từ database
+                    if (!string.IsNullOrEmpty(fileUrl))
+                    {
+                        DeleteFile(fileUrl);
+                    }
+                    if (!string.IsNullOrEmpty(imageUrl))
+                    {
+                        DeleteFile(imageUrl);
+                    }
+
                     await transaction.CommitAsync();
-                    return Json(new { success = true });
+                    return Json(new { success = true, message = "Xóa bài hát thành công" });
                 }
                 catch (Exception ex)
                 {
@@ -1024,17 +1079,45 @@ namespace TunePhere.Controllers
                     return Json(new { success = false, message = "Không tìm thấy playlist" });
                 }
 
-                // Xóa file ảnh
-                DeleteFile(playlist.ImageUrl);
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    // 2. Xóa tất cả bài hát trong playlist
+                    var playlistSongs = await _context.PlaylistSongs
+                        .Where(ps => ps.PlaylistId == id)
+                        .ToListAsync();
+                    _context.PlaylistSongs.RemoveRange(playlistSongs);
 
-                await _playlistRepository.DeleteAsync(id);
-                return Json(new { success = true });
+                    // 3. Lưu các thay đổi trước khi xóa playlist
+                    await _context.SaveChangesAsync();
+
+                    // 4. Lưu đường dẫn file trước khi xóa playlist
+                    string imageUrl = playlist.ImageUrl;
+
+                    // 5. Xóa playlist
+                    await _playlistRepository.DeleteAsync(id);
+
+                    // 6. Xóa file ảnh sau khi xóa thành công từ database
+                    if (!string.IsNullOrEmpty(imageUrl))
+                    {
+                        DeleteFile(imageUrl);
+                    }
+
+                    await transaction.CommitAsync();
+                    return Json(new { success = true, message = "Xóa playlist thành công" });
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return Json(new { success = false, message = "Có lỗi xảy ra khi xóa playlist: " + ex.Message });
+                }
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Có lỗi xảy ra khi xóa playlist: " + ex.Message });
             }
         }
+
 
         [HttpPost]
         public async Task<IActionResult> AddSongToPlaylist(int playlistId, int songId)

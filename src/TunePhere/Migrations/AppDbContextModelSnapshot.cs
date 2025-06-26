@@ -675,6 +675,9 @@ namespace TunePhere.Migrations
                     b.Property<int>("LikeCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Mood")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("PlayCount")
                         .HasColumnType("int");
 

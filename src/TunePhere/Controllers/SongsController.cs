@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.ResponseCaching;
+using TunePhere.Services;
 
 namespace TunePhere.Controllers
 {
@@ -349,7 +350,7 @@ namespace TunePhere.Controllers
                     return View(song);
                 }
 
-                // Create upload directories if they don't exist
+                // Tạo upload directories if they don't exist
                 var songUploadPath = Path.Combine(_environment.WebRootPath, "uploads", "songs");
                 var coverUploadPath = Path.Combine(_environment.WebRootPath, "uploads", "covers");
                 Directory.CreateDirectory(songUploadPath);
@@ -375,6 +376,11 @@ namespace TunePhere.Controllers
                 {
                     song.Duration = tagFile.Properties.Duration;
                 }
+
+                // Phân tích mood tự động bằng Audd.io
+                var analyzer = new SongMoodAnalyzer();
+                var mood = await analyzer.AnalyzeSongMoodAsync(audioPath);
+                song.Mood = mood;
 
                 // Save image file
                 var imageFileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
@@ -569,52 +575,13 @@ namespace TunePhere.Controllers
         {
             try
             {
-                // 1. Lấy toàn bộ PlayHistories liên quan và detach/xóa từng bản ghi
-                var playHistories = await _context.PlayHistories.Where(ph => ph.SongId == id).ToListAsync();
-                if (playHistories.Any())
-                {
-                    foreach (var ph in playHistories)
-                    {
-                        _context.Entry(ph).State = EntityState.Deleted;
-                    }
-                    await _context.SaveChangesAsync();
-                }
-
-                // 2. Xóa các entity khác liên quan
-                var playlistSongs = await _context.PlaylistSongs.Where(ps => ps.SongId == id).ToListAsync();
-                if (playlistSongs.Any())
-                {
-                    _context.PlaylistSongs.RemoveRange(playlistSongs);
-                }
-
-                var lyrics = await _context.Lyrics.Where(l => l.SongId == id).ToListAsync();
-                if (lyrics.Any())
-                {
-                    _context.Lyrics.RemoveRange(lyrics);
-                }
-
-                var favoriteSongs = await _context.UserFavoriteSongs.Where(fs => fs.SongId == id).ToListAsync();
-                if (favoriteSongs.Any())
-                {
-                    _context.UserFavoriteSongs.RemoveRange(favoriteSongs);
-                }
-
-                var remixes = await _context.Remixes.Where(r => r.OriginalSongId == id).ToListAsync();
-                if (remixes.Any())
-                {
-                    _context.Remixes.RemoveRange(remixes);
-                }
-
-                await _context.SaveChangesAsync();
-
-                // 3. Xóa bài hát
-                var song = await _context.Songs.FindAsync(id);
-                if (song != null)
-                {
-                    _context.Songs.Remove(song);
-                    await _context.SaveChangesAsync();
-                }
-
+                // Sử dụng lại _context hiện tại để xóa dữ liệu bằng SQL thuần
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM PlayHistories WHERE SongId = {0}", id);
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM PlaylistSongs WHERE SongId = {0}", id);
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM UserFavoriteSongs WHERE SongId = {0}", id);
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM Lyrics WHERE SongId = {0}", id);
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM Remixes WHERE OriginalSongId = {0}", id);
+                await _context.Database.ExecuteSqlRawAsync("DELETE FROM Songs WHERE SongId = {0}", id);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -900,6 +867,31 @@ namespace TunePhere.Controllers
                 }
             }
             return View(existingSong);
+        }
+
+        // GET: Songs/SearchByMood?mood=happy
+        [HttpGet]
+        public async Task<IActionResult> SearchByMood(string mood)
+        {
+            if (string.IsNullOrEmpty(mood))
+            {
+                return Json(new List<object>());
+            }
+
+            var songs = await _context.Songs
+                .Include(s => s.Artists)
+                .Where(s => s.Mood != null && s.Mood.ToLower().Contains(mood.ToLower()))
+                .Select(s => new
+                {
+                    songId = s.SongId,
+                    title = s.Title,
+                    artistName = s.Artists.ArtistName,
+                    imageUrl = s.ImageUrl,
+                    mood = s.Mood
+                })
+                .ToListAsync();
+
+            return Json(songs);
         }
 
         private bool SongExists(int id)
