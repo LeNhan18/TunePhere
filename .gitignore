@@ -20,3 +20,5 @@ appsettings.Local.json
 *.log
 Migrations/
 appsettings.Development.json
+
+firebase-config.json
