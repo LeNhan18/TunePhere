@@ -3,13 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 
 using Microsoft.EntityFrameworkCore;
-using System;
 
-
-using System.Threading.Tasks;
 using TunePhere.Models;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
 using TunePhere.Models.Momo;
 using TunePhere.Models.VNPAY;
 using TunePhere.Services.Momo;
@@ -20,7 +15,7 @@ namespace TunePhere.Controllers
     [Authorize]
     public class PaymentController : Controller
     {
-        private const double ArtistRegistrationFee = 480000d; // 480.000 VNĐ
+        private const double ArtistRegistrationFee = 480000d; 
 
         private readonly UserManager<AppUser> _userManager;
         private readonly AppDbContext _db;

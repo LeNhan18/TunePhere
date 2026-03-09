@@ -581,7 +581,7 @@ namespace TunePhere.Controllers
                             _context.UserFavoriteSongs.RemoveRange(remainingFavoriteSongs);
                         }
 
-                        // Xóa Songs
+     
                         _context.Songs.RemoveRange(songs);
 
                         // Xóa Albums
@@ -591,10 +591,10 @@ namespace TunePhere.Controllers
                         _context.Albums.RemoveRange(albums);
                     }
 
-                    // Xóa Artists
+
                     _context.Artists.RemoveRange(artists);
 
-                    // Lưu tất cả thay đổi
+        
                     await _context.SaveChangesAsync();
 
                     // Bước cuối: Xóa user
