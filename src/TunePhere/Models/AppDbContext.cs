@@ -104,7 +104,6 @@ namespace TunePhere.Models
                 .HasForeignKey<UserPreference>(up => up.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // PlaylistSong relationships
             modelBuilder.Entity<PlaylistSong>()
                 .HasOne(ps => ps.Playlist)
                 .WithMany(p => p.PlaylistSongs)
