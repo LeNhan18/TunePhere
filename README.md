@@ -9,6 +9,7 @@ TunePhere is a comprehensive open-source music streaming and social listening pl
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+- [Demo](#demo)
 - [Key Features](#key-features)
 - [Technology Stack](#technology-stack)
 - [System Architecture](#system-architecture)
@@ -37,6 +38,16 @@ TunePhere represents a modern approach to music streaming, combining traditional
 - **Supported File Formats:** MP3, WAV, FLAC, AAC
 - **Concurrent User Capacity:** 1000+ simultaneous connections
 - **Payment Processing:** VNPay and MoMo integration
+
+---
+
+## Demo
+
+Watch our platform demo video to see TunePhere in action:
+
+📺 **[Watch Demo on YouTube](https://www.youtube.com/watch?v=_rfkmQrOdKo)**
+
+The demo showcases key features including music streaming, listening rooms, real-time chat, and artist management tools.
 
 ---
 
