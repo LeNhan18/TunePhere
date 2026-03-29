@@ -11,8 +11,61 @@ const firebaseConfig = {
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const analytics = firebase.analytics();
+// Analytics can fail in local/dev browsers and should not block auth flow.
+if (typeof firebase.analytics === 'function') {
+    try {
+        firebase.analytics();
+    } catch (e) {
+        console.warn('Firebase Analytics init failed:', e?.message || e);
+    }
+}
 const auth = firebase.auth();
+
+function getFirebaseAuthErrorMessage(error, providerName) {
+    const base = `Co loi xay ra khi dang nhap ${providerName}: `;
+
+    switch (error?.code) {
+        case 'auth/popup-closed-by-user':
+            return base + 'Cua so dang nhap da bi dong. Vui long thu lai.';
+        case 'auth/cancelled-popup-request':
+            return base + 'Yeu cau dang nhap da bi huy. Vui long thu lai.';
+        case 'auth/popup-blocked':
+            return base + 'Trinh duyet da chan popup. Hay cho phep popup va thu lai.';
+        case 'auth/configuration-not-found':
+        case 'auth/operation-not-allowed':
+            return base + 'Provider chua duoc bat tren Firebase Console (Authentication > Sign-in method).';
+        case 'auth/unauthorized-domain':
+            return base + 'Domain hien tai chua duoc them vao Authorized domains tren Firebase.';
+        case 'auth/invalid-api-key':
+        case 'auth/app-not-authorized':
+            return base + 'Firebase config sai hoac project khong duoc phep su dung API key nay.';
+        default:
+            return base + (error?.message || 'Loi khong xac dinh. Vui long kiem tra Console.');
+    }
+}
+
+async function postFirebaseToken(idToken) {
+    const response = await fetch('/FirebaseAuth/Login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ idToken })
+    });
+
+    let data = null;
+    try {
+        data = await response.json();
+    } catch {
+        throw new Error('Server tra ve du lieu khong hop le.');
+    }
+
+    if (!response.ok || !data?.success) {
+        throw new Error(data?.message || `Dang nhap that bai (HTTP ${response.status}).`);
+    }
+
+    return data;
+}
 
 // Xử lý đăng nhập bằng Google
 async function signInWithGoogle() {
@@ -28,47 +81,15 @@ async function signInWithGoogle() {
         // Lấy ID token
         const idToken = await result.user.getIdToken();
         console.log("Đã lấy được ID token từ Google");
-        
-        // Gửi token lên server
-        const response = await fetch('/FirebaseAuth/Login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ idToken })
-        });
 
-        const data = await response.json();
+        const data = await postFirebaseToken(idToken);
         console.log("Server response:", data);
-        
-        if (data.success) {
-            // Chuyển hướng về trang chủ sau khi đăng nhập thành công
-            window.location.href = '/';
-        } else {
-            alert('Đăng nhập thất bại: ' + data.message);
-        }
+
+        // Chuyển hướng về trang chủ sau khi đăng nhập thành công
+        window.location.href = '/';
     } catch (error) {
         console.error('Chi tiết lỗi Google:', error);
-        let errorMessage = 'Có lỗi xảy ra khi đăng nhập Google: ';
-        
-        switch (error.code) {
-            case 'auth/popup-closed-by-user':
-                errorMessage += 'Cửa sổ đăng nhập đã bị đóng. Vui lòng thử lại.';
-                break;
-            case 'auth/cancelled-popup-request':
-                errorMessage += 'Yêu cầu đăng nhập đã bị hủy. Vui lòng thử lại.';
-                break;
-            case 'auth/popup-blocked':
-                errorMessage += 'Cửa sổ đăng nhập bị chặn. Vui lòng cho phép popup và thử lại.';
-                break;
-            case 'auth/configuration-not-found':
-                errorMessage += 'Cấu hình Firebase không đúng. Vui lòng kiểm tra lại cấu hình.';
-                break;
-            default:
-                errorMessage += error.message;
-        }
-        
-        alert(errorMessage);
+        alert(getFirebaseAuthErrorMessage(error, 'Google'));
     }
 }
 
@@ -87,46 +108,14 @@ async function signInWithFacebook() {
         const idToken = await result.user.getIdToken();
         console.log("Đã lấy được ID token từ Facebook");
 
-        // Gửi token lên server
-        const response = await fetch('/FirebaseAuth/Login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ idToken })
-        });
-
-        const data = await response.json();
+        const data = await postFirebaseToken(idToken);
         console.log("Server response:", data);
 
-        if (data.success) {
-            // Chuyển hướng về trang chủ sau khi đăng nhập thành công
-            window.location.href = '/';
-        } else {
-            alert('Đăng nhập Facebook thất bại: ' + data.message);
-        }
+        // Chuyển hướng về trang chủ sau khi đăng nhập thành công
+        window.location.href = '/';
     } catch (error) {
         console.error('Chi tiết lỗi Facebook:', error);
-        let errorMessage = 'Có lỗi xảy ra khi đăng nhập Facebook: ';
-        
-        switch (error.code) {
-            case 'auth/popup-closed-by-user':
-                errorMessage += 'Cửa sổ đăng nhập đã bị đóng. Vui lòng thử lại.';
-                break;
-            case 'auth/cancelled-popup-request':
-                errorMessage += 'Yêu cầu đăng nhập đã bị hủy. Vui lòng thử lại.';
-                break;
-            case 'auth/popup-blocked':
-                errorMessage += 'Cửa sổ đăng nhập bị chặn. Vui lòng cho phép popup và thử lại.';
-                break;
-            case 'auth/configuration-not-found':
-                errorMessage += 'Cấu hình Firebase không đúng. Vui lòng kiểm tra lại cấu hình.';
-                break;
-            default:
-                errorMessage += error.message;
-        }
-        
-        alert(errorMessage);
+        alert(getFirebaseAuthErrorMessage(error, 'Facebook'));
     }
 }
 
